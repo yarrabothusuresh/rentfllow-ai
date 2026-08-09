@@ -1,0 +1,53 @@
+<div class="dashboard-layout">
+  <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <div class="sidebar-header">
+      <div class="logo">RentFlow AI</div>
+      <button class="toggle-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">Dashboard</a>
+      <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item">AI Copilot</a>
+      
+      <div class="nav-section">Operations</div>
+      <a class="nav-item disabled" (click)="showFutureToast()">Leads</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Customers</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Quotes</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Bookings</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Calendar</a>
+      
+      <div class="nav-section">Fulfillment</div>
+      <a class="nav-item disabled" (click)="showFutureToast()">Inventory</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Products</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Warehouse</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Delivery</a>
+      
+      <div class="nav-section">Finance & Admin</div>
+      <a class="nav-item disabled" (click)="showFutureToast()">Payments</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Analytics</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Storefront</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Integrations</a>
+      <a class="nav-item disabled" (click)="showFutureToast()">Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <div class="company-context">
+        <span class="company-name">Evergreen Event Rentals</span>
+        <span class="location">Dallas, Texas</span>
+      </div>
+      <div class="user-profile">
+        <div class="avatar">ER</div>
+      </div>
+    </header>
+    
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+  
+  <div class="toast" [class.show]="toastVisible">
+    This module will be available in a future RentFlow AI release.
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="landing-page">
+  <header class="header">
+    <div class="logo">RentFlow AI</div>
+    <nav class="nav">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it Works</a>
+      <a href="#demo">AI Demo</a>
+      <a routerLink="/dashboard" class="btn-primary" style="margin-left: 1rem;">Start Demo</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Turn Every Rental Inquiry Into a <span class="highlight">Profitable Booking.</span></h1>
+        <p class="subtitle">AI-powered rental commerce, operations and profitability for event and party rental companies.</p>
+        <div class="hero-actions">
+          <button routerLink="/dashboard" class="btn-primary btn-large">Start Demo</button>
+          <button class="btn-secondary btn-large" (click)="scrollTo('demo')">See How AI Works</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="workflow">
+          <div class="node">Customer Inquiry</div>
+          <div class="arrow">↓</div>
+          <div class="node ai-node">AI Sales Agent</div>
+          <div class="arrow">↓</div>
+          <div class="node">Check Availability</div>
+          <div class="arrow">↓</div>
+          <div class="node">Generate Quote</div>
+          <div class="arrow">↓</div>
+          <div class="node">Payment</div>
+          <div class="arrow">↓</div>
+          <div class="node">Booking</div>
+          <div class="arrow">↓</div>
+          <div class="node">Inventory</div>
+          <div class="arrow">↓</div>
+          <div class="node">Delivery</div>
+          <div class="arrow">↓</div>
+          <div class="node highlight-node">Profit</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features">
+      <h2>Value Proposition</h2>
+      <div class="grid">
+        <div class="card glass-card">
+          <h3>AI Sales Agent</h3>
+          <p>Automatically understand customer requirements and help turn inquiries into quotes.</p>
+        </div>
+        <div class="card glass-card">
+          <h3>Smart Inventory</h3>
+          <p>Know exactly what is available for every event date.</p>
+        </div>
+        <div class="card glass-card">
+          <h3>AI Quote Generator</h3>
+          <p>Generate profitable rental quotes in seconds.</p>
+        </div>
+        <div class="card glass-card">
+          <h3>Automated Operations</h3>
+          <p>Connect bookings with warehouse, delivery and pickup workflows.</p>
+        </div>
+        <div class="card glass-card">
+          <h3>Profit Intelligence</h3>
+          <p>Understand revenue, costs and expected margin before accepting an event.</p>
+        </div>
+        <div class="card glass-card">
+          <h3>AI Business Copilot</h3>
+          <p>Ask your business questions in natural language and take action.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="timeline">
+        <div class="step">
+          <div class="step-number">01</div>
+          <div class="step-content">Customer contacts you</div>
+        </div>
+        <div class="step">
+          <div class="step-number">02</div>
+          <div class="step-content">AI understands the event</div>
+        </div>
+        <div class="step">
+          <div class="step-number">03</div>
+          <div class="step-content">AI checks inventory and pricing</div>
+        </div>
+        <div class="step">
+          <div class="step-number">04</div>
+          <div class="step-content">AI creates a profitable quote</div>
+        </div>
+        <div class="step">
+          <div class="step-number">05</div>
+          <div class="step-content">Customer books and pays</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+      <h2>Your AI Rental Assistant</h2>
+      <div class="chat-mock glass-card">
+        <div class="message user-message">
+          I need chairs and tables for a wedding with 250 guests on September 20.
+        </div>
+        <div class="message ai-message">
+          <p>I found availability for September 20.</p>
+          <p>I recommend:</p>
+          <ul>
+            <li>250 Chiavari Chairs</li>
+            <li>25 Round Tables</li>
+            <li>25 White Linens</li>
+          </ul>
+          <div class="quote-summary">
+            <div class="line"><span>Estimated rental:</span> <span>$4,850</span></div>
+            <div class="line"><span>Delivery & setup:</span> <span>$1,150</span></div>
+            <div class="line total"><span>Estimated total:</span> <span>$6,480</span></div>
+            <div class="line highlight"><span>Estimated profit margin:</span> <span>54.9%</span></div>
+          </div>
+          <div class="actions">
+            <button class="btn-primary">Create Quote</button>
+            <button class="btn-secondary">Check Availability</button>
+            <button class="btn-secondary">View Details</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

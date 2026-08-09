@@ -1,0 +1,42 @@
+<div class="ai-copilot">
+  <div class="copilot-header">
+    <h2>RentFlow AI Copilot</h2>
+    <p>Ask anything about your rental business.</p>
+  </div>
+  
+  <div class="chat-container glass-card">
+    <div class="chat-history">
+      <div class="message ai-message">
+        Hello! I'm your RentFlow AI assistant. How can I help you manage your business today?
+      </div>
+      
+      @for (msg of messages; track msg) {
+        <div class="message" [class.user-message]="msg.role === 'user'" [class.ai-message]="msg.role === 'ai'">
+          <div [innerHTML]="msg.content"></div>
+          
+          @if (msg.actions && msg.actions.length > 0) {
+            <div class="message-actions">
+              @for (action of msg.actions; track action) {
+                <button class="btn-secondary" (click)="demoAction(action)">{{ action }}</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+    
+    <div class="suggested-questions" *ngIf="messages.length === 0">
+      <h3>Suggested Questions</h3>
+      <div class="questions-grid">
+        <button *ngFor="let q of suggestedQuestions" class="suggestion-btn" (click)="askQuestion(q)">
+          {{ q }}
+        </button>
+      </div>
+    </div>
+    
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" placeholder="Ask AI Copilot..." (keyup.enter)="askQuestion($any($event.target).value); $any($event.target).value=''">
+      <button class="send-btn" (click)="askQuestion('Test question')">Send</button>
+    </div>
+  </div>
+</div>
