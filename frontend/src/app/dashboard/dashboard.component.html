@@ -29,13 +29,30 @@
       <a class="nav-item disabled" (click)="showFutureToast()">Integrations</a>
       <a class="nav-item disabled" (click)="showFutureToast()">Settings</a>
     </nav>
+
+    <!-- Sidebar Profile Card -->
+    <div class="sidebar-profile-card" *ngIf="businessProfile && !isCollapsed">
+      <div class="profile-title">Your Business Profile</div>
+      <div class="profile-details">
+        <div class="profile-name">{{ businessProfile.name }}</div>
+        <div class="profile-location">{{ businessProfile.city }}, {{ businessProfile.state }}</div>
+        <div class="profile-meta">
+          <div><span>Type:</span> <span>{{ businessProfile.businessType }}</span></div>
+          <div><span>Products:</span> <span>{{ businessProfile.productsCount | number }}</span></div>
+          <div><span>Inventory:</span> <span>{{ businessProfile.inventoryUnitsCount | number }}</span></div>
+          <div><span>Employees:</span> <span>{{ businessProfile.employees }}</span></div>
+          <div><span>Locations:</span> <span>{{ businessProfile.locations }}</span></div>
+        </div>
+        <button class="btn-edit-profile" (click)="openEditModal()">Edit Profile</button>
+      </div>
+    </div>
   </aside>
 
   <main class="main-content">
     <header class="top-bar">
-      <div class="company-context">
-        <span class="company-name">Evergreen Event Rentals</span>
-        <span class="location">Dallas, Texas</span>
+      <div class="company-context" *ngIf="businessProfile">
+        <span class="company-name">{{ businessProfile.name }}</span>
+        <span class="location">{{ businessProfile.city }}, {{ businessProfile.state }}</span>
       </div>
       <div class="user-profile">
         <div class="avatar">ER</div>
@@ -50,4 +67,60 @@
   <div class="toast" [class.show]="toastVisible">
     This module will be available in a future RentFlow AI release.
   </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" *ngIf="isEditModalOpen && tempProfile">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>Edit Business Profile</h3>
+        <button class="close-btn" (click)="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" [(ngModel)]="tempProfile.name" class="form-control">
+        </div>
+        <div class="form-row">
+          <div class="form-group col">
+            <label>City</label>
+            <input type="text" [(ngModel)]="tempProfile.city" class="form-control">
+          </div>
+          <div class="form-group col">
+            <label>State</label>
+            <input type="text" [(ngModel)]="tempProfile.state" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Business Type</label>
+          <select [(ngModel)]="tempProfile.businessType" class="form-control">
+            <option value="Event & Party Rental">Event & Party Rental</option>
+            <option value="Wedding Rental">Wedding Rental</option>
+            <option value="Tent Rental">Tent Rental</option>
+            <option value="Event Furniture Rental">Event Furniture Rental</option>
+            <option value="Event Décor Rental">Event Décor Rental</option>
+            <option value="AV & Lighting Rental">AV & Lighting Rental</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group col">
+            <label>Employees</label>
+            <input type="number" [(ngModel)]="tempProfile.employees" class="form-control">
+          </div>
+          <div class="form-group col">
+            <label>Locations</label>
+            <input type="number" [(ngModel)]="tempProfile.locations" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Number of Products</label>
+          <input type="number" [(ngModel)]="tempProfile.productsCount" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
 </div>
+

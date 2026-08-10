@@ -2,104 +2,370 @@
   <header class="header">
     <div class="logo">RentFlow AI</div>
     <nav class="nav">
-      <a href="#features">Features</a>
-      <a href="#how-it-works">How it Works</a>
-      <a href="#demo">AI Demo</a>
+      <a (click)="scrollTo('features')">Value Propositions</a>
+      <a (click)="scrollTo('target-customers')">Customers</a>
+      <a (click)="scrollTo('problems')">The Problem</a>
+      <a (click)="scrollTo('solution')">Our Solution</a>
+      <a (click)="scrollTo('roi-calculator')">ROI Calculator</a>
       <a routerLink="/dashboard" class="btn-primary" style="margin-left: 1rem;">Start Demo</a>
     </nav>
   </header>
 
   <main>
+    <!-- 1. Hero Section -->
     <section class="hero">
       <div class="hero-content">
         <h1>Turn Every Rental Inquiry Into a <span class="highlight">Profitable Booking.</span></h1>
-        <p class="subtitle">AI-powered rental commerce, operations and profitability for event and party rental companies.</p>
+        <p class="subtitle">AI-powered sales, operations, and profitability automation built specifically for US event and party rental companies.</p>
         <div class="hero-actions">
           <button routerLink="/dashboard" class="btn-primary btn-large">Start Demo</button>
-          <button class="btn-secondary btn-large" (click)="scrollTo('demo')">See How AI Works</button>
+          <button class="btn-secondary btn-large" (click)="scrollTo('solution')">See How It Works</button>
         </div>
       </div>
       <div class="hero-visual">
-        <div class="workflow">
-          <div class="node">Customer Inquiry</div>
-          <div class="arrow">↓</div>
-          <div class="node ai-node">AI Sales Agent</div>
-          <div class="arrow">↓</div>
-          <div class="node">Check Availability</div>
-          <div class="arrow">↓</div>
-          <div class="node">Generate Quote</div>
-          <div class="arrow">↓</div>
-          <div class="node">Payment</div>
-          <div class="arrow">↓</div>
-          <div class="node">Booking</div>
-          <div class="arrow">↓</div>
-          <div class="node">Inventory</div>
-          <div class="arrow">↓</div>
-          <div class="node">Delivery</div>
-          <div class="arrow">↓</div>
-          <div class="node highlight-node">Profit</div>
+        <div class="glass-card visual-card">
+          <div class="stat-highlight">
+            <span class="stat-label">AI Automation</span>
+            <span class="stat-val">80% Time Saved</span>
+          </div>
+          <div class="stat-subtext">Estimated average reduction in quote turnaround times.</div>
         </div>
       </div>
     </section>
 
-    <section id="features" class="features">
-      <h2>Value Proposition</h2>
+    <!-- 2. AI Workflow Section -->
+    <section class="workflow-banner">
+      <div class="workflow-line">
+        <div class="workflow-node">Customer</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node ai-node">AI Sales Agent</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Availability</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Quote</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Payment</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Booking</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Inventory</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Warehouse</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node">Delivery</div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-node highlight-node">Profit</div>
+      </div>
+    </section>
+
+    <!-- 3. Target Customer Section -->
+    <section id="target-customers" class="target-customers">
+      <div class="section-header">
+        <span class="badge">Built for Event Rental Businesses</span>
+        <h2>Designed Specifically for Your Workflows</h2>
+        <p class="section-subtitle">We focus exclusively on US-based event and party rental companies operating at scale.</p>
+      </div>
+
       <div class="grid">
-        <div class="card glass-card">
-          <h3>AI Sales Agent</h3>
-          <p>Automatically understand customer requirements and help turn inquiries into quotes.</p>
+        <div class="card glass-card" *ngFor="let cat of targetCategories">
+          <div class="card-icon">{{ cat.icon }}</div>
+          <h3>{{ cat.title }}</h3>
+          <p class="card-desc">{{ cat.description }}</p>
+          <div class="card-example">
+            <strong>Example products:</strong> {{ cat.products }}
+          </div>
         </div>
-        <div class="card glass-card">
-          <h3>Smart Inventory</h3>
-          <p>Know exactly what is available for every event date.</p>
+      </div>
+
+      <!-- Customer Personas Sub-section -->
+      <div class="personas-section">
+        <div class="section-header">
+          <span class="badge">Customer Personas</span>
+          <h2>Who We Solve For: Key Personas</h2>
+          <p class="section-subtitle">RentFlow AI is tailored to solve specific pain points for everyone involved in the event rental cycle.</p>
         </div>
-        <div class="card glass-card">
-          <h3>AI Quote Generator</h3>
-          <p>Generate profitable rental quotes in seconds.</p>
-        </div>
-        <div class="card glass-card">
-          <h3>Automated Operations</h3>
-          <p>Connect bookings with warehouse, delivery and pickup workflows.</p>
-        </div>
-        <div class="card glass-card">
-          <h3>Profit Intelligence</h3>
-          <p>Understand revenue, costs and expected margin before accepting an event.</p>
-        </div>
-        <div class="card glass-card">
-          <h3>AI Business Copilot</h3>
-          <p>Ask your business questions in natural language and take action.</p>
+        <div class="personas-grid">
+          <div class="persona-card glass-card" *ngFor="let p of personas">
+            <div class="persona-avatar">{{ p.avatar }}</div>
+            <h4>{{ p.name }}</h4>
+            <div class="persona-role">{{ p.role }}</div>
+            <div class="persona-goal"><strong>Goal:</strong> {{ p.goal }}</div>
+            <div class="persona-problems">
+              <strong>Problems:</strong>
+              <ul>
+                <li *ngFor="let prob of p.problems">{{ prob }}</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="how-it-works" class="how-it-works">
-      <h2>How It Works</h2>
-      <div class="timeline">
-        <div class="step">
-          <div class="step-number">01</div>
-          <div class="step-content">Customer contacts you</div>
+    <!-- 4. Problems Section -->
+    <section id="problems" class="problems">
+      <div class="section-header">
+        <span class="badge warning">The Operational Toll</span>
+        <h2>The Problem with Traditional Rental Operations</h2>
+        <p class="section-subtitle">Managing manual processes slows down your business and limits your growth capacity.</p>
+      </div>
+
+      <div class="grid problem-grid">
+        <div class="card problem-card glass-card">
+          <div class="problem-num">01</div>
+          <h3>Too Many Manual Inquiries</h3>
+          <p>Customers call, email, or submit forms, forcing employees to manually collect event sizes, dates, and item requirements.</p>
         </div>
-        <div class="step">
-          <div class="step-number">02</div>
-          <div class="step-content">AI understands the event</div>
+        <div class="card problem-card glass-card">
+          <div class="problem-num">02</div>
+          <h3>Slow Quotes</h3>
+          <p>Employees must check product sheets, calculate taxes, determine delivery fees, and assess margins before sending a quote.</p>
         </div>
-        <div class="step">
-          <div class="step-number">03</div>
-          <div class="step-content">AI checks inventory and pricing</div>
+        <div class="card problem-card glass-card">
+          <div class="problem-num">03</div>
+          <h3>Inventory Uncertainty</h3>
+          <p>Staff spends valuable time cross-referencing bookings to see if enough inventory is physically available for a specific date.</p>
         </div>
-        <div class="step">
-          <div class="step-number">04</div>
-          <div class="step-content">AI creates a profitable quote</div>
+        <div class="card problem-card glass-card">
+          <div class="problem-num">04</div>
+          <h3>Lost Follow-ups</h3>
+          <p>Leads receive quotes, but busy sales teams lack the structured follow-up routines to secure the booking before it goes cold.</p>
         </div>
-        <div class="step">
-          <div class="step-number">05</div>
-          <div class="step-content">Customer books and pays</div>
+        <div class="card problem-card glass-card">
+          <div class="problem-num">05</div>
+          <h3>Operational Complexity</h3>
+          <p>A single event booking touches sales, inventory levels, warehouse logistics, delivery dispatching, payments, and customer support.</p>
+        </div>
+        <div class="card problem-card glass-card">
+          <div class="problem-num">06</div>
+          <h3>Unknown Profitability</h3>
+          <p>Many businesses understand their gross revenue but cannot determine their actual expected net profit margin for individual custom quotes.</p>
         </div>
       </div>
     </section>
 
+    <!-- 5. Solution Section (Interactive Stepper) -->
+    <section id="solution" class="solution">
+      <div class="section-header">
+        <span class="badge success">RentFlow AI Solution</span>
+        <h2>Connects the Entire Rental Journey</h2>
+        <p class="section-subtitle">Click on any step below to see how RentFlow AI integrates your workflows into one automated lifecycle.</p>
+      </div>
+
+      <div class="solution-stepper glass-card">
+        <div class="stepper-nav">
+          <button 
+            *ngFor="let step of solutionSteps; let i = index" 
+            class="stepper-btn" 
+            [class.active]="i === activeSolutionStepIndex"
+            (click)="selectSolutionStep(i)">
+            <span class="step-num-lbl">{{ i + 1 | number:'2.0-0' }}</span>
+            <span class="step-name">{{ step.name }}</span>
+          </button>
+        </div>
+        
+        <div class="step-explanation">
+          <div class="explanation-icon">✨</div>
+          <div class="explanation-content" *ngIf="solutionSteps[activeSolutionStepIndex]">
+            <h3>{{ solutionSteps[activeSolutionStepIndex].name }}</h3>
+            <p>{{ solutionSteps[activeSolutionStepIndex].description }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Value Proposition Section -->
+    <section id="features" class="features">
+      <div class="section-header">
+        <span class="badge">Value Propositions</span>
+        <h2>Why Event Rental Companies Choose RentFlow AI</h2>
+        <p class="section-subtitle">Engineered to accelerate your sales cycles and eliminate warehouse mistakes.</p>
+      </div>
+
+      <div class="grid value-grid">
+        <div class="card value-card glass-card" *ngFor="let vp of valueProps">
+          <div class="val-icon">{{ vp.icon }}</div>
+          <h3>{{ vp.title }}</h3>
+          <p>{{ vp.description }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Before vs After Section (Simulation) -->
+    <section class="before-after">
+      <div class="section-header">
+        <h2>Traditional Workflow vs RentFlow AI</h2>
+        <p class="section-subtitle">Watch how RentFlow AI condenses hours of back-and-forth into an automated, seamless flow.</p>
+      </div>
+
+      <div class="simulation-grid">
+        <!-- Before Card -->
+        <div class="simulation-card glass-card before-card">
+          <div class="card-header">
+            <h3>Traditional Workflow</h3>
+            <button class="btn-simulate" (click)="playBeforeSimulation()">Simulate Workflow</button>
+          </div>
+          <div class="simulation-steps">
+            <div 
+              *ngFor="let step of beforeSteps; let idx = index" 
+              class="sim-step" 
+              [class.highlighted]="idx === activeBeforeStep">
+              <span class="step-bullet">{{ idx + 1 }}</span>
+              <span class="step-text">{{ step }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- After Card -->
+        <div class="simulation-card glass-card after-card">
+          <div class="card-header">
+            <h3>With RentFlow AI</h3>
+            <button class="btn-simulate btn-success-sim" (click)="playAfterSimulation()">Simulate AI Flow</button>
+          </div>
+          <div class="simulation-steps">
+            <div 
+              *ngFor="let step of afterSteps; let idx = index" 
+              class="sim-step" 
+              [class.highlighted]="idx === activeAfterStep">
+              <span class="step-bullet">✨</span>
+              <span class="step-text">{{ step }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Competitive Positioning Table -->
+    <section class="positioning">
+      <div class="section-header">
+        <h2>Comparison: Traditional Software vs RentFlow AI</h2>
+      </div>
+      <div class="table-container glass-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Traditional Workflow</th>
+              <th>RentFlow AI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Inventory</td>
+              <td>Manual screens</td>
+              <td>AI-assisted</td>
+            </tr>
+            <tr>
+              <td>Quotes</td>
+              <td>User creates</td>
+              <td>AI can generate</td>
+            </tr>
+            <tr>
+              <td>Customer inquiry</td>
+              <td>Manual</td>
+              <td>AI-assisted</td>
+            </tr>
+            <tr>
+              <td>Follow-up</td>
+              <td>Manual</td>
+              <td>Automated</td>
+            </tr>
+            <tr>
+              <td>Availability</td>
+              <td>Search manually</td>
+              <td>AI can check</td>
+            </tr>
+            <tr>
+              <td>Profitability</td>
+              <td>Reports</td>
+              <td>AI recommendations</td>
+            </tr>
+            <tr>
+              <td>Business questions</td>
+              <td>Reports/screens</td>
+              <td>Ask in natural language</td>
+            </tr>
+            <tr>
+              <td>Operations</td>
+              <td>User coordinates</td>
+              <td>AI recommends actions</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8. Realistic Customer Story (Wedding Example) -->
+    <section class="wedding-story">
+      <div class="story-container glass-card">
+        <div class="story-badge">Example Workflow</div>
+        <h3>Case Study: 250-Person Wedding</h3>
+        <p class="customer-quote">
+          "I am planning a wedding for 250 guests in Dallas on September 20. I need tables, chairs, linens, and lighting."
+        </p>
+        <div class="story-comparison">
+          <div class="comp-col">
+            <div class="comp-title">Traditional Process</div>
+            <div class="comp-metric warning">45 – 90 mins</div>
+            <p class="comp-detail">Sales reps manually cross-check item databases, calculate delivery route metrics, compute margins, write emails, and wait for confirmation.</p>
+          </div>
+          <div class="comp-divider">VS</div>
+          <div class="comp-col">
+            <div class="comp-title">RentFlow AI Process</div>
+            <div class="comp-metric success">5 – 10 mins</div>
+            <p class="comp-detail">The AI system automatically drafts the quote matching inventory availability, estimates setup margins, sends the link, and triggers follow-ups.</p>
+          </div>
+        </div>
+        <p class="disclaimer">Note: These numbers represent an illustrative demo estimate, actual results depend on your workflow.</p>
+      </div>
+    </section>
+
+    <!-- 9. ROI Calculator Section -->
+    <section id="roi-calculator" class="roi-calculator">
+      <div class="section-header">
+        <span class="badge">ROI Estimation</span>
+        <h2>How Much Time Could AI Save Your Team?</h2>
+        <p class="section-subtitle">Adjust the inputs below to estimate your potential labor and cost savings.</p>
+      </div>
+
+      <div class="roi-container glass-card">
+        <div class="roi-inputs">
+          <div class="roi-form-group">
+            <label>Monthly Inquiries</label>
+            <input type="number" [(ngModel)]="roiInquiries" min="1" max="10000" class="roi-input-field">
+          </div>
+          <div class="roi-form-group">
+            <label>Average Minutes per Inquiry</label>
+            <input type="number" [(ngModel)]="roiMinutes" min="1" max="600" class="roi-input-field">
+          </div>
+          <div class="roi-form-group">
+            <label>Hourly Employee Cost ($)</label>
+            <input type="number" [(ngModel)]="roiHourlyCost" min="1" max="500" class="roi-input-field">
+          </div>
+        </div>
+
+        <div class="roi-outputs">
+          <div class="roi-out-card">
+            <div class="roi-out-title">Current Monthly Labor</div>
+            <div class="roi-out-value">{{ currentLaborHours }} hrs</div>
+            <div class="roi-out-sub">Estimated labor cost: ${{ currentLaborCost | number }}</div>
+          </div>
+          <div class="roi-out-card highlight-out">
+            <div class="roi-out-title">Potential Monthly Savings</div>
+            <div class="roi-out-value success">+{{ potentialHoursSaved }} hrs</div>
+            <div class="roi-out-sub">Estimated cost savings: ${{ potentialSavings | number }}</div>
+          </div>
+        </div>
+      </div>
+      <p class="roi-disclaimer">Illustrative estimate — actual savings depend on your specific business workflow and staff efficiency.</p>
+    </section>
+
+    <!-- 10. AI Demo Section (Landing Page Chat Mock) -->
     <section id="demo" class="demo-section">
-      <h2>Your AI Rental Assistant</h2>
+      <div class="section-header">
+        <h2>Your AI Rental Assistant</h2>
+        <p class="section-subtitle">Experience how the customer interaction behaves under RentFlow AI.</p>
+      </div>
+      
       <div class="chat-mock glass-card">
         <div class="message user-message">
           I need chairs and tables for a wedding with 250 guests on September 20.
@@ -119,11 +385,20 @@
             <div class="line highlight"><span>Estimated profit margin:</span> <span>54.9%</span></div>
           </div>
           <div class="actions">
-            <button class="btn-primary">Create Quote</button>
-            <button class="btn-secondary">Check Availability</button>
-            <button class="btn-secondary">View Details</button>
+            <button routerLink="/dashboard" class="btn-primary">Create Quote</button>
+            <button routerLink="/dashboard" class="btn-secondary">Check Availability</button>
+            <button routerLink="/dashboard" class="btn-secondary">View Details</button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- 11. CTA Section -->
+    <section class="cta-banner">
+      <div class="cta-content glass-card">
+        <h2>Ready to Streamline Your Rental Commerce?</h2>
+        <p>Start exploring the dashboard demo to see the AI Copilot and business profile in action.</p>
+        <button routerLink="/dashboard" class="btn-primary btn-large">Start Free Demo</button>
       </div>
     </section>
   </main>
