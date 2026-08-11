@@ -83,3 +83,95 @@
     gap: 1rem;
   }
 }
+
+.target-customer-card {
+  margin-top: 1rem;
+  background: white;
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .company-detail-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .company-logo-badge {
+        font-size: 2rem;
+        background-color: var(--background-color);
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+      }
+
+      .company-name-lbl {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .company-loc-lbl {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .profile-metrics-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      background: var(--background-color);
+      padding: 1.25rem;
+      border-radius: var(--border-radius-sm);
+      border: 1px solid var(--border-color);
+
+      .metric-row-lbl {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        span:first-child {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          font-weight: 600;
+          color: var(--text-secondary);
+        }
+
+        span:last-child {
+          font-size: 1rem;
+          color: var(--primary-color);
+        }
+      }
+    }
+
+    .view-icp-btn {
+      align-self: flex-start;
+      padding: 0.75rem 1.75rem;
+    }
+  }
+}
+

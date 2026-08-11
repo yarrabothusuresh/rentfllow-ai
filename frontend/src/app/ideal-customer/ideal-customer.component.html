@@ -1,0 +1,217 @@
+<div class="icp-page-layout">
+  <!-- Header Bar -->
+  <header class="icp-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <span class="logo">RentFlow AI</span>
+        <span class="badge">ICP Configuration</span>
+      </div>
+      <a routerLink="/dashboard" class="btn-secondary back-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="icp-main">
+    <!-- Intro Section -->
+    <section class="intro-section">
+      <h1>Built for Event Rental Businesses</h1>
+      <p class="subtitle">RentFlow AI is designed for rental companies that manage thousands of products, hundreds of events and complex delivery operations.</p>
+    </section>
+
+    <!-- 1. Who We Serve -->
+    <section class="who-we-serve-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">01</span>
+        <h2>Who We Serve</h2>
+      </div>
+      <div class="categories-grid">
+        <div class="category-card glass-card" *ngFor="let cat of categories">
+          <div class="card-glow"></div>
+          <h3>{{ cat.title }}</h3>
+          <p>{{ cat.desc }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Company Profile -->
+    <section class="company-profile-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">02</span>
+        <h2>Target Company Profile</h2>
+      </div>
+      <div class="badge-wrapper">
+        <span class="badge warning font-bold">Initial ICP Assumption</span>
+        <p class="badge-subtext">These parameters represent our working design hypotheses and are subject to validation with real customers.</p>
+      </div>
+
+      <div class="profile-cards-grid" *ngIf="icpProfile">
+        <div class="profile-card glass-card">
+          <div class="card-label">Annual Revenue</div>
+          <div class="card-val">{{ icpProfile.revenueRange }}</div>
+          <div class="card-footer-lbl">Target Range</div>
+        </div>
+        <div class="profile-card glass-card">
+          <div class="card-label">Employees</div>
+          <div class="card-val">{{ icpProfile.employeeRange }}</div>
+          <div class="card-footer-lbl">Full-time Staff</div>
+        </div>
+        <div class="profile-card glass-card">
+          <div class="card-label">Warehouses</div>
+          <div class="card-val">{{ icpProfile.warehouseRange }}</div>
+          <div class="card-footer-lbl">Locations</div>
+        </div>
+        <div class="profile-card glass-card">
+          <div class="card-label">Rental Products</div>
+          <div class="card-val">{{ icpProfile.productRange }}</div>
+          <div class="card-footer-lbl">Catalog Size</div>
+        </div>
+        <div class="profile-card glass-card">
+          <div class="card-label">Target Market</div>
+          <div class="card-val">{{ icpProfile.market }}</div>
+          <div class="card-footer-lbl">Primary Geography</div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading backend profile...</p>
+      </div>
+    </section>
+
+    <!-- 3. Typical Customer Personas -->
+    <section class="personas-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">03</span>
+        <h2>Typical Customer Personas</h2>
+      </div>
+      <div class="personas-grid">
+        <div class="persona-card glass-card" *ngFor="let p of personas">
+          <div class="persona-header">
+            <span class="avatar">{{ p.avatar }}</span>
+            <div>
+              <h3>{{ p.name }}</h3>
+              <span class="role-badge">{{ p.role }}</span>
+            </div>
+          </div>
+          <div class="goals-list">
+            <strong>Key Goals:</strong>
+            <ul>
+              <li *ngFor="let goal of p.goals">{{ goal }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Customer Pain Points -->
+    <section class="pain-points-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">04</span>
+        <h2>Customer Pain Points Mapped</h2>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card glass-card" *ngFor="let point of painPoints">
+          <div class="card-header-bar">
+            <h3>{{ point.problem }}</h3>
+          </div>
+          <div class="pain-body">
+            <div class="pain-row">
+              <span class="row-label">Why it matters:</span>
+              <p class="row-text">{{ point.whyItMatters }}</p>
+            </div>
+            <div class="pain-row success-row">
+              <span class="row-label">RentFlow AI Solution:</span>
+              <p class="row-text">{{ point.rentflowSolution }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Why RentFlow AI (Comparison) -->
+    <section class="comparison-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">05</span>
+        <h2>Why RentFlow AI?</h2>
+      </div>
+      <div class="intended-differentiation-badge">
+        <span class="badge success">Our Intended Differentiation</span>
+      </div>
+
+      <div class="comparison-matrix glass-card">
+        <div class="matrix-header">
+          <div>Traditional Workflow</div>
+          <div class="divider-col">VS</div>
+          <div>RentFlow AI Way</div>
+        </div>
+        <div class="matrix-rows">
+          <div class="matrix-row" *ngFor="let item of comparisons">
+            <div class="trad-col">{{ item.traditional }}</div>
+            <div class="vs-divider">⚡</div>
+            <div class="rentflow-col">{{ item.rentflow }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. ICP Qualification Quiz -->
+    <section class="qualification-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">06</span>
+        <h2>ICP Qualification</h2>
+      </div>
+      <p class="qual-intro">Is RentFlow AI a good fit for your business? Take this quick qualification questionnaire to evaluate your compatibility.</p>
+
+      <div class="qualification-container">
+        <!-- Quiz Questions -->
+        <div class="quiz-questions glass-card">
+          <div class="question-block" *ngFor="let q of quizQuestions; let qIdx = index">
+            <h3>{{ qIdx + 1 }}. {{ q.text }}</h3>
+            <div class="options-grid">
+              <button 
+                *ngFor="let opt of q.options; let oIdx = index"
+                class="option-btn"
+                [class.selected]="selectedAnswers[qIdx] === oIdx"
+                (click)="selectOption(qIdx, oIdx)">
+                {{ opt.text }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score Results Card -->
+        <div class="score-results-card glass-card">
+          <h3>Qualification Score</h3>
+          <div class="score-display">
+            <span class="score-num">{{ quizScore }}</span>
+            <span class="score-max">/ 100</span>
+          </div>
+
+          <div class="score-feedback" *ngIf="isQuizFullyAnswered">
+            <div class="category-title">Status Category:</div>
+            <div class="category-value" [class.ideal]="quizScore >= 81" [class.strong]="quizScore >= 61 && quizScore <= 80">
+              {{ scoreCategory }}
+            </div>
+            <p class="feedback-msg" *ngIf="quizScore >= 81">
+              🎉 Excellent match! Your operations, scale, and requirements fit perfectly into our core design profiles.
+            </p>
+            <p class="feedback-msg" *ngIf="quizScore >= 61 && quizScore <= 80">
+              👍 Strong candidate! RentFlow AI will offer significant process improvements and operational efficiency.
+            </p>
+            <p class="feedback-msg" *ngIf="quizScore < 61">
+              💼 Growing business. RentFlow AI can help structure your scaling efforts, though you may not need all AI modules yet.
+            </p>
+          </div>
+
+          <div class="score-pending" *ngIf="!isQuizFullyAnswered">
+            <p>Answer all questions above to calculate your qualification score.</p>
+          </div>
+
+          <div class="qual-disclaimer">
+            ⚠️ <strong>Demo qualification score</strong> — not a validated sales scoring model.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

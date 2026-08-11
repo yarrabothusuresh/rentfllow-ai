@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 interface ChatMessage {
   role: 'user' | 'ai';
@@ -18,6 +19,7 @@ export class AiCopilotComponent {
   messages: ChatMessage[] = [];
   
   suggestedQuestions = [
+    "Is Evergreen Event Rentals a good fit for RentFlow AI?",
     "Show me today's priorities",
     "Which customers haven't paid?",
     "Do I have enough chairs for Saturday?",
@@ -25,6 +27,8 @@ export class AiCopilotComponent {
     "Which products are underutilized?",
     "Create a quote for a 250-person wedding"
   ];
+
+  constructor(private router: Router) {}
 
   askQuestion(question: string) {
     if (!question || question.trim() === '') return;
@@ -39,7 +43,16 @@ export class AiCopilotComponent {
   }
 
   generateMockResponse(question: string) {
-    if (question.includes("priorities")) {
+    const qLower = question.toLowerCase();
+    if (qLower.includes("evergreen") && qLower.includes("good fit")) {
+      this.messages.push({
+        role: 'ai',
+        content: `
+          <p>Yes. Based on the current demo profile, Evergreen Event Rentals matches our initial ICP because it operates a sizable rental catalog, manages recurring events and has multiple operational workflows that could benefit from centralized rental management and AI-assisted sales.</p>
+        `,
+        actions: ['View ICP']
+      });
+    } else if (qLower.includes("priorities")) {
       this.messages.push({
         role: 'ai',
         content: `
@@ -64,6 +77,11 @@ export class AiCopilotComponent {
   }
 
   demoAction(actionName: string) {
-    alert(`[Demo] Action successful: ${actionName}`);
+    if (actionName === 'View ICP') {
+      this.router.navigate(['/ideal-customer']);
+    } else {
+      alert(`[Demo] Action successful: ${actionName}`);
+    }
   }
 }
+
