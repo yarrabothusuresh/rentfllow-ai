@@ -1,56 +1,238 @@
 <div class="overview">
-  <h2>Dashboard Overview</h2>
-  
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-title">Revenue</div>
-      <div class="stat-value">$184,620</div>
-      <div class="stat-trend positive">+18.4%</div>
+  <div class="overview-header">
+    <h2>Dashboard Overview</h2>
+    <span class="role-badge" [ngClass]="currentRole.toLowerCase()">Simulated Role: {{ currentRole }}</span>
+  </div>
+
+  <!-- 1. OWNER DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'OWNER'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Revenue</div>
+        <div class="stat-value">$184,620</div>
+        <div class="stat-trend positive">+18.4%</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-title">Upcoming Events</div>
+        <div class="stat-value">42</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-title">Outstanding Payments</div>
+        <div class="stat-value warning">$23,840</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-title">Inventory Utilization</div>
+        <div class="stat-value">78%</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-title">Average Event Margin</div>
+        <div class="stat-value">54.8%</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-title">Quote Conversion</div>
+        <div class="stat-value">62%</div>
+      </div>
     </div>
-    
-    <div class="stat-card">
-      <div class="stat-title">Upcoming Events</div>
-      <div class="stat-value">42</div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-title">Outstanding Payments</div>
-      <div class="stat-value warning">$23,840</div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-title">Inventory Utilization</div>
-      <div class="stat-value">78%</div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-title">Average Event Margin</div>
-      <div class="stat-value">54.8%</div>
-    </div>
-    
-    <div class="stat-card">
-      <div class="stat-title">Quote Conversion</div>
-      <div class="stat-value">62%</div>
+
+    <div class="ai-insight-card glass-card">
+      <div class="insight-header">
+        <span class="icon">✨</span>
+        <h3>AI Business Insight</h3>
+      </div>
+      <div class="insight-content">
+        <p>You have 7 events this weekend. Two customers have outstanding balances totaling $8,420. Your white Chiavari chairs are at 91% utilization.</p>
+      </div>
+      <div class="insight-actions">
+        <button class="btn-primary" (click)="demoAction('Payments Reviewed')">Review Payments</button>
+        <button class="btn-secondary" (click)="demoAction('Inventory Checked')">Check Inventory</button>
+        <button class="btn-secondary" (click)="demoAction('Events Loaded')">View Events</button>
+      </div>
     </div>
   </div>
 
-  <div class="ai-insight-card glass-card">
-    <div class="insight-header">
-      <span class="icon">✨</span>
-      <h3>AI Business Insight</h3>
+  <!-- 2. ADMIN DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'ADMIN'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Revenue (YTD)</div>
+        <div class="stat-value">$184,620</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Active Inventory Items</div>
+        <div class="stat-value">1,850</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Active Warehouse Staff</div>
+        <div class="stat-value">12</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Locations Active</div>
+        <div class="stat-value">2</div>
+      </div>
     </div>
-    <div class="insight-content">
-      <p>You have 7 events this weekend. Two customers have outstanding balances totaling $8,420. Your white Chiavari chairs are at 91% utilization.</p>
-    </div>
-    <div class="insight-actions">
-      <button class="btn-primary" (click)="demoAction('Payments Reviewed')">Review Payments</button>
-      <button class="btn-secondary" (click)="demoAction('Inventory Checked')">Check Inventory</button>
-      <button class="btn-secondary" (click)="demoAction('Events Loaded')">View Events</button>
+    
+    <div class="quick-admin-actions glass-card">
+      <h3>Administrative Quick Actions</h3>
+      <p>Configure warehouse settings, check global inventories, and review user accounts.</p>
+      <div class="action-buttons">
+        <button class="btn-primary" routerLink="/user-roles">Manage User Permissions</button>
+        <button class="btn-secondary" (click)="demoAction('Inventory Settings Loaded')">Inventory Settings</button>
+      </div>
     </div>
   </div>
 
-  <!-- Target Customer Profile Widget -->
-  <div class="target-customer-card glass-card">
+  <!-- 3. SALES DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'SALES'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">New Leads (Today)</div>
+        <div class="stat-value">8</div>
+        <div class="stat-trend positive">+2 new</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Quotes Awaiting Response</div>
+        <div class="stat-value">14</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Quote Conversion Rate</div>
+        <div class="stat-value">62%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Today's Follow-ups</div>
+        <div class="stat-value warning">5</div>
+      </div>
+    </div>
+
+    <div class="sales-list-card glass-card">
+      <h3>Active Pipeline & Follow-ups</h3>
+      <div class="pipeline-list">
+        <div class="pipeline-item">
+          <div class="client-info">
+            <strong>Grand Ballroom Wedding</strong>
+            <span>Client: Sarah Jenkins | Date: Aug 22</span>
+          </div>
+          <span class="status-badge pending">Awaiting Deposit</span>
+        </div>
+        <div class="pipeline-item">
+          <div class="client-info">
+            <strong>Corporate Gala Rentals</strong>
+            <span>Client: TechCorp Inc. | Date: Sep 05</span>
+          </div>
+          <span class="status-badge drafted">Quote Drafted</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. WAREHOUSE DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'WAREHOUSE'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Today's Pick Lists</div>
+        <div class="stat-value">12</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Items to Pack</div>
+        <div class="stat-value">450</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Items to Load</div>
+        <div class="stat-value">280</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Returns Today</div>
+        <div class="stat-value warning">6</div>
+      </div>
+    </div>
+
+    <div class="warehouse-alerts-card glass-card">
+      <h3>Inventory Alerts & Preparations</h3>
+      <div class="alert-list">
+        <div class="alert-item warning">
+          <span>⚠️ <strong>Shortage Warning</strong>: White Folding Chairs (-30 items for Aug 15)</span>
+          <button class="btn-sm btn-primary" (click)="demoAction('Resolved chairs shortage')">Resolve</button>
+        </div>
+        <div class="alert-item info">
+          <span>ℹ️ Pick list #1084 (Evergreen Gala) requires AV double-check.</span>
+          <button class="btn-sm btn-secondary" (click)="demoAction('Verified AV')">Verify</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. DRIVER DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'DRIVER'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Today's Deliveries</div>
+        <div class="stat-value">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Pickup Jobs</div>
+        <div class="stat-value">2</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Next Scheduled Stop</div>
+        <div class="stat-value text-primary">10:30 AM</div>
+      </div>
+    </div>
+
+    <div class="driver-route-card glass-card">
+      <h3>Active Delivery Route</h3>
+      <div class="stops-list">
+        <div class="stop-item active">
+          <div class="stop-header">
+            <span class="stop-number">Stop 1</span>
+            <span class="stop-time">10:30 AM (Delivery)</span>
+          </div>
+          <div class="stop-details">
+            <strong>Evergreen Wedding Venue</strong>
+            <p>1200 Oak Lawn Ave, Dallas, TX</p>
+            <p>Contact: Wedding Planner Sarah (555-0199)</p>
+            <p class="notes"><em>Notes: Deliver to back entrance. Set up 150 gold Chiavari chairs.</em></p>
+          </div>
+          <button class="btn-primary" (click)="demoAction('Delivery stop 1 marked complete')">Mark Delivered</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CUSTOMER DASHBOARD VIEW -->
+  <div class="role-dashboard" *ngIf="currentRole === 'CUSTOMER'">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Booking Status</div>
+        <div class="stat-value text-success">Confirmed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Outstanding Balance</div>
+        <div class="stat-value warning">$1,250</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Days Until Event</div>
+        <div class="stat-value">10 days</div>
+      </div>
+    </div>
+
+    <div class="customer-portal-card glass-card">
+      <h3>Your Event: Jenkins Wedding Ceremony</h3>
+      <p><strong>Date:</strong> August 22, 2026</p>
+      <p><strong>Location:</strong> Dallas Arboretum, TX</p>
+      <div class="portal-actions">
+        <button class="btn-primary" (click)="demoAction('Redirecting to payment portal')">Pay Outstanding Balance ($1,250)</button>
+        <button class="btn-secondary" (click)="demoAction('Signed contract downloaded')">Download Signed Contract</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Common Target Customer Profile Card (Preserve from Day 3) -->
+  <!-- Only show this to OWNER, ADMIN, and SALES roles (not Driver or Customer) -->
+  <div class="target-customer-card glass-card" *ngIf="currentRole === 'OWNER' || currentRole === 'ADMIN' || currentRole === 'SALES'">
     <div class="card-header">
       <h3>Target Customer</h3>
       <span class="badge success font-bold">Ideal Customer Profile</span>

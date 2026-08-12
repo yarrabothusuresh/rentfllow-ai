@@ -1,0 +1,139 @@
+<div class="roles-page-layout">
+  <!-- Header Bar -->
+  <header class="roles-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <span class="logo">RentFlow AI</span>
+        <span class="badge">Roles & Security</span>
+      </div>
+      <a routerLink="/dashboard" class="btn-secondary back-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="roles-main">
+    <!-- Intro Section -->
+    <section class="intro-section">
+      <h1>User Roles & Permissions</h1>
+      <p class="subtitle">Control what every member of your rental business can see and do.</p>
+    </section>
+
+    <!-- Role Tabs Selector -->
+    <section class="roles-selector-section">
+      <div class="tabs-list">
+        <button 
+          *ngFor="let role of roles" 
+          class="tab-btn" 
+          [class.active]="selectedRoleCode === role.code"
+          (click)="selectRole(role.code)">
+          <span class="avatar">{{ role.avatar }}</span>
+          <span class="role-name">{{ role.name }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Role Detail Card -->
+    <section class="role-detail-section">
+      <div class="role-detail-card glass-card">
+        <div class="card-glow"></div>
+        <div class="detail-header">
+          <span class="avatar-large">{{ selectedRole.avatar }}</span>
+          <div>
+            <h2>{{ selectedRole.name }} Role</h2>
+            <p class="responsibility-tag">Primary Responsibility</p>
+            <p class="responsibility-desc">{{ selectedRole.responsibility }}</p>
+          </div>
+        </div>
+
+        <div class="lists-grid">
+          <div class="access-list-box can">
+            <h3>Allowed Modules & Screens</h3>
+            <ul>
+              <li *ngFor="let item of selectedRole.canAccess">
+                <span class="check-icon">✓</span> {{ item }}
+              </li>
+            </ul>
+          </div>
+          <div class="access-list-box cannot" *ngIf="selectedRole.cannotAccess.length > 0">
+            <h3>Restricted Areas</h3>
+            <ul>
+              <li *ngFor="let item of selectedRole.cannotAccess">
+                <span class="cross-icon">✗</span> {{ item }}
+              </li>
+            </ul>
+          </div>
+          <div class="access-list-box cannot" *ngIf="selectedRole.cannotAccess.length === 0">
+            <h3>Restricted Areas</h3>
+            <p class="no-restrictions">No restrictions. Full system access.</p>
+          </div>
+        </div>
+
+        <!-- Backend Permissions Verification -->
+        <div class="backend-perms-section">
+          <h3>Backend Permissions (Fetched from Spring Boot API)</h3>
+          <div class="loader-placeholder" *ngIf="isLoadingPermissions">
+            <div class="spinner"></div>
+            <span>Loading endpoint `/api/roles/{{selectedRoleCode}}/permissions`...</span>
+          </div>
+          <div class="permissions-tag-container" *ngIf="!isLoadingPermissions">
+            <span class="permission-tag" *ngFor="let perm of backendPermissions">
+              {{ perm }}
+            </span>
+            <span class="no-perms-warning" *ngIf="backendPermissions.length === 0">
+              ⚠️ No permissions mapped in database or API offline.
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Permission Matrix Section -->
+    <section class="matrix-section">
+      <div class="section-title-wrapper">
+        <span class="section-num">02</span>
+        <h2>Access Control Permission Matrix</h2>
+      </div>
+      
+      <div class="matrix-table-container glass-card">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Module / Resource</th>
+              <th>Owner</th>
+              <th>Admin</th>
+              <th>Sales</th>
+              <th>Warehouse</th>
+              <th>Driver</th>
+              <th>Customer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of matrixRows">
+              <td class="module-name">{{ row.module }}</td>
+              <td [class.checked]="row.owner === '✓'">{{ row.owner }}</td>
+              <td [class.checked]="row.admin === '✓'">{{ row.admin }}</td>
+              <td [class.checked]="row.sales === '✓'" [class.limited]="row.sales === 'Limited' || row.sales === 'View'">{{ row.sales }}</td>
+              <td [class.checked]="row.warehouse === '✓'" [class.limited]="row.warehouse === 'Limited'">{{ row.warehouse }}</td>
+              <td [class.checked]="row.driver === '✓'" [class.limited]="row.driver === 'Limited' || row.driver === 'Assigned'">{{ row.driver }}</td>
+              <td [class.checked]="row.customer === '✓'" [class.limited]="row.customer === 'Own' || row.customer === 'View' || row.customer === 'Availability' || row.customer === 'Limited'">{{ row.customer }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Fallback view -->
+      <div class="mobile-matrix-view">
+        <div class="mobile-module-card glass-card" *ngFor="let row of matrixRows">
+          <h4>{{ row.module }}</h4>
+          <div class="mobile-grid">
+            <div><span>Owner:</span> <strong [class.checked]="row.owner === '✓'">{{ row.owner }}</strong></div>
+            <div><span>Admin:</span> <strong [class.checked]="row.admin === '✓'">{{ row.admin }}</strong></div>
+            <div><span>Sales:</span> <strong [class.checked]="row.sales === '✓' || row.sales === 'Limited' || row.sales === 'View'">{{ row.sales }}</strong></div>
+            <div><span>Warehouse:</span> <strong [class.checked]="row.warehouse === '✓' || row.warehouse === 'Limited'">{{ row.warehouse }}</strong></div>
+            <div><span>Driver:</span> <strong [class.checked]="row.driver === '✓' || row.driver === 'Limited' || row.driver === 'Assigned'">{{ row.driver }}</strong></div>
+            <div><span>Customer:</span> <strong [class.checked]="row.customer === '✓' || row.customer === 'Own' || row.customer === 'View' || row.customer === 'Availability'">{{ row.customer }}</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

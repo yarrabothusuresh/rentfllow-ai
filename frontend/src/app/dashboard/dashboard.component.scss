@@ -131,6 +131,36 @@
     align-items: center;
     justify-content: center;
     font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .demo-role-switcher-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--background-color);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+
+    .switcher-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .role-select-dropdown {
+      border: none;
+      background: transparent;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      cursor: pointer;
+      outline: none;
+      padding-right: 0.5rem;
+    }
   }
 }
 

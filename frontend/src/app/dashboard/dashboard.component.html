@@ -6,28 +6,28 @@
     </div>
     
     <nav class="sidebar-nav">
-      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">Dashboard</a>
-      <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item">AI Copilot</a>
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" *ngIf="hasPermission('DASHBOARD_VIEW')">Dashboard</a>
+      <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('AI_COPILOT_USE')">AI Copilot</a>
       
-      <div class="nav-section">Operations</div>
-      <a class="nav-item disabled" (click)="showFutureToast()">Leads</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Customers</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Quotes</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Bookings</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Calendar</a>
+      <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('CUSTOMER_VIEW')">Customers</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('QUOTE_VIEW')">Quotes</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>
       
-      <div class="nav-section">Fulfillment</div>
-      <a class="nav-item disabled" (click)="showFutureToast()">Inventory</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Products</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Warehouse</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Delivery</a>
+      <div class="nav-section" *ngIf="hasAnyPermissionInFulfillment()">Fulfillment</div>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery</a>
       
-      <div class="nav-section">Finance & Admin</div>
-      <a class="nav-item disabled" (click)="showFutureToast()">Payments</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Analytics</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Storefront</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Integrations</a>
-      <a class="nav-item disabled" (click)="showFutureToast()">Settings</a>
+      <div class="nav-section" *ngIf="hasAnyPermissionInFinanceAdmin()">Finance & Admin</div>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('PAYMENT_VIEW')">Payments</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('ANALYTICS_VIEW')">Analytics</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('STOREFRONT_VIEW')">Storefront</a>
+      <a routerLink="/user-roles" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('USER_VIEW')">User Roles</a>
+      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('COMPANY_SETTINGS_VIEW')">Settings</a>
     </nav>
 
     <!-- Sidebar Profile Card -->
@@ -43,7 +43,7 @@
           <div><span>Employees:</span> <span>{{ businessProfile.employees }}</span></div>
           <div><span>Locations:</span> <span>{{ businessProfile.locations }}</span></div>
         </div>
-        <button class="btn-edit-profile" (click)="openEditModal()">Edit Profile</button>
+        <button class="btn-edit-profile" (click)="openEditModal()" *ngIf="hasPermission('COMPANY_SETTINGS_UPDATE')">Edit Profile</button>
       </div>
     </div>
   </aside>
@@ -54,8 +54,22 @@
         <span class="company-name">{{ businessProfile.name }}</span>
         <span class="location">{{ businessProfile.city }}, {{ businessProfile.state }}</span>
       </div>
+
+      <!-- Demo-only Role Switcher -->
+      <div class="demo-role-switcher-container">
+        <span class="switcher-label">Demo role switcher</span>
+        <select class="role-select-dropdown" [ngModel]="currentRole" (ngModelChange)="switchRole($event)">
+          <option value="OWNER">Owner</option>
+          <option value="ADMIN">Admin</option>
+          <option value="SALES">Sales</option>
+          <option value="WAREHOUSE">Warehouse</option>
+          <option value="DRIVER">Driver</option>
+          <option value="CUSTOMER">Customer</option>
+        </select>
+      </div>
+
       <div class="user-profile">
-        <div class="avatar">ER</div>
+        <div class="avatar">{{ currentRole.substring(0, 2) }}</div>
       </div>
     </header>
     

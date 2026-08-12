@@ -4,6 +4,7 @@ import { ProfileService } from '../services/profile.service';
 import { of } from 'rxjs';
 import { INITIAL_BUSINESS_PROFILE } from '../data/business-profile.data';
 import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -16,7 +17,7 @@ describe('DashboardComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent, RouterTestingModule],
+      imports: [DashboardComponent, RouterTestingModule, HttpClientTestingModule],
       providers: [
         { provide: ProfileService, useValue: mockProfileService }
       ]
