@@ -7,6 +7,7 @@
     
     <nav class="sidebar-nav">
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" *ngIf="hasPermission('DASHBOARD_VIEW')">Dashboard</a>
+      <a routerLink="/workflow-demo" routerLinkActive="active" class="nav-item">Rental Workflow</a>
       <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('AI_COPILOT_USE')">AI Copilot</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>

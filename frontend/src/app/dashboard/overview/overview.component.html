@@ -4,6 +4,43 @@
     <span class="role-badge" [ngClass]="currentRole.toLowerCase()">Simulated Role: {{ currentRole }}</span>
   </div>
 
+  <!-- TODAY'S RENTAL OPERATIONS CARD -->
+  <div class="operations-workflow-card glass-card" style="margin-bottom: 1.5rem;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.2rem; color: #f8fafc;">Today's Rental Operations</h3>
+      <span class="badge live-badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Live Operations</span>
+    </div>
+    <div class="ops-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1rem;">
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #f1f5f9;">12</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Active Events</div>
+      </div>
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #fbbf24;">4</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Quotes Awaiting Response</div>
+      </div>
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #60a5fa;">3</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Bookings Preparing</div>
+      </div>
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #38bdf8;">5</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Deliveries Today</div>
+      </div>
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #a78bfa;">2</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Pickups Today</div>
+      </div>
+      <div class="ops-stat-item" style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.3rem; font-weight: 700; color: #f87171;">1</div>
+        <div style="font-size: 0.75rem; color: #94a3b8;">Inventory Conflict</div>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: flex-end;">
+      <button routerLink="/workflow-demo" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">View Workflow</button>
+    </div>
+  </div>
+
   <!-- 1. OWNER DASHBOARD VIEW -->
   <div class="role-dashboard" *ngIf="currentRole === 'OWNER'">
     <div class="stats-grid">

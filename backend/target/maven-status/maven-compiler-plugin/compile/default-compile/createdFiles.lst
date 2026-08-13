@@ -17,6 +17,7 @@ com\rentflow\permission\PermissionCode.class
 com\rentflow\auth\DataInitializer.class
 com\rentflow\auth\UserRoleService.class
 com\rentflow\auth\AuthController.class
+com\rentflow\workflow\WorkflowController$1.class
 com\rentflow\auth\AuthController$RoleDto.class
 com\rentflow\user\UserRepository.class
 com\rentflow\BackendApplication.class

@@ -1,0 +1,230 @@
+<div class="workflow-container">
+  <!-- Toast Notification -->
+  <div class="toast-notification" *ngIf="actionToastMessage">
+    <span class="toast-icon">ℹ️</span>
+    <span>{{ actionToastMessage }}</span>
+  </div>
+
+  <!-- Header Section -->
+  <header class="workflow-header glass-card">
+    <div class="header-main">
+      <div class="header-titles">
+        <span class="breadcrumb"><a routerLink="/dashboard">Dashboard</a> / Operations</span>
+        <h1>Rental Lifecycle</h1>
+        <p class="subtitle">Follow every rental from first inquiry to completed event.</p>
+      </div>
+
+      <div class="header-controls">
+        <!-- View Toggle -->
+        <div class="toggle-group">
+          <button 
+            class="toggle-btn" 
+            [class.active]="viewMode === 'INTERNAL'" 
+            (click)="toggleViewMode('INTERNAL')">
+            🛡️ Internal View
+          </button>
+          <button 
+            class="toggle-btn" 
+            [class.active]="viewMode === 'CUSTOMER'" 
+            (click)="toggleViewMode('CUSTOMER')">
+            👤 Customer View
+          </button>
+        </div>
+
+        <!-- Role Badge -->
+        <div class="role-indicator badge" [ngClass]="currentRole.toLowerCase()">
+          Role: {{ currentRole }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Indicator & Main Action -->
+    <div class="progress-bar-wrapper">
+      <div class="progress-info">
+        <span class="stage-label">Current Stage: <strong>{{ workflowData?.currentStage }}</strong></span>
+        <span class="progress-percentage">Lifecycle Progress: <strong>{{ workflowData?.progress }}%</strong></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="workflowData?.progress"></div>
+      </div>
+      
+      <div class="action-bar">
+        <button class="btn-primary advance-btn" (click)="advanceWorkflow()">
+          ⏩ Advance Workflow
+        </button>
+        <button class="btn-secondary reset-btn" (click)="resetWorkflow()">
+          🔄 Reset Demo Stage
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notice Banner if Customer View or Role restricted -->
+  <div class="view-notice-banner" *ngIf="viewMode === 'CUSTOMER'">
+    <span class="notice-icon">🔒</span>
+    <span><strong>Customer View Mode:</strong> Internal margins, costs, and warehouse notes are hidden.</span>
+  </div>
+
+  <!-- Main Workflow Grid Layout (Timeline + Detail Panel) -->
+  <div class="workflow-grid">
+    <!-- 12-Stage Visual Stepper Timeline -->
+    <div class="timeline-card glass-card">
+      <div class="card-header">
+        <h3>12-Stage Rental Workflow</h3>
+        <span class="hint-text">Click any stage to inspect details</span>
+      </div>
+
+      <div class="timeline-stepper">
+        <div 
+          *ngFor="let stage of workflowData?.stages; let i = index"
+          class="stepper-item"
+          [class.completed]="stage.status === 'COMPLETED'"
+          [class.current]="stage.status === 'CURRENT'"
+          [class.pending]="stage.status === 'PENDING'"
+          [class.selected]="selectedStage?.stageKey === stage.stageKey"
+          [class.role-highlight]="isStageRelevantToRole(stage)"
+          (click)="selectStage(stage)"
+        >
+          <div class="step-connector" *ngIf="i < (workflowData?.stages?.length || 0) - 1"></div>
+
+          <div class="step-marker">
+            <span class="status-symbol" *ngIf="stage.status === 'COMPLETED'">✓</span>
+            <span class="status-symbol" *ngIf="stage.status === 'CURRENT'">●</span>
+            <span class="status-symbol" *ngIf="stage.status === 'PENDING'">○</span>
+          </div>
+
+          <div class="step-content">
+            <div class="step-header">
+              <span class="stage-icon">{{ stage.icon }}</span>
+              <span class="stage-name">{{ stage.name }}</span>
+            </div>
+            <div class="step-meta">
+              <span class="role-tag">{{ stage.role }}</span>
+              <span class="stage-date">{{ stage.date }}</span>
+            </div>
+            <span class="status-badge" [ngClass]="stage.status.toLowerCase()">
+              {{ stage.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Detail Panel -->
+    <div class="detail-panel glass-card" *ngIf="selectedStage && workflowData">
+      <div class="panel-header">
+        <div class="stage-title-group">
+          <span class="panel-icon">{{ selectedStage.icon }}</span>
+          <div>
+            <h2>{{ selectedStage.name }}</h2>
+            <span class="status-badge" [ngClass]="selectedStage.status.toLowerCase()">
+              {{ selectedStage.status }}
+            </span>
+          </div>
+        </div>
+        <span class="role-focus-badge">Assigned Role: {{ selectedStage.role }}</span>
+      </div>
+
+      <div class="panel-body">
+        <!-- Stage Overview & Description -->
+        <div class="detail-section">
+          <h4>Stage Status & Overview</h4>
+          <p class="stage-desc">{{ selectedStage.description }}</p>
+        </div>
+
+        <!-- Customer & Event Context -->
+        <div class="detail-section">
+          <h4>Event Context</h4>
+          <div class="context-grid">
+            <div class="info-block">
+              <span class="label">Customer:</span>
+              <span class="val font-semibold">{{ workflowData.demoScenario.customerName }}</span>
+            </div>
+            <div class="info-block">
+              <span class="label">Location:</span>
+              <span class="val">{{ workflowData.demoScenario.customerLocation }}</span>
+            </div>
+            <div class="info-block">
+              <span class="label">Event Type:</span>
+              <span class="val">{{ workflowData.demoScenario.eventType }}</span>
+            </div>
+            <div class="info-block">
+              <span class="label">Event Date:</span>
+              <span class="val font-semibold text-primary">{{ workflowData.demoScenario.eventDate }}</span>
+            </div>
+            <div class="info-block">
+              <span class="label">Guest Count:</span>
+              <span class="val">{{ workflowData.demoScenario.guestCount }} guests</span>
+            </div>
+            <div class="info-block">
+              <span class="label">Rental Company:</span>
+              <span class="val">{{ workflowData.demoScenario.companyName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requested Products -->
+        <div class="detail-section">
+          <h4>Requested Products</h4>
+          <ul class="products-list">
+            <li *ngFor="let item of workflowData.demoScenario.products">
+              <span class="check-icon">📦</span> {{ item }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Financial Summary Breakdown -->
+        <div class="detail-section financials-section">
+          <h4>Financial Summary</h4>
+          <div class="financials-grid">
+            <div class="fin-card">
+              <span class="fin-label">Rental Items</span>
+              <span class="fin-value">${{ workflowData.demoScenario.estimatedRental | number:'1.2-2' }}</span>
+            </div>
+            <div class="fin-card">
+              <span class="fin-label">Delivery & Setup</span>
+              <span class="fin-value">${{ workflowData.demoScenario.deliverySetup | number:'1.2-2' }}</span>
+            </div>
+            <div class="fin-card total-card">
+              <span class="fin-label">Estimated Total</span>
+              <span class="fin-value text-success">${{ workflowData.demoScenario.totalEstimated | number:'1.2-2' }}</span>
+            </div>
+            
+            <!-- INTERNAL VIEW ONLY METRICS -->
+            <div class="fin-card internal-only" *ngIf="viewMode === 'INTERNAL'">
+              <span class="fin-label">Est. Cost (Internal)</span>
+              <span class="fin-value text-muted">${{ workflowData.demoScenario.estimatedCost | number:'1.2-2' }}</span>
+            </div>
+            <div class="fin-card internal-only highlight-margin" *ngIf="viewMode === 'INTERNAL'">
+              <span class="fin-label">Est. Gross Margin</span>
+              <span class="fin-value text-primary font-bold">{{ workflowData.demoScenario.estimatedMargin }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Internal Notes / Employee Info (Internal View Only) -->
+        <div class="detail-section internal-only-block" *ngIf="viewMode === 'INTERNAL'">
+          <h4>Internal Operations & Audit Trail</h4>
+          <div class="audit-info">
+            <p><strong>Created By:</strong> Sarah Miller — Sales Account Manager</p>
+            <p><strong>Tenant Isolation:</strong> Tenant ID <code>00000000-0000-0000-0000-000000000001</code></p>
+            <p><strong>Audit Log:</strong> State transitioned to <code>{{ selectedStage.stageKey }}</code> on {{ selectedStage.date }}.</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Stage Action Buttons -->
+        <div class="panel-actions">
+          <button class="btn-primary" (click)="triggerStageAction('View Stage Quote')">
+            📄 View Quote Details
+          </button>
+          <button class="btn-secondary" (click)="triggerStageAction('Send Customer Reminder')">
+            ✉️ Send Reminder
+          </button>
+          <button class="btn-secondary" (click)="triggerStageAction('Verify Reservation')">
+            📦 Reserve Inventory
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
