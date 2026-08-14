@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { RoleStateService, RoleType } from '../../services/role-state.service';
 
 @Component({
@@ -13,7 +13,10 @@ import { RoleStateService, RoleType } from '../../services/role-state.service';
 export class OverviewComponent implements OnInit {
   currentRole: RoleType = 'OWNER';
 
-  constructor(private roleStateService: RoleStateService) {}
+  constructor(
+    private roleStateService: RoleStateService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.roleStateService.currentRole$.subscribe(role => {
@@ -21,8 +24,11 @@ export class OverviewComponent implements OnInit {
     });
   }
 
+  investigateInsight(promptText: string) {
+    this.router.navigate(['/dashboard/ai-copilot'], { queryParams: { prompt: promptText } });
+  }
+
   demoAction(actionName: string) {
     alert(`[Demo] Action successful: ${actionName}`);
   }
 }
-

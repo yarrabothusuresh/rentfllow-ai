@@ -1,42 +1,185 @@
-<div class="ai-copilot">
-  <div class="copilot-header">
-    <h2>RentFlow AI Copilot</h2>
-    <p>Ask anything about your rental business.</p>
-  </div>
-  
-  <div class="chat-container glass-card">
-    <div class="chat-history">
-      <div class="message ai-message">
-        Hello! I'm your RentFlow AI assistant. How can I help you manage your business today?
-      </div>
-      
-      @for (msg of messages; track msg) {
-        <div class="message" [class.user-message]="msg.role === 'user'" [class.ai-message]="msg.role === 'ai'">
-          <div [innerHTML]="msg.content"></div>
-          
-          @if (msg.actions && msg.actions.length > 0) {
-            <div class="message-actions">
-              @for (action of msg.actions; track action) {
-                <button class="btn-secondary" (click)="demoAction(action)">{{ action }}</button>
-              }
-            </div>
-          }
+<div class="copilot-container">
+  <!-- Header -->
+  <header class="copilot-header">
+    <div class="header-main">
+      <div class="title-group">
+        <div class="copilot-avatar">✨</div>
+        <div>
+          <h1 class="copilot-title">RentFlow AI Copilot</h1>
+          <p class="copilot-subtitle">Your AI assistant for sales, inventory and rental operations.</p>
         </div>
-      }
+      </div>
+      <div class="connection-badge">
+        <span class="status-indicator"></span>
+        Connected to: <strong>{{ tenantName }}</strong>
+      </div>
     </div>
-    
-    <div class="suggested-questions" *ngIf="messages.length === 0">
-      <h3>Suggested Questions</h3>
-      <div class="questions-grid">
-        <button *ngFor="let q of suggestedQuestions" class="suggestion-btn" (click)="askQuestion(q)">
-          {{ q }}
+
+    <!-- Active User Role Selector -->
+    <div class="role-selector-bar">
+      <span class="role-label">Active User Role Context:</span>
+      <div class="role-pills">
+        <button 
+          *ngFor="let role of roles" 
+          [class.active]="activeRole === role"
+          (click)="setRole(role)" 
+          class="role-pill">
+          <span *ngIf="role === 'OWNER'">👨‍💼 Owner</span>
+          <span *ngIf="role === 'SALES'">💼 Sales</span>
+          <span *ngIf="role === 'WAREHOUSE'">🔧 Warehouse</span>
+          <span *ngIf="role === 'DRIVER'">🚚 Driver</span>
+          <span *ngIf="role === 'CUSTOMER'">👤 Customer</span>
         </button>
       </div>
     </div>
-    
-    <div class="chat-input-area">
-      <input type="text" class="chat-input" placeholder="Ask AI Copilot..." (keyup.enter)="askQuestion($any($event.target).value); $any($event.target).value=''">
-      <button class="send-btn" (click)="askQuestion('Test question')">Send</button>
+  </header>
+
+  <!-- Main Chat Body -->
+  <div class="copilot-body">
+    <!-- Suggested Prompts Sidebar / Top Section -->
+    <div class="suggested-prompts-section">
+      <h3 class="section-title">💡 Suggested Business Questions</h3>
+      <div class="prompts-grid">
+        <button 
+          *ngFor="let prompt of suggestedPrompts" 
+          (click)="askQuestion(prompt)" 
+          class="prompt-card">
+          <span>{{ prompt }}</span>
+          <span class="prompt-arrow">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Messages Feed -->
+    <div class="chat-feed" #chatFeed>
+      <div 
+        *ngFor="let msg of messages" 
+        [class.user-msg]="msg.role === 'user'" 
+        [class.ai-msg]="msg.role === 'ai'" 
+        class="message-wrapper">
+
+        <div class="msg-avatar">
+          <span *ngIf="msg.role === 'user'">👤</span>
+          <span *ngIf="msg.role === 'ai'">🤖</span>
+        </div>
+
+        <div class="msg-bubble">
+          <div class="msg-header">
+            <span class="sender-name">{{ msg.role === 'user' ? 'You (' + activeRole + ')' : 'RentFlow AI Assistant' }}</span>
+            <span class="msg-time">{{ msg.timestamp }}</span>
+          </div>
+
+          <!-- Message Body -->
+          <div class="msg-content" [innerHTML]="msg.content"></div>
+
+          <!-- Permission Denied Warning Notice -->
+          <div *ngIf="msg.intent === 'PERMISSION_DENIED'" class="permission-alert">
+            <span class="alert-icon">🔒</span>
+            <span>Security Enforcement: Access denied under role <strong>{{ activeRole }}</strong>.</span>
+          </div>
+
+          <!-- Action Approval UI -->
+          <div *ngIf="msg.requiresApproval" class="approval-card">
+            <div class="approval-header">
+              <span class="warning-icon">⚠️</span>
+              <strong class="approval-title">AI Action Approval Required</strong>
+            </div>
+
+            <div class="approval-details" *ngIf="msg.actionDetails">
+              <div class="detail-row">
+                <span class="detail-label">AI wants to perform:</span>
+                <span class="detail-value highlight">{{ msg.actionDetails.targetAction || 'Send payment reminder' }}</span>
+              </div>
+              <div class="detail-row" *ngIf="msg.actionDetails.customer">
+                <span class="detail-label">Customer:</span>
+                <span class="detail-value">{{ msg.actionDetails.customer }}</span>
+              </div>
+              <div class="detail-row" *ngIf="msg.actionDetails.outstandingAmount">
+                <span class="detail-label">Outstanding Amount:</span>
+                <span class="detail-value price">{{ msg.actionDetails.outstandingAmount }}</span>
+              </div>
+              <div class="preview-box" *ngIf="msg.actionDetails.previewMessage">
+                <span class="preview-label">Message Preview:</span>
+                <p class="preview-text">"{{ msg.actionDetails.previewMessage }}"</p>
+              </div>
+            </div>
+
+            <div *ngIf="!msg.approved" class="approval-actions">
+              <button (click)="approveAction(msg)" class="btn-approve">✓ Approve Action</button>
+              <button (click)="cancelAction(msg)" class="btn-cancel">✕ Cancel</button>
+            </div>
+
+            <div *ngIf="msg.approved" class="approved-banner">
+              <span class="check-icon">✓</span> Demo action approved. (Simulated execution — no email sent)
+            </div>
+          </div>
+
+          <!-- Tools Used Badges -->
+          <div *ngIf="msg.toolsUsed && msg.toolsUsed.length > 0" class="tools-used-section">
+            <span class="tools-label">Tools used:</span>
+            <div class="tool-badges">
+              <span *ngFor="let tool of msg.toolsUsed" class="tool-badge">
+                ✓ {{ tool }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Suggested Actions Buttons -->
+          <div *ngIf="msg.suggestedActions && msg.suggestedActions.length > 0 && !msg.requiresApproval" class="actions-section">
+            <span class="actions-label">Suggested actions:</span>
+            <div class="action-buttons">
+              <button 
+                *ngFor="let act of msg.suggestedActions" 
+                (click)="handleAction(act)" 
+                class="btn-action">
+                {{ act }}
+              </button>
+            </div>
+          </div>
+
+          <!-- AI Operational Reasoning Trace (Expandable) -->
+          <div *ngIf="msg.reasoningSteps && msg.reasoningSteps.length > 0" class="reasoning-container">
+            <button (click)="toggleReasoning(msg)" class="toggle-reasoning-btn">
+              <span>🔍 AI Operational Trace</span>
+              <span class="toggle-icon">{{ msg.showReasoning ? '▲' : '▼' }}</span>
+            </button>
+            <div *ngIf="msg.showReasoning" class="reasoning-body">
+              <ul>
+                <li *ngFor="let step of msg.reasoningSteps">{{ step }}</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="message-wrapper ai-msg loading-msg">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble loading-bubble">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="loading-text">Analyzing business request & evaluating tools...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="chat-input-bar">
+      <form (ngSubmit)="askQuestion(inputMessage)" class="input-form">
+        <input 
+          type="text" 
+          [(ngModel)]="inputMessage" 
+          name="userMessage" 
+          placeholder="Ask RentFlow AI a business question (e.g. Do I have enough chairs for Saturday?)..." 
+          class="chat-input"
+          [disabled]="isLoading" />
+        <button type="submit" [disabled]="isLoading || !inputMessage.trim()" class="btn-send">
+          <span>Send</span>
+          <span class="send-icon">➔</span>
+        </button>
+      </form>
     </div>
   </div>
 </div>

@@ -36,8 +36,72 @@
         <div style="font-size: 0.75rem; color: #94a3b8;">Inventory Conflict</div>
       </div>
     </div>
-    <div style="display: flex; justify-content: flex-end;">
-      <button routerLink="/workflow-demo" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">View Workflow</button>
+    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <button routerLink="/dashboard/ai-copilot" class="btn-primary" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">✨ Ask AI Copilot</button>
+      <button routerLink="/workflow-demo" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">View Workflow</button>
+    </div>
+  </div>
+
+  <!-- AI DAILY BRIEFING CARD -->
+  <div class="ai-briefing-card glass-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 14px; padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-size: 1.2rem;">✨</span>
+        <h3 style="margin: 0; color: #ffffff; font-size: 1.15rem;">AI Daily Briefing</h3>
+      </div>
+      <button routerLink="/dashboard/ai-copilot" style="background: #6366f1; color: #ffffff; border: none; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">[Ask AI]</button>
+    </div>
+    <div style="color: #e0e7ff; font-size: 0.95rem; line-height: 1.6;">
+      <p style="margin: 0;"><strong>Good morning.</strong> You have <strong>7 events this weekend</strong> | <strong>3 quotes awaiting response</strong> | <strong>2 overdue payments</strong> | <strong>1 inventory conflict</strong> | <strong>4 deliveries today</strong>.</p>
+    </div>
+  </div>
+
+  <!-- AI BUSINESS INSIGHTS SECTION -->
+  <div class="ai-insights-section" style="margin-bottom: 1.5rem;">
+    <h3 style="color: #f8fafc; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span>📊</span> AI Business Insights
+    </h3>
+    <div class="insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+      
+      <!-- Sales Insight Card -->
+      <div class="insight-card glass-card" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">SALES INSIGHT</span>
+          </div>
+          <p style="color: #e2e8f0; font-size: 0.88rem; margin: 0 0 1rem 0; line-height: 1.5;">
+            4 quotes have been waiting for customer response for more than 48 hours.
+          </p>
+        </div>
+        <button (click)="investigateInsight('Which bookings are waiting for customer action?')" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid #fbbf24; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; align-self: flex-start;">[Investigate]</button>
+      </div>
+
+      <!-- Inventory Insight Card -->
+      <div class="insight-card glass-card" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span style="background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">INVENTORY INSIGHT</span>
+          </div>
+          <p style="color: #e2e8f0; font-size: 0.88rem; margin: 0 0 1rem 0; line-height: 1.5;">
+            Chiavari chairs are expected to reach 91% utilization this weekend.
+          </p>
+        </div>
+        <button (click)="investigateInsight('Do I have enough chairs for Saturday?')" style="background: rgba(96, 165, 250, 0.15); color: #60a5fa; border: 1px solid #60a5fa; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; align-self: flex-start;">[Investigate]</button>
+      </div>
+
+      <!-- Operations Insight Card -->
+      <div class="insight-card glass-card" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <span style="background: rgba(52, 211, 153, 0.2); color: #34d399; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">OPERATIONS INSIGHT</span>
+          </div>
+          <p style="color: #e2e8f0; font-size: 0.88rem; margin: 0 0 1rem 0; line-height: 1.5;">
+            Tomorrow has 7 deliveries and 5 pickups. Consider reviewing driver capacity.
+          </p>
+        </div>
+        <button (click)="investigateInsight('What deliveries are scheduled today?')" style="background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid #34d399; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; align-self: flex-start;">[Investigate]</button>
+      </div>
+
     </div>
   </div>
 
@@ -73,21 +137,6 @@
       <div class="stat-card">
         <div class="stat-title">Quote Conversion</div>
         <div class="stat-value">62%</div>
-      </div>
-    </div>
-
-    <div class="ai-insight-card glass-card">
-      <div class="insight-header">
-        <span class="icon">✨</span>
-        <h3>AI Business Insight</h3>
-      </div>
-      <div class="insight-content">
-        <p>You have 7 events this weekend. Two customers have outstanding balances totaling $8,420. Your white Chiavari chairs are at 91% utilization.</p>
-      </div>
-      <div class="insight-actions">
-        <button class="btn-primary" (click)="demoAction('Payments Reviewed')">Review Payments</button>
-        <button class="btn-secondary" (click)="demoAction('Inventory Checked')">Check Inventory</button>
-        <button class="btn-secondary" (click)="demoAction('Events Loaded')">View Events</button>
       </div>
     </div>
   </div>
@@ -268,7 +317,6 @@
   </div>
 
   <!-- Common Target Customer Profile Card (Preserve from Day 3) -->
-  <!-- Only show this to OWNER, ADMIN, and SALES roles (not Driver or Customer) -->
   <div class="target-customer-card glass-card" *ngIf="currentRole === 'OWNER' || currentRole === 'ADMIN' || currentRole === 'SALES'">
     <div class="card-header">
       <h3>Target Customer</h3>
@@ -300,4 +348,3 @@
     </div>
   </div>
 </div>
-

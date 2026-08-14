@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'ideal-customer', component: IdealCustomerComponent },
   { path: 'user-roles', component: UserRolesComponent },
   { path: 'workflow-demo', component: WorkflowDemoComponent },
+  { path: 'ai-copilot', component: AiCopilotComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
