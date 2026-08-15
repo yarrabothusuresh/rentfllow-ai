@@ -1,0 +1,92 @@
+<div class="customer-detail-container" *ngIf="customer">
+  <!-- Top Navigation -->
+  <div class="top-nav">
+    <a routerLink="/customers" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Customers
+    </a>
+  </div>
+
+  <!-- Hero Profile Banner -->
+  <div class="profile-hero">
+    <div class="profile-avatar">
+      <i class="fas fa-user-circle"></i>
+    </div>
+    <div class="profile-info">
+      <div class="title-row">
+        <h1 class="customer-name">{{ customer.firstName }} {{ customer.lastName }}</h1>
+        <span class="customer-num-badge">{{ customer.customerNumber }}</span>
+      </div>
+      <p class="company-sub" *ngIf="customer.companyName"><i class="fas fa-building"></i> {{ customer.companyName }}</p>
+      <div class="meta-tags">
+        <span class="type-tag"><i class="fas fa-tag"></i> {{ customer.customerType }}</span>
+        <span class="status-tag" [class.active]="customer.status === 'ACTIVE'"><i class="fas fa-signal"></i> {{ customer.status }}</span>
+        <span><i class="fas fa-envelope"></i> {{ customer.email }}</span>
+        <span *ngIf="customer.phone"><i class="fas fa-phone"></i> {{ customer.phone }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Content -->
+  <div class="customer-grid">
+    <!-- Left Column: Contact & Address Info -->
+    <div class="info-card">
+      <h3 class="card-title"><i class="fas fa-address-card icon-indigo"></i> Account Details</h3>
+      <div class="detail-list">
+        <div class="detail-row">
+          <span class="detail-label">Billing Address</span>
+          <span class="detail-val">{{ customer.billingAddress || 'Not specified' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">City, State ZIP</span>
+          <span class="detail-val" *ngIf="customer.city">
+            {{ customer.city }}, {{ customer.state }} {{ customer.zipCode }}
+          </span>
+          <span class="detail-val" *ngIf="!customer.city">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Country</span>
+          <span class="detail-val">{{ customer.country || 'USA' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Alternate Phone</span>
+          <span class="detail-val">{{ customer.alternatePhone || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Associated Events Timeline -->
+    <div class="events-card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-calendar-alt icon-gold"></i> Event History & Active Bookings</h3>
+        <span class="event-count-badge">{{ events.length }} Events</span>
+      </div>
+
+      <div class="events-list" *ngIf="events.length > 0">
+        <div class="event-item-card" *ngFor="let ev of events">
+          <div class="event-main">
+            <div class="event-type-icon">
+              <i class="fas fa-glass-cheers"></i>
+            </div>
+            <div>
+              <h4 class="event-title">{{ ev.eventName }}</h4>
+              <p class="event-meta">
+                <span><i class="fas fa-calendar"></i> {{ ev.eventDate | date:'mediumDate' }}</span>
+                <span><i class="fas fa-users"></i> {{ ev.guestCount }} guests</span>
+                <span *ngIf="ev.venueName"><i class="fas fa-map-marker-alt"></i> {{ ev.venueName }}</span>
+              </p>
+            </div>
+          </div>
+          <div class="event-right">
+            <span class="status-badge" [ngClass]="getEventStatusClass(ev.status)">{{ ev.status }}</span>
+            <a [routerLink]="['/events', ev.id]" class="btn-event-link">View Event <i class="fas fa-chevron-right"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-events" *ngIf="events.length === 0">
+        <i class="fas fa-calendar-times"></i>
+        <p>No active or past events found for this customer.</p>
+      </div>
+    </div>
+  </div>
+</div>

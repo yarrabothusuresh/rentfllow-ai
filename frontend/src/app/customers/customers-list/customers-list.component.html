@@ -1,0 +1,183 @@
+<div class="customers-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <i class="fas fa-users icon-glow"></i> Customers
+      </h1>
+      <p class="page-subtitle">Manage customer profiles, contact details, event history, and account status.</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <i class="fas fa-user-plus"></i> Add New Customer
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        placeholder="Search by name, email, phone, company, or CUS number..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <div class="filters-group">
+      <select [(ngModel)]="selectedType" (change)="applyFilters()">
+        <option value="">All Customer Types</option>
+        <option value="INDIVIDUAL">Individual</option>
+        <option value="BUSINESS">Business</option>
+        <option value="VENUE">Venue</option>
+        <option value="EVENT_PLANNER">Event Planner</option>
+        <option value="CORPORATE">Corporate</option>
+      </select>
+
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">All Statuses</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+        <option value="BLOCKED">Blocked</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <table class="customers-table">
+      <thead>
+        <tr>
+          <th>Customer Number</th>
+          <th>Name / Company</th>
+          <th>Contact Info</th>
+          <th>Type</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filteredCustomers">
+          <td>
+            <span class="cus-number">{{ c.customerNumber }}</span>
+          </td>
+          <td>
+            <div class="customer-name-cell">
+              <span class="full-name">{{ c.firstName }} {{ c.lastName }}</span>
+              <span class="company-sub" *ngIf="c.companyName">{{ c.companyName }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="contact-cell">
+              <span><i class="fas fa-envelope"></i> {{ c.email }}</span>
+              <span *ngIf="c.phone"><i class="fas fa-phone"></i> {{ c.phone }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="type-badge" [ngClass]="getTypeBadgeClass(c.customerType)">
+              {{ c.customerType }}
+            </span>
+          </td>
+          <td>
+            <span class="location-text" *ngIf="c.city || c.state">
+              {{ c.city }}<span *ngIf="c.state">, {{ c.state }}</span>
+            </span>
+            <span class="location-text empty" *ngIf="!c.city && !c.state">—</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.active]="c.status === 'ACTIVE'" [class.inactive]="c.status !== 'ACTIVE'">
+              {{ c.status }}
+            </span>
+          </td>
+          <td>
+            <a [routerLink]="['/customers', c.id]" class="btn-action">
+              View Profile <i class="fas fa-chevron-right"></i>
+            </a>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredCustomers.length === 0 && !loading">
+          <td colspan="7" class="empty-row">
+            <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
+            <p>No customers match your query.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CREATE CUSTOMER MODAL -->
+  <div *ngIf="showCreateModal" class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus icon-indigo"></i> Create New Customer</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" [(ngModel)]="newCustomer.firstName" placeholder="e.g. Emily" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" [(ngModel)]="newCustomer.lastName" placeholder="e.g. Brown" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" [(ngModel)]="newCustomer.email" placeholder="emily.brown@example.com" required />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" [(ngModel)]="newCustomer.phone" placeholder="+1 555-010-1001" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" [(ngModel)]="newCustomer.companyName" placeholder="e.g. Brown Events LLC" />
+          </div>
+          <div class="form-group">
+            <label>Customer Type</label>
+            <select [(ngModel)]="newCustomer.customerType">
+              <option value="INDIVIDUAL">Individual</option>
+              <option value="BUSINESS">Business</option>
+              <option value="VENUE">Venue</option>
+              <option value="EVENT_PLANNER">Event Planner</option>
+              <option value="CORPORATE">Corporate</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Billing Address</label>
+          <input type="text" [(ngModel)]="newCustomer.billingAddress" placeholder="Street address..." />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" [(ngModel)]="newCustomer.city" placeholder="Dallas" />
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <input type="text" [(ngModel)]="newCustomer.state" placeholder="TX" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn-primary" (click)="createCustomer()">
+          <i class="fas fa-check"></i> Create Customer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

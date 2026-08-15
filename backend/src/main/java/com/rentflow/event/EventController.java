@@ -1,5 +1,8 @@
 package com.rentflow.event;
 
+import com.rentflow.ai.dto.EventRequirementDTO;
+import com.rentflow.ai.mock.DemoDataRepository;
+import com.rentflow.ai.service.EventService;
 import com.rentflow.event.dto.CreateEventRequest;
 import com.rentflow.event.dto.EventDTO;
 import com.rentflow.workflow.model.EventStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -20,10 +24,22 @@ import java.util.stream.Collectors;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final EventService eventService;
     private static final UUID DEFAULT_TENANT_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     public EventController(EventRepository eventRepository) {
+        this(eventRepository, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public EventController(EventRepository eventRepository, EventService eventService) {
         this.eventRepository = eventRepository;
+        this.eventService = eventService;
+    }
+
+    private String resolveTenantId(String tenantIdHeader) {
+        return (tenantIdHeader != null && !tenantIdHeader.isBlank())
+                ? tenantIdHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
     }
 
     @PostMapping
@@ -54,7 +70,6 @@ public class EventController {
         UUID effectiveTenantId = tenantId != null ? tenantId : DEFAULT_TENANT_ID;
         List<Event> events = eventRepository.findByTenantId(effectiveTenantId);
 
-        // If repo is empty, return a default seed list for demo purposes
         if (events.isEmpty()) {
             Event demoEvent = new Event(
                     UUID.fromString("d3b07384-d113-4601-a71f-488667c48564"),
@@ -104,6 +119,53 @@ public class EventController {
 
         Event saved = eventRepository.save(event);
         return ResponseEntity.ok(mapToDTO(saved));
+    }
+
+    // Requirements Endpoints
+    @GetMapping("/{eventId}/requirements")
+    public ResponseEntity<?> getRequirements(
+            @PathVariable("eventId") UUID eventId,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        return ResponseEntity.ok(eventService.getRequirements(tenantId, eventId));
+    }
+
+    @PostMapping("/{eventId}/requirements")
+    public ResponseEntity<?> addRequirement(
+            @PathVariable("eventId") UUID eventId,
+            @RequestBody EventRequirementDTO dto,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        if (dto.getDescription() == null || dto.getDescription().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Description is required."));
+        }
+        String tenantId = resolveTenantId(tenantHeader);
+        EventRequirementDTO created = eventService.addRequirement(tenantId, eventId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{eventId}/requirements/{requirementId}")
+    public ResponseEntity<?> updateRequirement(
+            @PathVariable("eventId") UUID eventId,
+            @PathVariable("requirementId") UUID requirementId,
+            @RequestBody EventRequirementDTO dto,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        return eventService.updateRequirement(tenantId, eventId, requirementId, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @DeleteMapping("/{eventId}/requirements/{requirementId}")
+    public ResponseEntity<?> deleteRequirement(
+            @PathVariable("eventId") UUID eventId,
+            @PathVariable("requirementId") UUID requirementId,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        boolean deleted = eventService.deleteRequirement(tenantId, eventId, requirementId);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     private EventDTO mapToDTO(Event entity) {

@@ -29,6 +29,7 @@ public class AIOrchestrator {
         }
         // Register default future action tools
         registerFutureActionTool("sendPaymentReminder");
+        registerFutureActionTool("createCustomerAction");
         registerFutureActionTool("createQuote");
         registerFutureActionTool("sendQuote");
         registerFutureActionTool("reserveInventory");
@@ -59,17 +60,34 @@ public class AIOrchestrator {
         String intent;
         List<String> toolsToCall = new ArrayList<>();
 
-        if (msgLower.contains("another customer") || msgLower.contains("other customer")) {
+        if (msgLower.contains("create customer") || msgLower.contains("create a customer")) {
+            intent = "ACTION_REQUIRES_APPROVAL";
+            toolsToCall.add("createCustomerAction");
+        } else if (msgLower.contains("another customer") || msgLower.contains("other customer")) {
             intent = "CUSTOMER_BOOKING_STATUS";
             toolsToCall.add("searchCustomer");
-            toolsToCall.add("getBooking");
+            toolsToCall.add("searchCustomers");
+            toolsToCall.add("getCustomerEvents");
         } else if (msgLower.contains("remind") || msgLower.contains("payment reminder")) {
             intent = "ACTION_REQUIRES_APPROVAL";
             toolsToCall.add("sendPaymentReminder");
-        } else if (msgLower.contains("emily") || (msgLower.contains("status") && msgLower.contains("wedding"))) {
-            intent = "CUSTOMER_BOOKING_STATUS";
-            toolsToCall.add("searchCustomer");
-            toolsToCall.add("getBooking");
+        } else if (msgLower.contains("weekend") || msgLower.contains("upcoming events")) {
+            intent = "UPCOMING_EVENTS";
+            toolsToCall.add("getUpcomingEvents");
+        } else if (msgLower.contains("find emily") || msgLower.contains("search emily") || msgLower.contains("emily brown")) {
+            if (msgLower.contains("status") || msgLower.contains("wedding")) {
+                intent = "CUSTOMER_BOOKING_STATUS";
+                toolsToCall.add("searchCustomer");
+                toolsToCall.add("searchCustomers");
+                toolsToCall.add("getBooking");
+                toolsToCall.add("getCustomerEvents");
+                toolsToCall.add("getEvent");
+            } else {
+                intent = "CUSTOMER_SEARCH_RESULT";
+                toolsToCall.add("searchCustomer");
+                toolsToCall.add("searchCustomers");
+                toolsToCall.add("getCustomerEvents");
+            }
         } else if (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("availability")) {
             intent = "AVAILABILITY_CHECK";
             toolsToCall.add("searchProducts");

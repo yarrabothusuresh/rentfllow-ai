@@ -1,0 +1,199 @@
+<div class="lead-detail-container" *ngIf="lead">
+  <!-- Back Link & Action Bar -->
+  <div class="top-nav">
+    <a routerLink="/leads" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Leads
+    </a>
+    <div class="header-actions">
+      <button class="btn-convert" (click)="openConvertModal()" *ngIf="lead.status !== 'CONVERTED'">
+        <i class="fas fa-magic"></i> Convert to Customer
+      </button>
+      <span class="converted-badge-lg" *ngIf="lead.status === 'CONVERTED'">
+        <i class="fas fa-check-circle"></i> Converted Lead
+      </span>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero-card">
+    <div class="hero-main">
+      <div class="lead-avatar">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <div>
+        <h1 class="lead-title">{{ lead.firstName }} {{ lead.lastName }}</h1>
+        <p class="company-sub" *ngIf="lead.companyName">{{ lead.companyName }}</p>
+        <div class="meta-row">
+          <span><i class="fas fa-envelope"></i> {{ lead.email }}</span>
+          <span *ngIf="lead.phone"><i class="fas fa-phone"></i> {{ lead.phone }}</span>
+          <span><i class="fas fa-bullhorn"></i> Source: {{ lead.source }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-side">
+      <div class="status-box">
+        <span class="status-label">Status</span>
+        <span class="status-val">{{ lead.status }}</span>
+      </div>
+      <div class="assigned-box">
+        <span class="assigned-label">Sales Rep</span>
+        <span class="assigned-val">{{ lead.assignedTo || 'Sales Team' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Timeline -->
+  <div class="timeline-card">
+    <h3 class="section-title"><i class="fas fa-route icon-indigo"></i> Lead Progression Lifecycle</h3>
+    <div class="timeline-track">
+      <div
+        *ngFor="let stage of timelineStages; let i = index"
+        class="timeline-node"
+        [class.completed]="isStageCompleted(stage.key)"
+        [class.active]="isCurrentStage(stage.key)"
+      >
+        <div class="node-icon">
+          <i class="fas fa-check" *ngIf="isStageCompleted(stage.key) && !isCurrentStage(stage.key)"></i>
+          <i class="fas fa-circle" *ngIf="isCurrentStage(stage.key)"></i>
+          <span *ngIf="!isStageCompleted(stage.key)">{{ i + 1 }}</span>
+        </div>
+        <span class="node-label">{{ stage.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="details-grid">
+    <!-- Event Details Card -->
+    <div class="info-card">
+      <h3 class="card-header-title"><i class="fas fa-glass-cheers icon-gold"></i> Event Inquiry</h3>
+      <div class="info-body">
+        <div class="info-item">
+          <span class="info-label">Event Type</span>
+          <span class="info-value badge-gold">{{ lead.eventType }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Event Date</span>
+          <span class="info-value">{{ lead.eventDate | date:'fullDate' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Guest Count</span>
+          <span class="info-value">{{ lead.guestCount }} guests</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Venue</span>
+          <span class="info-value">{{ lead.venueName || 'Not specified' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes & Preferences -->
+    <div class="info-card">
+      <h3 class="card-header-title"><i class="fas fa-sticky-note icon-blue"></i> Customer Notes & Requirements</h3>
+      <div class="info-body">
+        <p class="notes-text" *ngIf="lead.notes">{{ lead.notes }}</p>
+        <p class="notes-text empty" *ngIf="!lead.notes">No notes provided for this lead.</p>
+        <div class="timestamp-footer">
+          <span>Created: {{ lead.createdAt | date:'short' }}</span>
+          <span>Last Updated: {{ lead.updatedAt | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERT LEAD MODAL -->
+  <div *ngIf="showConvertModal" class="modal-backdrop" (click)="closeConvertModal()">
+    <div class="modal-content convert-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-check icon-indigo"></i> Convert Lead to Customer</h3>
+        <button class="btn-close" (click)="closeConvertModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Initial Confirmation Step -->
+        <div *ngIf="!conversionResult && !conversionLoading">
+          <p class="convert-intro">
+            Converting this lead will automatically generate a new <strong>Customer Profile</strong> and link a new <strong>Event</strong> in <code>PLANNING</code> status.
+          </p>
+
+          <div class="conversion-preview">
+            <div class="preview-box">
+              <span class="box-tag">CUSTOMER</span>
+              <h4>{{ lead.firstName }} {{ lead.lastName }}</h4>
+              <p>{{ lead.email }}</p>
+            </div>
+            <div class="preview-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="preview-box">
+              <span class="box-tag">EVENT</span>
+              <h4>{{ lead.firstName }}'s {{ lead.eventType }}</h4>
+              <p>{{ lead.eventDate | date:'mediumDate' }} • {{ lead.guestCount }} Guests</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="conversionLoading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Processing lead conversion & generating CRM entities...</p>
+        </div>
+
+        <!-- Duplicate Customer Found Prompt -->
+        <div *ngIf="possibleDuplicate && !conversionLoading" class="duplicate-alert">
+          <div class="alert-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h4>Existing Customer Found</h4>
+          </div>
+          <p>An existing customer with email <code>{{ lead.email }}</code> was detected:</p>
+          <div class="duplicate-card">
+            <span class="cus-num">{{ possibleDuplicate.customerNumber }}</span>
+            <span class="cus-name">{{ possibleDuplicate.firstName }} {{ possibleDuplicate.lastName }}</span>
+            <span class="cus-comp" *ngIf="possibleDuplicate.companyName">({{ possibleDuplicate.companyName }})</span>
+          </div>
+          <p class="duplicate-question">How would you like to proceed?</p>
+        </div>
+
+        <!-- Success Result -->
+        <div *ngIf="conversionResult && conversionResult.status === 'SUCCESS'" class="conversion-success">
+          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+          <h3>Lead Converted Successfully!</h3>
+          <ul class="success-checklist">
+            <li><i class="fas fa-check"></i> Customer Created: <strong>{{ conversionResult.customerNumber }}</strong></li>
+            <li><i class="fas fa-check"></i> Event Created: <strong>{{ lead.firstName }}'s {{ lead.eventType }}</strong></li>
+            <li><i class="fas fa-check"></i> Event Rental Requirements Populated</li>
+            <li><i class="fas fa-check"></i> Lead marked as <strong>CONVERTED</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <!-- Default State Buttons -->
+        <ng-container *ngIf="!conversionResult && !conversionLoading && !possibleDuplicate">
+          <button class="btn-secondary" (click)="closeConvertModal()">Cancel</button>
+          <button class="btn-primary" (click)="executeConversion()">
+            <i class="fas fa-magic"></i> Convert Now
+          </button>
+        </ng-container>
+
+        <!-- Duplicate Choice Buttons -->
+        <ng-container *ngIf="possibleDuplicate && !conversionLoading">
+          <button class="btn-secondary" (click)="executeConversion(false, possibleDuplicate.id)">
+            Use Existing Customer
+          </button>
+          <button class="btn-primary" (click)="executeConversion(true)">
+            Create New Customer
+          </button>
+        </ng-container>
+
+        <!-- Success Navigation Buttons -->
+        <ng-container *ngIf="conversionResult && conversionResult.status === 'SUCCESS'">
+          <a [routerLink]="['/customers', conversionResult.customerId]" (click)="closeConvertModal()" class="btn-secondary">
+            View Customer
+          </a>
+          <a [routerLink]="['/events', conversionResult.eventId]" (click)="closeConvertModal()" class="btn-primary">
+            View Event <i class="fas fa-arrow-right"></i>
+          </a>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

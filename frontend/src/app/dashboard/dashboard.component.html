@@ -11,8 +11,9 @@
       <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('AI_COPILOT_USE')">AI Copilot</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('CUSTOMER_VIEW')">Customers</a>
+      <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>
+      <a routerLink="/dashboard/customers" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('CUSTOMER_VIEW')">Customers</a>
+      <a routerLink="/dashboard/events" routerLinkActive="active" class="nav-item">Events</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('QUOTE_VIEW')">Quotes</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>

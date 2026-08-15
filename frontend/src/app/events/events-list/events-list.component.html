@@ -1,0 +1,161 @@
+<div class="events-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <i class="fas fa-calendar-star icon-glow"></i> Event Operations
+      </h1>
+      <p class="page-subtitle">Track event logistics, rental requirements, guest counts, and status pipelines.</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <i class="fas fa-plus"></i> Create New Event
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        placeholder="Search event name, venue, city..."
+        [(ngModel)]="searchQuery"
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <div class="filters-group">
+      <select [(ngModel)]="selectedType" (change)="applyFilters()">
+        <option value="">All Event Types</option>
+        <option value="WEDDING">Wedding</option>
+        <option value="BIRTHDAY">Birthday</option>
+        <option value="CORPORATE">Corporate</option>
+        <option value="CONFERENCE">Conference</option>
+        <option value="FESTIVAL">Festival</option>
+        <option value="PRIVATE_PARTY">Private Party</option>
+      </select>
+
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">All Statuses</option>
+        <option value="PLANNING">Planning</option>
+        <option value="QUOTED">Quoted</option>
+        <option value="BOOKED">Booked</option>
+        <option value="PREPARING">Preparing</option>
+        <option value="COMPLETED">Completed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Events Grid Cards -->
+  <div class="events-grid" *ngIf="filteredEvents.length > 0">
+    <div class="event-card" *ngFor="let ev of filteredEvents">
+      <div class="card-top">
+        <span class="type-pill">{{ ev.eventType }}</span>
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(ev.status)">{{ ev.status }}</span>
+      </div>
+
+      <h3 class="event-name">{{ ev.eventName }}</h3>
+
+      <div class="card-details">
+        <div class="detail-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ ev.eventDate | date:'fullDate' }}</span>
+        </div>
+        <div class="detail-item" *ngIf="ev.startTime">
+          <i class="fas fa-clock"></i>
+          <span>{{ ev.startTime }} - {{ ev.endTime }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fas fa-users"></i>
+          <span>{{ ev.guestCount }} Guests</span>
+        </div>
+        <div class="detail-item" *ngIf="ev.venueName">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>{{ ev.venueName }} ({{ ev.city || 'Dallas' }})</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a [routerLink]="['/events', ev.id]" class="btn-card-action">
+          Manage Event <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredEvents.length === 0 && !loading">
+    <i class="fas fa-calendar-times"></i>
+    <h3>No Events Found</h3>
+    <p>Try adjusting your search criteria or create a new event inquiry.</p>
+  </div>
+
+  <!-- CREATE EVENT MODAL -->
+  <div *ngIf="showCreateModal" class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-plus icon-indigo"></i> Create Event</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Event Name *</label>
+          <input type="text" [(ngModel)]="newEvent.eventName" placeholder="e.g. Brown Wedding Reception" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Type</label>
+            <select [(ngModel)]="newEvent.eventType">
+              <option value="WEDDING">Wedding</option>
+              <option value="BIRTHDAY">Birthday</option>
+              <option value="CORPORATE">Corporate</option>
+              <option value="CONFERENCE">Conference</option>
+              <option value="FESTIVAL">Festival</option>
+              <option value="PRIVATE_PARTY">Private Party</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Event Date *</label>
+            <input type="date" [(ngModel)]="newEvent.eventDate" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Guest Count *</label>
+            <input type="number" [(ngModel)]="newEvent.guestCount" min="1" placeholder="250" required />
+          </div>
+          <div class="form-group">
+            <label>Customer ID (UUID) *</label>
+            <input type="text" [(ngModel)]="newEvent.customerId" placeholder="Customer UUID" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Venue Name</label>
+            <input type="text" [(ngModel)]="newEvent.venueName" placeholder="e.g. Dallas Garden Hall" />
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" [(ngModel)]="newEvent.city" placeholder="Dallas" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Special Instructions</label>
+          <textarea [(ngModel)]="newEvent.specialInstructions" rows="3" placeholder="Setup notes, loading dock instructions..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn-primary" (click)="createEvent()">
+          <i class="fas fa-check"></i> Create Event
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

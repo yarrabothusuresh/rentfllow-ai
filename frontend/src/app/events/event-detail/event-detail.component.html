@@ -1,0 +1,138 @@
+<div class="event-detail-container" *ngIf="event">
+  <!-- Top Navigation & Action Header -->
+  <div class="top-nav">
+    <a routerLink="/events" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Events
+    </a>
+    <div class="header-actions">
+      <button class="btn-availability" (click)="checkProductAvailability()">
+        <i class="fas fa-boxes-packing"></i> Check Product Availability
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero Event Banner -->
+  <div class="event-hero">
+    <div class="hero-main">
+      <span class="type-pill">{{ event.eventType }}</span>
+      <h1 class="event-name">{{ event.eventName }}</h1>
+      <div class="meta-row">
+        <span><i class="fas fa-calendar-day"></i> {{ event.eventDate | date:'fullDate' }}</span>
+        <span *ngIf="event.startTime"><i class="fas fa-clock"></i> {{ event.startTime }} - {{ event.endTime }}</span>
+        <span><i class="fas fa-users"></i> {{ event.guestCount }} Guests</span>
+        <span *ngIf="event.venueName"><i class="fas fa-map-marker-alt"></i> {{ event.venueName }}</span>
+      </div>
+    </div>
+    <div class="hero-status">
+      <span class="status-badge-lg">{{ event.status }}</span>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <div class="event-grid">
+    <!-- Left Column: Requirements & Inventory Checklist -->
+    <div class="requirements-card">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-clipboard-check icon-indigo"></i> Rental Requirements Checklist</h3>
+        <button class="btn-secondary-sm" (click)="openAddRequirementModal()">
+          <i class="fas fa-plus"></i> Add Item
+        </button>
+      </div>
+
+      <div class="req-table-wrapper" *ngIf="requirements.length > 0">
+        <table class="req-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Required Qty</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of requirements">
+              <td>
+                <span class="req-desc">{{ r.description }}</span>
+              </td>
+              <td>
+                <span class="req-qty-badge">{{ r.quantity }} units</span>
+              </td>
+              <td>
+                <span class="req-notes">{{ r.notes || '—' }}</span>
+              </td>
+              <td>
+                <button class="btn-del" (click)="deleteRequirement(r.id)">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-reqs" *ngIf="requirements.length === 0">
+        <i class="fas fa-box-open"></i>
+        <p>No rental requirements defined yet. Click <strong>Add Item</strong> to populate equipment needs.</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Customer Info & Special Instructions -->
+    <div class="side-column">
+      <!-- Customer Card -->
+      <div class="info-card" *ngIf="customer">
+        <h3 class="card-title"><i class="fas fa-user icon-gold"></i> Client Information</h3>
+        <div class="customer-preview">
+          <span class="cus-num">{{ customer.customerNumber }}</span>
+          <h4 class="cus-name">{{ customer.firstName }} {{ customer.lastName }}</h4>
+          <p class="cus-comp" *ngIf="customer.companyName">{{ customer.companyName }}</p>
+          <div class="cus-contacts">
+            <div><i class="fas fa-envelope"></i> {{ customer.email }}</div>
+            <div *ngIf="customer.phone"><i class="fas fa-phone"></i> {{ customer.phone }}</div>
+          </div>
+          <a [routerLink]="['/customers', customer.id]" class="btn-cus-profile">View Profile <i class="fas fa-chevron-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Special Instructions Card -->
+      <div class="info-card">
+        <h3 class="card-title"><i class="fas fa-exclamation-circle icon-blue"></i> Special Logistics Instructions</h3>
+        <p class="notes-text" *ngIf="event.specialInstructions">{{ event.specialInstructions }}</p>
+        <p class="notes-text empty" *ngIf="!event.specialInstructions">No special loading dock or delivery instructions logged.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD REQUIREMENT MODAL -->
+  <div *ngIf="showRequirementModal" class="modal-backdrop" (click)="closeRequirementModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-plus-circle icon-indigo"></i> Add Rental Requirement</h3>
+        <button class="btn-close" (click)="closeRequirementModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Item Description *</label>
+          <input type="text" [(ngModel)]="newReq.description" placeholder="e.g. 10ft x 10ft Pop-up Canopy Tent" required />
+        </div>
+
+        <div class="form-group">
+          <label>Quantity *</label>
+          <input type="number" [(ngModel)]="newReq.quantity" min="1" required />
+        </div>
+
+        <div class="form-group">
+          <label>Notes / Specifications</label>
+          <input type="text" [(ngModel)]="newReq.notes" placeholder="White canvas, stakes included..." />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeRequirementModal()">Cancel</button>
+        <button class="btn-primary" (click)="addRequirement()">
+          <i class="fas fa-plus"></i> Add Requirement
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

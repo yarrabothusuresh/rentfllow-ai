@@ -47,6 +47,24 @@ public class MockAIProvider implements AIProvider {
 
         // Standard Intent Responses
         switch (intent) {
+            case "CUSTOMER_SEARCH_RESULT":
+                response.setMessage("Found customer: Emily Brown (CUS-000001).\nEmail: emily.brown@example-demo.com | Phone: +1 555-010-1001\nUpcoming event: Emily's Wedding (September 20, 2026, 250 guests at Dallas Garden Hall).");
+                response.setSuggestedActions(List.of("View Customer", "View Event", "Create Quote"));
+                response.setRequiresApproval(false);
+                break;
+
+            case "EVENT_STATUS_DETAILS":
+                response.setMessage("Emily Brown's wedding is currently in PLANNING status for September 20, 2026.\n\nGuest count: 250\nVenue: Dallas Garden Hall\n\nThe next expected step is to create a rental quote.");
+                response.setSuggestedActions(List.of("View Event", "Check Product Availability", "Create Quote"));
+                response.setRequiresApproval(false);
+                break;
+
+            case "UPCOMING_EVENTS":
+                response.setMessage("Upcoming scheduled events for Evergreen Event Rentals:\n1. Emily's Wedding - September 20, 2026 (250 guests, Dallas Garden Hall)\n2. Fairview Autumn Gala - September 21, 2026 (120 guests, Fairview Event Hall)\n3. TechCorp Annual Gala - September 22, 2026 (500 guests, Austin Convention Center)");
+                response.setSuggestedActions(List.of("View Events Calendar", "View Staging Schedule"));
+                response.setRequiresApproval(false);
+                break;
+
             case "CUSTOMER_BOOKING_STATUS":
                 response.setMessage("Emily Brown's wedding quote ($6,480) has been sent and is awaiting customer confirmation & deposit. 250 Chiavari chairs and 25 round tables are currently available.");
                 response.setSuggestedActions(List.of("View Rental Workflow", "Send Follow-up"));

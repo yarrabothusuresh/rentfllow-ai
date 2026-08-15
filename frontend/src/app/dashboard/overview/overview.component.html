@@ -40,6 +40,32 @@
       <button routerLink="/dashboard/ai-copilot" class="btn-primary" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">✨ Ask AI Copilot</button>
       <button routerLink="/workflow-demo" class="btn-secondary" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.5rem 1.25rem; border-radius: 6px; font-weight: 600; cursor: pointer;">View Workflow</button>
     </div>
+  <!-- CRM LEADS & CUSTOMERS SNAPSHOT CARD -->
+  <div class="crm-overview-card glass-card" style="margin-bottom: 1.5rem; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 14px; padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.15rem; color: #f8fafc; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-users-gear" style="color: #818cf8;"></i> CRM & Sales Pipeline Snapshot
+      </h3>
+      <div style="display: flex; gap: 0.5rem;">
+        <a routerLink="/dashboard/leads" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Leads</a>
+        <a routerLink="/dashboard/customers" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Customers</a>
+        <a routerLink="/dashboard/events" style="background: rgba(245, 158, 11, 0.2); color: #fde047; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Events</a>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">NEW INQUIRY DEMO</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin: 0.2rem 0;">Emily Brown</div>
+        <div style="font-size: 0.8rem; color: #cbd5e1;">September 20, 2026 • 250 Guests</div>
+        <a routerLink="/dashboard/leads" style="font-size: 0.75rem; color: #818cf8; text-decoration: none; margin-top: 0.3rem; display: inline-block;">Convert Lead →</a>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.85rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">CUSTOMER PROFILES</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin: 0.2rem 0;">Auto CUS-000001</div>
+        <div style="font-size: 0.8rem; color: #cbd5e1;">Sequenced Numbers & Duplicate Detection</div>
+        <a routerLink="/dashboard/customers" style="font-size: 0.75rem; color: #34d399; text-decoration: none; margin-top: 0.3rem; display: inline-block;">Customer Directory →</a>
+      </div>
+    </div>
   </div>
 
   <!-- AI DAILY BRIEFING CARD -->

@@ -1,0 +1,232 @@
+<div class="leads-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-filter icon-glow"></i> Leads</h1>
+      <p class="page-subtitle">Turn event inquiries into profitable rental opportunities.</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <i class="fas fa-plus"></i> New Lead
+    </button>
+  </div>
+
+  <!-- Pipeline Dashboard Stats Cards -->
+  <div class="pipeline-grid">
+    <div class="stat-card" [class.active]="selectedStatus === 'NEW'" (click)="selectedStatus = selectedStatus === 'NEW' ? '' : 'NEW'; applyFilters()">
+      <div class="stat-icon new"><i class="fas fa-sparkles"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">New Leads</span>
+        <span class="stat-value">{{ newCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card" [class.active]="selectedStatus === 'QUALIFIED'" (click)="selectedStatus = selectedStatus === 'QUALIFIED' ? '' : 'QUALIFIED'; applyFilters()">
+      <div class="stat-icon qualified"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">Qualified</span>
+        <span class="stat-value">{{ qualifiedCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card" [class.active]="selectedStatus === 'QUOTE_REQUESTED'" (click)="selectedStatus = selectedStatus === 'QUOTE_REQUESTED' ? '' : 'QUOTE_REQUESTED'; applyFilters()">
+      <div class="stat-icon quote-req"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">Quotes Requested</span>
+        <span class="stat-value">{{ quoteRequestedCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card" [class.active]="selectedStatus === 'QUOTE_SENT'" (click)="selectedStatus = selectedStatus === 'QUOTE_SENT' ? '' : 'QUOTE_SENT'; applyFilters()">
+      <div class="stat-icon quote-sent"><i class="fas fa-paper-plane"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">Quotes Sent</span>
+        <span class="stat-value">{{ quoteSentCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card" [class.active]="selectedStatus === 'NEGOTIATION'" (click)="selectedStatus = selectedStatus === 'NEGOTIATION' ? '' : 'NEGOTIATION'; applyFilters()">
+      <div class="stat-icon negotiation"><i class="fas fa-handshake"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">Negotiation</span>
+        <span class="stat-value">{{ negotiationCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card" [class.active]="selectedStatus === 'CONVERTED'" (click)="selectedStatus = selectedStatus === 'CONVERTED' ? '' : 'CONVERTED'; applyFilters()">
+      <div class="stat-icon converted"><i class="fas fa-user-check"></i></div>
+      <div class="stat-info">
+        <span class="stat-label">Converted</span>
+        <span class="stat-value">{{ convertedCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" placeholder="Search leads by name, email, phone, venue..." />
+    </div>
+
+    <div class="filters-group">
+      <select [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">All Statuses</option>
+        <option value="NEW">New</option>
+        <option value="QUALIFIED">Qualified</option>
+        <option value="QUOTE_REQUESTED">Quote Requested</option>
+        <option value="QUOTE_SENT">Quote Sent</option>
+        <option value="NEGOTIATION">Negotiation</option>
+        <option value="CONVERTED">Converted</option>
+        <option value="LOST">Lost</option>
+      </select>
+
+      <select [(ngModel)]="selectedSource" (change)="applyFilters()">
+        <option value="">All Sources</option>
+        <option value="WEBSITE">Website</option>
+        <option value="PHONE">Phone</option>
+        <option value="EMAIL">Email</option>
+        <option value="REFERRAL">Referral</option>
+        <option value="SOCIAL_MEDIA">Social Media</option>
+        <option value="WALK_IN">Walk-In</option>
+        <option value="PARTNER">Partner</option>
+        <option value="OTHER">Other</option>
+      </select>
+
+      <select [(ngModel)]="selectedEventType" (change)="applyFilters()">
+        <option value="">All Event Types</option>
+        <option value="WEDDING">Wedding</option>
+        <option value="CORPORATE">Corporate</option>
+        <option value="BIRTHDAY">Birthday</option>
+        <option value="FESTIVAL">Festival</option>
+        <option value="PRIVATE_PARTY">Private Party</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading & Empty States -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading leads...</p>
+  </div>
+
+  <!-- Leads Table -->
+  <div *ngIf="!loading" class="table-card">
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th>Lead</th>
+          <th>Event</th>
+          <th>Event Date</th>
+          <th>Guests</th>
+          <th>Source</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let lead of filteredLeads">
+          <td>
+            <div class="lead-person">
+              <span class="lead-name">{{ lead.firstName }} {{ lead.lastName }}</span>
+              <span class="lead-email">{{ lead.email }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="event-cell">
+              <span class="event-type-badge">{{ lead.eventType || 'Event' }}</span>
+              <span class="venue-name" *ngIf="lead.venueName">{{ lead.venueName }}</span>
+            </div>
+          </td>
+          <td class="date-cell">{{ lead.eventDate | date:'mediumDate' }}</td>
+          <td>
+            <span class="guest-count"><i class="fas fa-users"></i> {{ lead.guestCount || 0 }}</span>
+          </td>
+          <td>
+            <span class="source-badge">{{ lead.source }}</span>
+          </td>
+          <td>
+            <span class="assignee">{{ lead.assignedTo || 'Unassigned' }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(lead.status)">
+              {{ lead.status }}
+            </span>
+          </td>
+          <td>
+            <a [routerLink]="['/leads', lead.id]" class="btn-action">
+              View <i class="fas fa-arrow-right"></i>
+            </a>
+          </td>
+        </tr>
+        <tr *ngIf="filteredLeads.length === 0">
+          <td colspan="8" class="empty-row">
+            <i class="fas fa-inbox empty-icon"></i>
+            <p>No leads found matching current criteria.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Create Lead Modal -->
+  <div *ngIf="showCreateModal" class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Create New Lead</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" [(ngModel)]="newLead.firstName" placeholder="Emily" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" [(ngModel)]="newLead.lastName" placeholder="Brown" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="newLead.email" placeholder="emily.brown@example-demo.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" [(ngModel)]="newLead.phone" placeholder="+1 555-010-1001" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Event Type</label>
+            <select [(ngModel)]="newLead.eventType">
+              <option value="WEDDING">Wedding</option>
+              <option value="BIRTHDAY">Birthday</option>
+              <option value="CORPORATE">Corporate</option>
+              <option value="FESTIVAL">Festival</option>
+              <option value="PRIVATE_PARTY">Private Party</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Event Date *</label>
+            <input type="date" [(ngModel)]="newLead.eventDate" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Guest Count</label>
+            <input type="number" [(ngModel)]="newLead.guestCount" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Venue Name</label>
+            <input type="text" [(ngModel)]="newLead.venueName" placeholder="Dallas Garden Hall" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea [(ngModel)]="newLead.notes" rows="3" placeholder="Special requirements, inventory requests..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn-primary" (click)="createLead()">Save Lead</button>
+      </div>
+    </div>
+  </div>
+</div>
