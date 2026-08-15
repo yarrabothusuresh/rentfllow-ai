@@ -45,6 +45,19 @@ public class MockAIProvider implements AIProvider {
             }
         }
 
+        // Tool-driven response override for Day 8 Product & Inventory tools
+        if (List.of("AVAILABILITY_CHECK", "PRODUCT_INQUIRY", "LOW_STOCK_INQUIRY").contains(intent)) {
+            for (int i = toolResults.size() - 1; i >= 0; i--) {
+                ToolResult tr = toolResults.get(i);
+                if (tr.getMessage() != null && !tr.getMessage().isBlank() && tr.getData() != null) {
+                    response.setMessage(tr.getMessage());
+                    response.setSuggestedActions(List.of("View Product", "Check Availability", "View Event"));
+                    response.setRequiresApproval(false);
+                    return response;
+                }
+            }
+        }
+
         // Standard Intent Responses
         switch (intent) {
             case "CUSTOMER_SEARCH_RESULT":

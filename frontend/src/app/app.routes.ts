@@ -12,6 +12,10 @@ import { CustomersListComponent } from './customers/customers-list/customers-lis
 import { CustomerDetailComponent } from './customers/customer-detail/customer-detail.component';
 import { EventsListComponent } from './events/events-list/events-list.component';
 import { EventDetailComponent } from './events/event-detail/event-detail.component';
+import { ProductListComponent } from './pages/products/product-list/product-list.component';
+import { ProductFormComponent } from './pages/products/product-form/product-form.component';
+import { ProductDetailComponent } from './pages/products/product-detail/product-detail.component';
+import { InventoryOverviewComponent } from './pages/inventory/inventory-overview/inventory-overview.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -25,6 +29,11 @@ export const routes: Routes = [
   { path: 'customers/:id', component: CustomerDetailComponent },
   { path: 'events', component: EventsListComponent },
   { path: 'events/:id', component: EventDetailComponent },
+  { path: 'products', component: ProductListComponent },
+  { path: 'products/new', component: ProductFormComponent },
+  { path: 'products/:id', component: ProductDetailComponent },
+  { path: 'products/:id/edit', component: ProductFormComponent },
+  { path: 'inventory', component: InventoryOverviewComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -37,7 +46,12 @@ export const routes: Routes = [
       { path: 'customers', component: CustomersListComponent },
       { path: 'customers/:id', component: CustomerDetailComponent },
       { path: 'events', component: EventsListComponent },
-      { path: 'events/:id', component: EventDetailComponent }
+      { path: 'events/:id', component: EventDetailComponent },
+      { path: 'products', component: ProductListComponent },
+      { path: 'products/new', component: ProductFormComponent },
+      { path: 'products/:id', component: ProductDetailComponent },
+      { path: 'products/:id/edit', component: ProductFormComponent },
+      { path: 'inventory', component: InventoryOverviewComponent }
     ]
   },
   { path: '**', redirectTo: '' }

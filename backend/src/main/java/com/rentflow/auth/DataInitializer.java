@@ -34,6 +34,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (permissionRepository.count() > 0 || tenantRepository.count() > 0) {
+            return;
+        }
+
         // 1. Initialize Tenant
         UUID tenantId = UUID.fromString("99999999-9999-9999-9999-999999999999");
         Tenant tenant = new Tenant(tenantId, "Evergreen Event Rentals");

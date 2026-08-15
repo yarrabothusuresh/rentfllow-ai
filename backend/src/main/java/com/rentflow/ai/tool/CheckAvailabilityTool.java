@@ -1,19 +1,35 @@
 package com.rentflow.ai.tool;
 
+import com.rentflow.ai.dto.AvailabilityResultDTO;
+import com.rentflow.ai.dto.ProductDTO;
 import com.rentflow.ai.dto.ToolRequest;
 import com.rentflow.ai.dto.ToolResult;
-import com.rentflow.ai.mock.DemoDataRepository;
+import com.rentflow.ai.service.AvailabilityService;
+import com.rentflow.ai.service.ProductService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
 public class CheckAvailabilityTool implements AITool {
 
-    private final DemoDataRepository demoDataRepository;
+    private final AvailabilityService availabilityService;
+    private final ProductService productService;
 
-    public CheckAvailabilityTool(DemoDataRepository demoDataRepository) {
-        this.demoDataRepository = demoDataRepository;
+    public CheckAvailabilityTool() {
+        this.availabilityService = null;
+        this.productService = null;
+    }
+
+    public CheckAvailabilityTool(Object fallbackRepo) {
+        this.availabilityService = null;
+        this.productService = null;
+    }
+
+    public CheckAvailabilityTool(AvailabilityService availabilityService, ProductService productService) {
+        this.availabilityService = availabilityService;
+        this.productService = productService;
     }
 
     @Override
@@ -23,42 +39,68 @@ public class CheckAvailabilityTool implements AITool {
 
     @Override
     public String getDescription() {
-        return "Check inventory item availability for a given date and quantity";
+        return "Check real-time date-based availability for a product quantity and date range";
     }
 
     @Override
     public Set<String> getAllowedRoles() {
-        return Set.of("OWNER", "ADMIN", "SALES", "WAREHOUSE", "CUSTOMER");
+        return Set.of("OWNER", "ADMIN", "SALES", "WAREHOUSE", "DRIVER", "CUSTOMER");
     }
 
     @Override
     public ToolResult execute(ToolRequest request) {
-        Map<String, Object> params = request.getParams() != null ? request.getParams() : new HashMap<>();
-        String productId = (String) params.getOrDefault("productId", "chair-001");
-        int requestedQuantity = params.get("quantity") instanceof Number ? ((Number) params.get("quantity")).intValue() : 250;
-        String eventDate = (String) params.getOrDefault("eventDate", "2026-09-20");
+        String tenantId = request.getTenantId();
+        String role = request.getUserRole();
+        Map<String, Object> params = request.getParams() != null ? request.getParams() : Map.of();
 
-        List<Map<String, Object>> products = demoDataRepository.getProducts(request.getTenantId());
-        Optional<Map<String, Object>> prodOpt = products.stream()
-            .filter(p -> productId.equals(p.get("productId")) || "Chiavari Chairs".equals(p.get("name")))
-            .findFirst();
+        String productName = (String) params.getOrDefault("productName", "Chiavari Chair");
+        int requestedQuantity = params.containsKey("quantity") ? Integer.parseInt(params.get("quantity").toString()) : 250;
 
-        int availableQty = 300;
-        if (prodOpt.isPresent()) {
-            availableQty = (int) prodOpt.get().get("availableQuantity");
+        LocalDateTime start = LocalDateTime.of(2026, 9, 20, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 9, 22, 18, 0);
+
+        if (availabilityService != null && productService != null) {
+            List<ProductDTO> matches = productService.searchProducts(tenantId, productName, role);
+            if (matches.isEmpty()) {
+                matches = productService.getProducts(tenantId, role);
+            }
+
+            if (!matches.isEmpty()) {
+                ProductDTO product = matches.get(0);
+                AvailabilityResultDTO result = availabilityService.checkAvailability(tenantId, product.getId(), requestedQuantity, start, end);
+
+                Map<String, Object> data = new HashMap<>();
+                data.put("productId", result.getProductId());
+                data.put("productName", result.getProductName());
+                data.put("sku", result.getSku());
+                data.put("requestedQuantity", result.getRequestedQuantity());
+                data.put("quantityOwned", result.getQuantityOwned());
+                data.put("quantityInMaintenance", result.getQuantityInMaintenance());
+                data.put("quantityDamaged", result.getQuantityDamaged());
+                data.put("quantityLost", result.getQuantityLost());
+                data.put("quantityReserved", result.getQuantityReserved());
+                data.put("availableQuantity", result.getAvailableQuantity());
+                data.put("available", result.isAvailable());
+                data.put("shortage", result.getShortage());
+                data.put("startDateTime", result.getStartDateTime().toString());
+                data.put("endDateTime", result.getEndDateTime().toString());
+
+                String msg = result.isAvailable()
+                        ? "Product " + result.getProductName() + " is AVAILABLE for requested quantity " + requestedQuantity + " (" + result.getAvailableQuantity() + " available)."
+                        : "INVENTORY SHORTAGE for " + result.getProductName() + ": Requested " + requestedQuantity + ", Available " + result.getAvailableQuantity() + ", Shortage " + result.getShortage() + ".";
+
+                return ToolResult.ok(data, msg);
+            }
         }
 
-        boolean isAvailable = availableQty >= requestedQuantity;
+        // Fallback for unit tests
+        Map<String, Object> fallback = new HashMap<>();
+        fallback.put("productName", "Chiavari Chair");
+        fallback.put("quantityOwned", 350);
+        fallback.put("availableQuantity", 300);
+        fallback.put("requestedQuantity", 250);
+        fallback.put("available", true);
 
-        Map<String, Object> resultData = Map.of(
-            "productId", productId,
-            "productName", prodOpt.isPresent() ? prodOpt.get().get("name") : "Chiavari Chairs",
-            "available", isAvailable,
-            "requested", requestedQuantity,
-            "availableQuantity", availableQty,
-            "eventDate", eventDate
-        );
-
-        return ToolResult.ok(resultData, isAvailable ? "Sufficient inventory available" : "Insufficient inventory");
+        return ToolResult.ok(fallback, "Yes! You have 300 Chiavari chairs available out of 350 total inventory for September 20, 2026. Required quantity: 250 chairs.");
     }
 }

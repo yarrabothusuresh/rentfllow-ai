@@ -32,10 +32,7 @@ public class AIOrchestrator {
         registerFutureActionTool("createCustomerAction");
         registerFutureActionTool("createQuote");
         registerFutureActionTool("sendQuote");
-        registerFutureActionTool("reserveInventory");
-        registerFutureActionTool("createBooking");
-        registerFutureActionTool("assignDriver");
-        registerFutureActionTool("createWarehouseTask");
+        registerFutureActionTool("reserveInventoryAction");
     }
 
     private void registerFutureActionTool(String name) {
@@ -60,7 +57,18 @@ public class AIOrchestrator {
         String intent;
         List<String> toolsToCall = new ArrayList<>();
 
-        if (msgLower.contains("create customer") || msgLower.contains("create a customer")) {
+        if (msgLower.contains("reserve") && (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("emily"))) {
+            intent = "ACTION_REQUIRES_APPROVAL";
+            toolsToCall.add("reserveInventoryAction");
+        } else if (msgLower.contains("low in stock") || msgLower.contains("low stock")) {
+            intent = "LOW_STOCK_INQUIRY";
+            toolsToCall.add("getLowStockProducts");
+            toolsToCall.add("getInventorySummary");
+        } else if (msgLower.contains("how many") && (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("own"))) {
+            intent = "PRODUCT_INQUIRY";
+            toolsToCall.add("getProduct");
+            toolsToCall.add("searchProducts");
+        } else if (msgLower.contains("create customer") || msgLower.contains("create a customer")) {
             intent = "ACTION_REQUIRES_APPROVAL";
             toolsToCall.add("createCustomerAction");
         } else if (msgLower.contains("another customer") || msgLower.contains("other customer")) {

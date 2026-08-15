@@ -88,6 +88,10 @@ export class RoleStateService {
     return this.activePermissionsSubject.value.has(permission.toUpperCase());
   }
 
+  hasAnyRole(roles: string[]): boolean {
+    return roles.includes(this.getCurrentRole());
+  }
+
   fetchPermissionsForRole(role: RoleType) {
     const user = this.demoUsers.find(u => u.role === role);
     if (!user) return;

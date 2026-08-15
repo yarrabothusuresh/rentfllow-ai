@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CrmService } from '../../services/crm.service';
+import { CatalogService } from '../../services/catalog.service';
 import { Event, EventRequirement, Customer } from '../../models/crm.models';
+import { AvailabilityResult } from '../../models/catalog.models';
 
 @Component({
   selector: 'app-event-detail',
@@ -22,9 +24,15 @@ export class EventDetailComponent implements OnInit {
   showRequirementModal = false;
   newReq: EventRequirement = { description: '', quantity: 100, notes: '' };
 
+  // Date-Based Availability Engine state
+  checkingAvailability = false;
+  availabilityChecked = false;
+  availabilityCheckResults: { req: EventRequirement; result?: AvailabilityResult }[] = [];
+
   constructor(
     private route: ActivatedRoute,
-    private crmService: CrmService
+    private crmService: CrmService,
+    private catalogService: CatalogService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +54,7 @@ export class EventDetailComponent implements OnInit {
 
         if (ev.customerId) {
           this.crmService.getCustomerById(ev.customerId).subscribe({
-            next: (cus) => this.customer = cus,
+            next: (cus) => (this.customer = cus),
             error: () => {}
           });
         }
@@ -103,6 +111,35 @@ export class EventDetailComponent implements OnInit {
   }
 
   checkProductAvailability(): void {
-    alert(`Checking real-time warehouse inventory availability for ${this.event?.eventName}... All ${this.requirements.length} required items reserved & available!`);
+    if (!this.event || this.requirements.length === 0) return;
+    this.checkingAvailability = true;
+    this.availabilityChecked = false;
+    this.availabilityCheckResults = [];
+
+    const start = (this.event.eventDate || '2026-09-20') + 'T' + (this.event.startTime || '08:00:00');
+    const end = (this.event.eventDate || '2026-09-22') + 'T' + (this.event.endTime || '18:00:00');
+
+    let completed = 0;
+    this.requirements.forEach((req) => {
+      // Use Chiavari Chair product ID as default fallback for demo if req doesn't have specific productId
+      const prodId = req.productId || '11111111-1111-1111-1111-111111111111';
+      this.catalogService.checkAvailability(prodId, req.quantity || 1, start, end).subscribe({
+        next: (res) => {
+          this.availabilityCheckResults.push({ req, result: res });
+          completed++;
+          if (completed === this.requirements.length) {
+            this.checkingAvailability = false;
+            this.availabilityChecked = true;
+          }
+        },
+        error: () => {
+          completed++;
+          if (completed === this.requirements.length) {
+            this.checkingAvailability = false;
+            this.availabilityChecked = true;
+          }
+        }
+      });
+    });
   }
 }

@@ -82,6 +82,7 @@ export interface EventRequirement {
   id?: string;
   tenantId?: string;
   eventId?: string;
+  productId?: string;
   description: string;
   quantity: number;
   notes?: string;

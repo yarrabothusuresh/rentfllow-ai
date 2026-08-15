@@ -1,0 +1,203 @@
+<div class="space-y-6">
+  <!-- Header Banner -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 p-6 rounded-2xl border border-indigo-500/20 shadow-xl backdrop-blur-md">
+    <div>
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m-8-10l-8-4m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-white tracking-tight">Product Catalog & Inventory</h1>
+          <p class="text-sm text-slate-400">Manage rental items, rates, health metrics, and date-based availability</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3" *ngIf="roleState.hasPermission('PRODUCT_CREATE')">
+      <a routerLink="/inventory" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Inventory Dashboard
+      </a>
+      <a routerLink="/products/new" class="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Product
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Control Bar -->
+  <div class="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+    <!-- Search Bar -->
+    <div class="relative flex-1 w-full">
+      <svg class="w-5 h-5 absolute left-3.5 top-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        placeholder="Search product by name or SKU..."
+        class="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+      />
+    </div>
+
+    <!-- Category Selector -->
+    <div class="w-full md:w-56">
+      <select
+        [(ngModel)]="selectedCategory"
+        class="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+      </select>
+    </div>
+
+    <!-- Status Selector -->
+    <div class="w-full md:w-48">
+      <select
+        [(ngModel)]="selectedStatus"
+        class="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition"
+      >
+        <option value="ALL">All Statuses</option>
+        <option value="ACTIVE">Active</option>
+        <option value="INACTIVE">Inactive</option>
+        <option value="DRAFT">Draft</option>
+        <option value="DISCONTINUED">Discontinued</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex flex-col items-center justify-center py-16 text-slate-400">
+    <div class="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-3"></div>
+    <p class="text-sm">Loading product catalog & inventory levels...</p>
+  </div>
+
+  <!-- Empty Catalog -->
+  <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
+    <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m-8-10l-8-4m8 4v10M4 7v10l8 4" />
+    </svg>
+    <h3 class="text-lg font-semibold text-slate-300">No products found</h3>
+    <p class="text-sm text-slate-500 max-w-md mx-auto mt-1">No rental items match your search query or filter criteria.</p>
+  </div>
+
+  <!-- Product Grid Cards -->
+  <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div
+      *ngFor="let p of filteredProducts"
+      class="bg-slate-900/90 rounded-2xl border border-slate-800/80 overflow-hidden shadow-lg hover:border-indigo-500/40 transition group flex flex-col justify-between"
+    >
+      <div>
+        <!-- Image Header -->
+        <div class="relative h-44 bg-slate-950 overflow-hidden">
+          <img
+            [src]="p.imageUrl || 'https://images.unsplash.com/photo-1541558869434-2840d308329a?w=400'"
+            [alt]="p.name"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+
+          <!-- SKU Pill -->
+          <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-700 text-xs font-mono font-medium text-slate-300">
+            {{ p.sku }}
+          </div>
+
+          <!-- Health Badge -->
+          <div class="absolute top-3 right-3 px-2.5 py-1 rounded-lg backdrop-blur-md text-xs font-semibold border" [ngClass]="getHealthBadgeClass(p.health)">
+            {{ p.health || 'GOOD' }}
+          </div>
+
+          <!-- Status Indicator -->
+          <div class="absolute bottom-3 left-3">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              {{ p.status }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Product Details -->
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="text-xs font-medium text-indigo-400 mb-1">{{ p.categoryName || 'General Category' }}</div>
+            <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition line-clamp-1">{{ p.name }}</h3>
+            <p class="text-xs text-slate-400 line-clamp-2 mt-1">{{ p.description || 'No description provided.' }}</p>
+          </div>
+
+          <!-- Pricing & Financial Summary -->
+          <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Rental Rate</div>
+              <div class="text-base font-bold text-emerald-400">${{ p.rentalPrice | number:'1.2-2' }} <span class="text-xs text-slate-500 font-normal">/ day</span></div>
+            </div>
+            <div>
+              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Replacement</div>
+              <div class="text-base font-bold text-slate-300">
+                <span *ngIf="p.replacementCost != null">${{ p.replacementCost | number:'1.2-2' }}</span>
+                <span *ngIf="p.replacementCost == null" class="text-xs text-slate-500 italic">Protected</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inventory Breakdown Metrics -->
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-slate-400">Total Owned: <strong class="text-white">{{ p.quantityOwned }}</strong></span>
+              <span class="text-slate-400">Available: <strong class="text-emerald-400">{{ p.availableQuantity }}</strong></span>
+            </div>
+
+            <!-- Visual Availability Bar -->
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden flex">
+              <div
+                class="bg-emerald-500 h-full"
+                [style.width.%]="(p.availableQuantity / (p.quantityOwned || 1)) * 100"
+                title="Available"
+              ></div>
+              <div
+                class="bg-amber-500 h-full"
+                [style.width.%]="(p.quantityInMaintenance / (p.quantityOwned || 1)) * 100"
+                title="Maintenance"
+              ></div>
+              <div
+                class="bg-rose-500 h-full"
+                [style.width.%]="(p.quantityDamaged / (p.quantityOwned || 1)) * 100"
+                title="Damaged"
+              ></div>
+            </div>
+
+            <div class="flex justify-between items-center text-[11px] text-slate-500 pt-1">
+              <span>Maint: {{ p.quantityInMaintenance }}</span>
+              <span>Damaged: {{ p.quantityDamaged }}</span>
+              <span>Lost: {{ p.quantityLost }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Action Footer -->
+      <div class="p-4 bg-slate-950/40 border-t border-slate-800/80 flex items-center justify-between gap-2">
+        <a [routerLink]="['/products', p.id]" class="flex-1 py-2 text-center text-xs font-semibold text-slate-200 bg-slate-800/80 hover:bg-slate-700 rounded-xl transition border border-slate-700/60">
+          View & Availability
+        </a>
+
+        <a *ngIf="roleState.hasPermission('PRODUCT_UPDATE')" [routerLink]="['/products', p.id, 'edit']" class="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition border border-transparent hover:border-indigo-500/20" title="Edit Product">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </a>
+
+        <button *ngIf="roleState.hasPermission('PRODUCT_DELETE')" (click)="deleteProduct(p)" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition border border-transparent hover:border-rose-500/20" title="Delete Product">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

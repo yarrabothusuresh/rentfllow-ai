@@ -19,8 +19,8 @@
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFulfillment()">Fulfillment</div>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory</a>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
+      <a routerLink="/inventory" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory</a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery</a>
       

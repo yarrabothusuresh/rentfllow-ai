@@ -46,7 +46,9 @@ public class CrmDataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
 
-        if (leadRepository.findByTenantId(tenantId).isEmpty()) {
+        if (customerRepository.count() > 0 || leadRepository.count() > 0) {
+            return;
+        }
             // Seed Demo Lead 1: Emily Brown (Primary Demo Lead for Day 7)
             LeadDTO emilyLead = new LeadDTO();
             emilyLead.setFirstName("Emily");
@@ -158,6 +160,5 @@ public class CrmDataInitializer implements CommandLineRunner {
             req2.setQuantity(12);
             req2.setNotes("60-inch round tables");
             eventService.addRequirement(tenantId, createdEvent.getId(), req2);
-        }
     }
 }

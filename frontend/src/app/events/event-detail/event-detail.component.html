@@ -32,11 +32,41 @@
   <div class="event-grid">
     <!-- Left Column: Requirements & Inventory Checklist -->
     <div class="requirements-card">
-      <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-clipboard-check icon-indigo"></i> Rental Requirements Checklist</h3>
-        <button class="btn-secondary-sm" (click)="openAddRequirementModal()">
-          <i class="fas fa-plus"></i> Add Item
-        </button>
+      <div class="card-header flex justify-between items-center">
+        <h3><i class="fas fa-boxes icon-indigo"></i> Required Rental Equipment & Inventory Availability</h3>
+        <div class="header-actions flex gap-2">
+          <button class="btn-secondary" (click)="checkProductAvailability()" [disabled]="checkingAvailability">
+            <i class="fas fa-calendar-check text-emerald-400"></i>
+            {{ checkingAvailability ? 'Calculating Availability...' : 'Check Date-Based Availability' }}
+          </button>
+          <button class="btn-primary" (click)="openAddRequirementModal()">
+            <i class="fas fa-plus"></i> Add Item
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Date-Based Availability Engine Calculation Results -->
+      <div *ngIf="availabilityChecked" class="my-4 p-4 rounded-xl bg-slate-900 border border-indigo-500/30">
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Date-Based Warehouse Inventory Calculation Results
+        </h4>
+        <div class="space-y-2">
+          <div *ngFor="let item of availabilityCheckResults" class="p-2.5 rounded-lg bg-slate-950/80 border flex items-center justify-between text-xs" [ngClass]="item.result?.available ? 'border-emerald-500/30' : 'border-rose-500/30'">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white">{{ item.req.description }}</span>
+              <span class="text-slate-400">({{ item.req.quantity }} units)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span *ngIf="item.result?.available" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                ✓ {{ item.result?.availableQuantity }} Available in Warehouse
+              </span>
+              <span *ngIf="!item.result?.available" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold">
+                ⚠ Shortage of {{ item.result?.shortageQuantity }} units
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="req-table-wrapper" *ngIf="requirements.length > 0">

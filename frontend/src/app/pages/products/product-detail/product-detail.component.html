@@ -1,0 +1,287 @@
+<div *ngIf="loading" class="flex flex-col items-center justify-center py-20 text-slate-400">
+  <div class="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-3"></div>
+  <p class="text-sm">Loading product details and inventory log...</p>
+</div>
+
+<div *ngIf="!loading && error" class="p-8 text-center bg-slate-900/60 rounded-2xl border border-slate-800">
+  <p class="text-rose-400 font-semibold mb-4">{{ error }}</p>
+  <a routerLink="/products" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-sm font-medium border border-slate-700">Back to Products Catalog</a>
+</div>
+
+<div *ngIf="!loading && product" class="space-y-8">
+  <!-- Breadcrumb & Top Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <a routerLink="/products" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition border border-slate-700">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      </a>
+      <div>
+        <div class="flex items-center gap-2 text-xs text-indigo-400 font-medium">
+          <span>{{ product.categoryName || 'General Catalog' }}</span>
+          <span>•</span>
+          <span class="font-mono text-slate-300">{{ product.sku }}</span>
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">{{ product.name }}</h1>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Adjust Inventory Button (OWNER, ADMIN, WAREHOUSE only) -->
+      <button
+        *ngIf="canAdjustInventory"
+        (click)="openAdjustModal()"
+        class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-2"
+      >
+        <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Adjust Stock Log
+      </button>
+
+      <!-- Edit Button -->
+      <a
+        *ngIf="roleState.hasPermission('PRODUCT_UPDATE')"
+        [routerLink]="['/products', product.id, 'edit']"
+        class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition flex items-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Edit Product
+      </a>
+    </div>
+  </div>
+
+  <!-- Product Overview & Metrics Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Photo & Details Card -->
+    <div class="lg:col-span-1 space-y-6">
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 overflow-hidden shadow-xl p-5 space-y-4 backdrop-blur-md">
+        <div class="h-64 rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+          <img [src]="product.imageUrl || 'https://images.unsplash.com/photo-1541558869434-2840d308329a?w=400'" [alt]="product.name" class="w-full h-full object-cover" />
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-white">{{ product.name }}</h3>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">{{ product.description || 'No detailed description available for this item.' }}</p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-2 text-xs">
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">Daily Rental Rate:</span>
+            <span class="font-bold text-emerald-400">${{ product.rentalPrice | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">Replacement Cost:</span>
+            <span class="font-bold text-slate-200">
+              <span *ngIf="product.replacementCost != null">${{ product.replacementCost | number:'1.2-2' }}</span>
+              <span *ngIf="product.replacementCost == null" class="text-slate-500 italic">Protected (Customer Role)</span>
+            </span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">Type:</span>
+            <span class="font-medium text-indigo-300">{{ product.productType }}</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">Status:</span>
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              {{ product.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Inventory Breakdown & Date-Based Availability Engine -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Real-Time Stock Breakdown Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+          <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Owned</div>
+          <div class="text-2xl font-bold text-white mt-1">{{ product.quantityOwned }}</div>
+        </div>
+
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+          <div class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Available</div>
+          <div class="text-2xl font-bold text-emerald-400 mt-1">{{ product.availableQuantity }}</div>
+        </div>
+
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+          <div class="text-xs font-medium text-amber-400 uppercase tracking-wider">Maint</div>
+          <div class="text-2xl font-bold text-amber-400 mt-1">{{ product.quantityInMaintenance }}</div>
+        </div>
+
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+          <div class="text-xs font-medium text-rose-400 uppercase tracking-wider">Damaged</div>
+          <div class="text-2xl font-bold text-rose-400 mt-1">{{ product.quantityDamaged }}</div>
+        </div>
+
+        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center">
+          <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Lost</div>
+          <div class="text-2xl font-bold text-slate-400 mt-1">{{ product.quantityLost }}</div>
+        </div>
+      </div>
+
+      <!-- Date-Based Availability Engine Widget -->
+      <div class="bg-slate-900/90 rounded-2xl border border-indigo-500/30 p-6 shadow-xl space-y-4 backdrop-blur-md">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-white">Date-Based Availability Calculation Engine</h2>
+              <p class="text-xs text-slate-400">Calculates exact overlap formula: Available = Owned - Maint - Dmg - Lost - ReservedInPeriod</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Start Date & Time</label>
+            <input
+              type="datetime-local"
+              [(ngModel)]="checkStartDate"
+              class="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">End Date & Time</label>
+            <input
+              type="datetime-local"
+              [(ngModel)]="checkEndDate"
+              class="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Requested Quantity</label>
+            <div class="flex gap-2">
+              <input
+                type="number"
+                min="1"
+                [(ngModel)]="checkQuantity"
+                class="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-indigo-500 transition"
+              />
+              <button
+                (click)="onCheckAvailability()"
+                [disabled]="checkingAvailability"
+                class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-xs font-semibold shadow-md transition disabled:opacity-50 flex items-center whitespace-nowrap"
+              >
+                {{ checkingAvailability ? 'Checking...' : 'Check Availability' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Availability Result Output -->
+        <div *ngIf="availabilityResult" class="p-4 rounded-xl border transition" [ngClass]="availabilityResult.available ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" [ngClass]="availabilityResult.available ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400 animate-pulse'"></span>
+                <h4 class="text-sm font-bold" [ngClass]="availabilityResult.available ? 'text-emerald-400' : 'text-rose-400'">
+                  {{ availabilityResult.available ? 'AVAILABLE FOR RESERVATION' : 'INVENTORY SHORTAGE DETECTED' }}
+                </h4>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">
+                Requested: <strong>{{ availabilityResult.requestedQuantity }}</strong> units • Available in window: <strong class="text-emerald-400">{{ availabilityResult.availableQuantity }}</strong> units (Total Owned: {{ availabilityResult.totalOwned }}, Reserved: {{ availabilityResult.reservedForPeriod }})
+              </p>
+            </div>
+
+            <div *ngIf="!availabilityResult.available" class="text-right">
+              <span class="px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-xs font-bold border border-rose-500/30">
+                Shortage: -{{ availabilityResult.shortageQuantity }} units
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Audit Log History -->
+      <div class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-6 shadow-xl space-y-4 backdrop-blur-md">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Inventory Audit Log History
+        </h2>
+
+        <div *ngIf="transactions.length === 0" class="py-8 text-center text-slate-500 text-sm">
+          No inventory transactions recorded yet.
+        </div>
+
+        <div *ngIf="transactions.length > 0" class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="p-3">Type</th>
+                <th class="p-3">Qty</th>
+                <th class="p-3">Ref Type</th>
+                <th class="p-3">User</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+              <tr *ngFor="let tx of transactions" class="hover:bg-slate-800/30 transition">
+                <td class="p-3">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 border border-slate-700 text-indigo-300">
+                    {{ tx.transactionType }}
+                  </span>
+                </td>
+                <td class="p-3 font-bold text-white">{{ tx.quantity }}</td>
+                <td class="p-3 font-mono text-slate-400">{{ tx.referenceType || 'DIRECT' }}</td>
+                <td class="p-3 text-slate-300">{{ tx.createdBy || 'SYSTEM' }}</td>
+                <td class="p-3 text-slate-400">{{ tx.createdAt | date:'short' }}</td>
+                <td class="p-3 text-slate-400 max-w-xs truncate">{{ tx.notes || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Direct Inventory Adjustment Modal -->
+<div *ngIf="showAdjustModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+      <h3 class="text-base font-bold text-white">Direct Inventory Adjustment</h3>
+      <button (click)="closeAdjustModal()" class="text-slate-400 hover:text-white">&times;</button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Adjustment Type</label>
+        <select [(ngModel)]="adjustType" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm">
+          <option *ngFor="let t of adjustmentTypes" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Quantity</label>
+        <input type="number" min="1" [(ngModel)]="adjustQuantity" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold text-sm" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-400 mb-1">Reason / Reference Notes</label>
+        <textarea [(ngModel)]="adjustReason" rows="3" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm" placeholder="Reason for inventory adjustment..."></textarea>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+      <button (click)="closeAdjustModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white bg-slate-800 rounded-xl">Cancel</button>
+      <button (click)="submitAdjustment()" [disabled]="adjusting" class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-lg disabled:opacity-50">
+        {{ adjusting ? 'Processing...' : 'Submit Adjustment' }}
+      </button>
+    </div>
+  </div>
+</div>
