@@ -2,7 +2,6 @@ package com.rentflow.ai.security;
 
 import com.rentflow.ai.dto.ToolRequest;
 import com.rentflow.ai.dto.ToolResult;
-import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.tool.AITool;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +22,16 @@ public class AIToolSecurityService {
             return ToolResult.permissionDenied("Tenant ID is required for tool execution.");
         }
 
-        // 2. Role-Based Tool Authorization Check
-        Set<String> allowedRoles = tool.getAllowedRoles();
-        if (allowedRoles != null && !allowedRoles.contains(role)) {
-            return ToolResult.permissionDenied("You don't have permission to access that information.");
+        // Superusers (OWNER and ADMIN) bypass tool-level role restrictions
+        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+            // 2. Role-Based Tool Authorization Check
+            Set<String> allowedRoles = tool.getAllowedRoles();
+            if (allowedRoles != null && !allowedRoles.isEmpty()) {
+                boolean roleAllowed = allowedRoles.stream().anyMatch(r -> r.equalsIgnoreCase(role));
+                if (!roleAllowed) {
+                    return ToolResult.permissionDenied("You don't have permission to access that information.");
+                }
+            }
         }
 
         // 3. Customer Role Strict Isolation

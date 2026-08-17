@@ -1,5 +1,4 @@
 com\rentflow\ai\ProductInventoryFoundationTest.class
-com\rentflow\ai\AIOrchestratorTest.class
 com\rentflow\ai\CrmFoundationTest.class
 com\rentflow\event\EventControllerTest.class
 com\rentflow\workflow\WorkflowControllerTest.class

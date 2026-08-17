@@ -1,0 +1,239 @@
+<div class="builder-container">
+  <!-- Header -->
+  <div class="builder-header">
+    <div>
+      <span class="back-link" routerLink="/quotes">← Back to Quotes Pipeline</span>
+      <h1 class="page-title">{{ isEditMode ? 'Edit Quote ' + (quote.quoteNumber || '') : 'Create Intelligent Rental Quote' }}</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" routerLink="/quotes">Cancel</button>
+      <button class="btn btn-primary" (click)="saveQuote('OWNER')" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Draft Quote') }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-banner">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+  <div class="builder-grid">
+    <!-- Main Form Section -->
+    <div class="main-form">
+      <!-- 1. Context & Event Setup -->
+      <div class="form-card">
+        <h2 class="card-title">1. Customer & Event Information</h2>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Customer *</label>
+            <select [(ngModel)]="quote.customerId" class="form-control">
+              <option *ngFor="let c of customers" [value]="c.id">
+                {{ c.firstName }} {{ c.lastName }} ({{ c.companyName || c.customerNumber }})
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Event *</label>
+            <select [(ngModel)]="quote.eventId" class="form-control">
+              <option *ngFor="let e of events" [value]="e.id">
+                {{ e.eventName }} ({{ e.eventDate | date:'mediumDate' }})
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2 mt-3">
+          <div class="form-group">
+            <label>Rental Delivery/Start Date & Time</label>
+            <input type="datetime-local" [(ngModel)]="quote.rentalStartDateTime" class="form-control" (change)="calculateTotals()" />
+          </div>
+
+          <div class="form-group">
+            <label>Rental Pickup/End Date & Time</label>
+            <input type="datetime-local" [(ngModel)]="quote.rentalEndDateTime" class="form-control" (change)="calculateTotals()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Equipment & Rental Line Items -->
+      <div class="form-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">2. Rental Line Items</h2>
+          <span class="badge badge-info">{{ quote.items.length }} Items Added</span>
+        </div>
+
+        <!-- Line Items Table -->
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Unit Price ($)</th>
+              <th>Strategy</th>
+              <th>Subtotal ($)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of quote.items; let i = index">
+              <td>
+                <input type="text" [(ngModel)]="item.description" class="form-control compact" />
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.quantity" (change)="calculateTotals()" class="form-control compact qty" min="1" />
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.unitPrice" (change)="calculateTotals()" class="form-control compact price" step="0.01" />
+                <span *ngIf="item.standardUnitPrice && item.unitPrice !== item.standardUnitPrice" class="override-tag">
+                  Override (Std: ${{ item.standardUnitPrice }})
+                </span>
+              </td>
+              <td>
+                <select [(ngModel)]="item.pricingStrategy" (change)="calculateTotals()" class="form-control compact">
+                  <option value="PER_EVENT">Per Event</option>
+                  <option value="PER_DAY">Per Day</option>
+                  <option value="PER_WEEK">Per Week</option>
+                  <option value="FLAT_RATE">Flat Rate</option>
+                </select>
+              </td>
+              <td class="subtotal-cell">
+                <strong>{{ item.lineSubtotal | currency:'USD':'symbol':'1.2-2' }}</strong>
+              </td>
+              <td>
+                <button class="btn-delete" (click)="removeItem(i)" title="Remove item">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Add Item Bar -->
+        <div class="add-item-bar">
+          <div class="add-item-inputs">
+            <select [(ngModel)]="selectedProductId" (change)="onProductSelect()" class="form-control">
+              <option *ngFor="let p of products" [value]="p.id">
+                {{ p.name }} (${{ p.rentalPrice }})
+              </option>
+            </select>
+            <input type="number" [(ngModel)]="newQuantity" placeholder="Qty" class="form-control qty" min="1" />
+            <input type="number" [(ngModel)]="newUnitPrice" placeholder="Price" class="form-control price" step="0.01" />
+            <select [(ngModel)]="newStrategy" class="form-control">
+              <option value="PER_EVENT">Per Event</option>
+              <option value="PER_DAY">Per Day</option>
+              <option value="PER_WEEK">Per Week</option>
+              <option value="FLAT_RATE">Flat Rate</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary" (click)="addItem()">+ Add Product</button>
+        </div>
+      </div>
+
+      <!-- 3. Operational Fees & Discounts -->
+      <div class="form-card">
+        <h2 class="card-title">3. Logistics Fees & Package Discount</h2>
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Delivery Fee ($)</label>
+            <input type="number" [(ngModel)]="quote.deliveryFee" (change)="calculateTotals()" class="form-control" step="0.01" />
+          </div>
+
+          <div class="form-group">
+            <label>Pickup Fee ($)</label>
+            <input type="number" [(ngModel)]="quote.pickupFee" (change)="calculateTotals()" class="form-control" step="0.01" />
+          </div>
+
+          <div class="form-group">
+            <label>Setup / Teardown Fee ($)</label>
+            <input type="number" [(ngModel)]="quote.setupFee" (change)="calculateTotals()" class="form-control" step="0.01" />
+          </div>
+        </div>
+
+        <div class="grid-2 mt-3">
+          <div class="form-group">
+            <label>Discount Amount ($)</label>
+            <input type="number" [(ngModel)]="quote.discountAmount" (change)="calculateTotals()" class="form-control" step="0.01" />
+            <span class="help-text">Sales role limit: Max 20% of gross subtotal</span>
+          </div>
+
+          <div class="form-group">
+            <label>Tax Rate (%)</label>
+            <input type="number" [(ngModel)]="quote.taxRate" (change)="calculateTotals()" class="form-control" step="0.01" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Notes & Terms -->
+      <div class="form-card">
+        <h2 class="card-title">4. Customer Notes & Internal Strategy</h2>
+        <div class="form-group">
+          <label>Customer Facing Notes & Terms</label>
+          <textarea [(ngModel)]="quote.notes" rows="3" class="form-control" placeholder="Visible to customer on quotation PDF and preview portal..."></textarea>
+        </div>
+
+        <div class="form-group mt-3">
+          <label>Internal Operations & Sales Notes (Private)</label>
+          <textarea [(ngModel)]="quote.internalNotes" rows="3" class="form-control internal-notes" placeholder="Confidential notes hidden from customer..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <div class="sidebar-summary">
+      <div class="summary-card">
+        <h2 class="card-title">Quote Calculation Summary</h2>
+
+        <div class="summary-row">
+          <span>Gross Line Subtotal:</span>
+          <span>{{ calculation.grossSubtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row discount-row" *ngIf="calculation.discountAmount > 0">
+          <span>Discount Applied:</span>
+          <span>-{{ calculation.discountAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row divider">
+          <span>Discounted Subtotal:</span>
+          <strong>{{ calculation.subtotal | currency:'USD':'symbol':'1.2-2' }}</strong>
+        </div>
+
+        <div class="summary-row">
+          <span>Logistics & Setup Fees:</span>
+          <span>{{ calculation.totalFees | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Taxable Base:</span>
+          <span>{{ calculation.taxableAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span>Sales Tax ({{ quote.taxRate }}%):</span>
+          <span>{{ calculation.taxAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-row total-row">
+          <span>Total Rental Quote:</span>
+          <span class="total-price">{{ calculation.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="deposit-box">
+          <div class="summary-row">
+            <span>Required Deposit ({{ quote.depositPercentage }}%):</span>
+            <strong class="deposit-price">{{ calculation.depositAmount | currency:'USD':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="summary-row balance-row">
+            <span>Remaining Balance Due:</span>
+            <span>{{ calculation.remainingBalance | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="sidebar-actions">
+          <button class="btn btn-primary full-width" (click)="saveQuote('OWNER')" [disabled]="isSaving">
+            💾 Save Quote
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

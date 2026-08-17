@@ -1,0 +1,249 @@
+.preview-page {
+  background: #f1f5f9;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.print-bar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.print-bar-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-badge {
+  background: #2563eb;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+}
+
+.quote-document {
+  background: #ffffff;
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 48px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.company-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px 0;
+}
+
+.company-tagline {
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.company-address {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.doc-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  text-align: right;
+}
+
+.meta-table {
+  font-size: 13px;
+
+  td {
+    padding: 3px 8px;
+  }
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 32px 0;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.detail-box {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.8px;
+    margin: 0 0 10px 0;
+  }
+
+  p {
+    font-size: 13px;
+    margin: 0 0 4px 0;
+    color: #334155;
+  }
+}
+
+.equipment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+  }
+
+  .amount {
+    font-weight: 700;
+    color: #0f172a;
+  }
+}
+
+.totals-section {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.terms-column {
+  h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+}
+
+.totals-table {
+  width: 100%;
+  font-size: 14px;
+
+  td {
+    padding: 6px 0;
+  }
+
+  .grand-total {
+    border-top: 2px solid #0f172a;
+    font-weight: 800;
+    font-size: 16px;
+
+    .total-amount {
+      font-size: 20px;
+      color: #2563eb;
+    }
+  }
+
+  .deposit-highlight {
+    background: #eff6ff;
+    font-weight: 700;
+
+    td {
+      padding: 10px 8px;
+    }
+
+    .deposit-amount {
+      color: #1d4ed8;
+      font-size: 16px;
+    }
+  }
+}
+
+.acceptance-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 60px;
+  padding-top: 24px;
+
+  .sig-line {
+    border-bottom: 1px solid #94a3b8;
+    height: 40px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-blue { color: #2563eb; font-weight: 700; }
+.text-green { color: #059669; }
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-outline { background: transparent; border: 1px solid #475569; color: #fff; }
+
+@media print {
+  .no-print { display: none !important; }
+  .preview-page { background: #fff; padding: 0; }
+  .quote-document { box-shadow: none; margin: 0; padding: 0; max-width: 100%; }
+}

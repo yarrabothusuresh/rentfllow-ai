@@ -14,9 +14,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 public class CrmDataInitializer implements CommandLineRunner {
+
+    public static final UUID EMILY_CUSTOMER_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    public static final UUID EMILY_EVENT_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
     private final LeadRepository leadRepository;
     private final CustomerRepository customerRepository;
@@ -49,116 +53,105 @@ public class CrmDataInitializer implements CommandLineRunner {
         if (customerRepository.count() > 0 || leadRepository.count() > 0) {
             return;
         }
-            // Seed Demo Lead 1: Emily Brown (Primary Demo Lead for Day 7)
-            LeadDTO emilyLead = new LeadDTO();
-            emilyLead.setFirstName("Emily");
-            emilyLead.setLastName("Brown");
-            emilyLead.setCompanyName("Brown Wedding");
-            emilyLead.setEmail("emily.brown@example-demo.com");
-            emilyLead.setPhone("+1 555-010-1001");
-            emilyLead.setSource(LeadSource.WEBSITE);
-            emilyLead.setEventType(EventType.WEDDING);
-            emilyLead.setEventDate(LocalDate.of(2026, 9, 20));
-            emilyLead.setGuestCount(250);
-            emilyLead.setVenueName("Dallas Garden Hall");
-            emilyLead.setNotes("Wants Chiavari chairs, round tables, white linens, bistro string lights, and dance floor for 250 guests.");
-            emilyLead.setStatus(LeadStatus.QUALIFIED);
-            emilyLead.setAssignedTo("Sarah Miller");
-            leadService.createLead(tenantId, emilyLead);
 
-            // Seed Demo Lead 2: TechCorp Annual Gala
-            LeadDTO techLead = new LeadDTO();
-            techLead.setFirstName("Alex");
-            techLead.setLastName("Morgan");
-            techLead.setCompanyName("TechCorp Inc");
-            techLead.setEmail("events@techcorp-demo.com");
-            techLead.setPhone("+1 555-019-2044");
-            techLead.setSource(LeadSource.PARTNER);
-            techLead.setEventType(EventType.CORPORATE);
-            techLead.setEventDate(LocalDate.of(2026, 9, 22));
-            techLead.setGuestCount(500);
-            techLead.setVenueName("Austin Convention Center");
-            techLead.setNotes("Annual employee gala requiring stage platform, audio system, 50 cocktail tables.");
-            techLead.setStatus(LeadStatus.NEW);
-            techLead.setAssignedTo("James Taylor");
-            leadService.createLead(tenantId, techLead);
+        // Seed Customer 1: Emily Brown
+        Customer emilyCust = new Customer();
+        emilyCust.setId(EMILY_CUSTOMER_ID);
+        emilyCust.setTenantId(tenantId);
+        emilyCust.setCustomerNumber("CUS-000001");
+        emilyCust.setFirstName("Emily");
+        emilyCust.setLastName("Brown");
+        emilyCust.setCompanyName("Brown Wedding");
+        emilyCust.setEmail("emily.brown@example-demo.com");
+        emilyCust.setPhone("+1 555-010-1001");
+        emilyCust.setCustomerType(CustomerType.INDIVIDUAL);
+        emilyCust.setStatus(CustomerStatus.ACTIVE);
+        customerRepository.save(emilyCust);
 
-            // Seed Demo Lead 3: Sarah Jenkins
-            LeadDTO sarahLead = new LeadDTO();
-            sarahLead.setFirstName("Sarah");
-            sarahLead.setLastName("Jenkins");
-            sarahLead.setEmail("sjenkins@example-demo.com");
-            sarahLead.setPhone("+1 555-083-3912");
-            sarahLead.setSource(LeadSource.REFERRAL);
-            sarahLead.setEventType(EventType.PRIVATE_PARTY);
-            sarahLead.setEventDate(LocalDate.of(2026, 9, 19));
-            sarahLead.setGuestCount(150);
-            sarahLead.setVenueName("Fort Worth Botanic Garden");
-            sarahLead.setNotes("Outdoor anniversary reception.");
-            sarahLead.setStatus(LeadStatus.QUOTE_REQUESTED);
-            sarahLead.setAssignedTo("Sarah Miller");
-            leadService.createLead(tenantId, sarahLead);
+        // Seed Event 1: Emily's Wedding
+        Event emilyEvent = new Event();
+        emilyEvent.setId(EMILY_EVENT_ID);
+        emilyEvent.setTenantId(tenantId);
+        emilyEvent.setCustomerId(EMILY_CUSTOMER_ID);
+        emilyEvent.setEventName("Emily's Wedding");
+        emilyEvent.setEventType(EventType.WEDDING);
+        emilyEvent.setEventDate(LocalDate.of(2026, 9, 20));
+        emilyEvent.setStartTime("08:00");
+        emilyEvent.setEndTime("18:00");
+        emilyEvent.setGuestCount(250);
+        emilyEvent.setVenueName("Dallas Garden Hall");
+        emilyEvent.setVenueAddress("200 Garden Way");
+        emilyEvent.setCity("Dallas");
+        emilyEvent.setState("TX");
+        emilyEvent.setZipCode("75201");
+        emilyEvent.setStatus(EventStatus.PLANNING);
+        eventRepository.save(emilyEvent);
 
-            // Seed Demo Lead 4: Festival Committee
-            LeadDTO festLead = new LeadDTO();
-            festLead.setFirstName("Marcus");
-            festLead.setLastName("Vance");
-            festLead.setCompanyName("Austin Festival Committee");
-            festLead.setEmail("info@austinfestival-demo.org");
-            festLead.setPhone("+1 555-099-1122");
-            festLead.setSource(LeadSource.WALK_IN);
-            festLead.setEventType(EventType.FESTIVAL);
-            festLead.setEventDate(LocalDate.of(2026, 9, 25));
-            festLead.setGuestCount(1000);
-            festLead.setVenueName("Zilker Park, Austin TX");
-            festLead.setNotes("40x60 Frame tent and outdoor staging.");
-            festLead.setStatus(LeadStatus.NEGOTIATION);
-            festLead.setAssignedTo("James Taylor");
-            leadService.createLead(tenantId, festLead);
+        // Seed Requirements for Emily's Wedding
+        EventRequirement req1 = new EventRequirement();
+        req1.setTenantId(tenantId);
+        req1.setEventId(EMILY_EVENT_ID);
+        req1.setDescription("Chiavari Chairs");
+        req1.setQuantity(250);
+        req1.setNotes("Gold chiavari chairs with ivory vinyl cushion");
+        requirementRepository.save(req1);
 
-            // Seed existing Customer + Event for demonstration of pre-converted customer
-            CustomerDTO existingCust = new CustomerDTO();
-            existingCust.setFirstName("Fairview");
-            existingCust.setLastName("Hall Manager");
-            existingCust.setCompanyName("Fairview Event Hall");
-            existingCust.setEmail("contact@fairviewhall-demo.com");
-            existingCust.setPhone("+1 555-042-2811");
-            existingCust.setCustomerType(CustomerType.VENUE);
-            existingCust.setBillingAddress("100 Fairview Blvd");
-            existingCust.setCity("Arlington");
-            existingCust.setState("TX");
-            existingCust.setZipCode("76010");
-            existingCust.setCountry("USA");
-            existingCust.setStatus(CustomerStatus.ACTIVE);
-            CustomerDTO createdCust = customerService.createCustomer(tenantId, existingCust);
+        EventRequirement req2 = new EventRequirement();
+        req2.setTenantId(tenantId);
+        req2.setEventId(EMILY_EVENT_ID);
+        req2.setDescription("Round Banquet Tables 60\"");
+        req2.setQuantity(25);
+        req2.setNotes("Seats 8-10 guests");
+        requirementRepository.save(req2);
 
-            // Seed Event for Fairview Hall
-            EventDTO event1 = new EventDTO();
-            event1.setCustomerId(createdCust.getId());
-            event1.setEventName("Fairview Autumn Gala");
-            event1.setEventType(EventType.CORPORATE);
-            event1.setEventDate(LocalDate.of(2026, 9, 21));
-            event1.setStartTime("18:00");
-            event1.setEndTime("23:00");
-            event1.setGuestCount(120);
-            event1.setVenueName("Fairview Event Hall");
-            event1.setVenueAddress("100 Fairview Blvd, Arlington TX");
-            event1.setCity("Arlington");
-            event1.setState("TX");
-            event1.setStatus(EventStatus.BOOKED);
-            EventDTO createdEvent = eventService.createEvent(tenantId, event1);
+        EventRequirement req3 = new EventRequirement();
+        req3.setTenantId(tenantId);
+        req3.setEventId(EMILY_EVENT_ID);
+        req3.setDescription("White Table Linens");
+        req3.setQuantity(25);
+        req3.setNotes("120 inch round white linens");
+        requirementRepository.save(req3);
 
-            // Seed Event Requirements
-            EventRequirementDTO req1 = new EventRequirementDTO();
-            req1.setDescription("Chiavari Chairs");
-            req1.setQuantity(120);
-            req1.setNotes("Black chiavari chairs");
-            eventService.addRequirement(tenantId, createdEvent.getId(), req1);
+        EventRequirement req4 = new EventRequirement();
+        req4.setTenantId(tenantId);
+        req4.setEventId(EMILY_EVENT_ID);
+        req4.setDescription("Wireless LED Uplights");
+        req4.setQuantity(10);
+        req4.setNotes("Battery powered uplighting");
+        requirementRepository.save(req4);
 
-            EventRequirementDTO req2 = new EventRequirementDTO();
-            req2.setDescription("Round Tables");
-            req2.setQuantity(12);
-            req2.setNotes("60-inch round tables");
-            eventService.addRequirement(tenantId, createdEvent.getId(), req2);
+        // Seed Demo Lead 1: Emily Brown
+        LeadDTO emilyLead = new LeadDTO();
+        emilyLead.setFirstName("Emily");
+        emilyLead.setLastName("Brown");
+        emilyLead.setCompanyName("Brown Wedding");
+        emilyLead.setEmail("emily.brown@example-demo.com");
+        emilyLead.setPhone("+1 555-010-1001");
+        emilyLead.setSource(LeadSource.WEBSITE);
+        emilyLead.setEventType(EventType.WEDDING);
+        emilyLead.setEventDate(LocalDate.of(2026, 9, 20));
+        emilyLead.setGuestCount(250);
+        emilyLead.setVenueName("Dallas Garden Hall");
+        emilyLead.setNotes("Wants Chiavari chairs, round tables, white linens, bistro string lights, and dance floor for 250 guests.");
+        emilyLead.setStatus(LeadStatus.QUALIFIED);
+        emilyLead.setAssignedTo("Sarah Miller");
+        leadService.createLead(tenantId, emilyLead);
+
+        // Seed Demo Lead 2: TechCorp Annual Gala
+        LeadDTO techLead = new LeadDTO();
+        techLead.setFirstName("Alex");
+        techLead.setLastName("Morgan");
+        techLead.setCompanyName("TechCorp Inc");
+        techLead.setEmail("events@techcorp-demo.com");
+        techLead.setPhone("+1 555-019-2044");
+        techLead.setSource(LeadSource.PARTNER);
+        techLead.setEventType(EventType.CORPORATE);
+        techLead.setEventDate(LocalDate.of(2026, 9, 22));
+        techLead.setGuestCount(500);
+        techLead.setVenueName("Austin Convention Center");
+        techLead.setNotes("Annual employee gala requiring stage platform, audio system, 50 cocktail tables.");
+        techLead.setStatus(LeadStatus.NEW);
+        techLead.setAssignedTo("James Taylor");
+        leadService.createLead(tenantId, techLead);
     }
 }

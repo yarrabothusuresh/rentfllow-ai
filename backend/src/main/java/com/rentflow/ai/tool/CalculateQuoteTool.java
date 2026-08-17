@@ -1,13 +1,28 @@
 package com.rentflow.ai.tool;
 
+import com.rentflow.ai.dto.QuoteCalculationRequest;
+import com.rentflow.ai.dto.QuoteCalculationResponse;
 import com.rentflow.ai.dto.ToolRequest;
 import com.rentflow.ai.dto.ToolResult;
+import com.rentflow.ai.service.QuoteCalculationService;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class CalculateQuoteTool implements AITool {
+
+    private final QuoteCalculationService calculationService;
+
+    public CalculateQuoteTool() {
+        this.calculationService = new QuoteCalculationService();
+    }
+
+    public CalculateQuoteTool(QuoteCalculationService calculationService) {
+        this.calculationService = calculationService;
+    }
 
     @Override
     public String getName() {
@@ -16,36 +31,31 @@ public class CalculateQuoteTool implements AITool {
 
     @Override
     public String getDescription() {
-        return "Calculate estimated quote pricing breakdown (Rental, Delivery, Setup, Total)";
+        return "Calculates subtotal, discounts, fees, tax, total, and deposit for rental quote line items.";
     }
 
     @Override
     public Set<String> getAllowedRoles() {
-        return Set.of("OWNER", "ADMIN", "SALES", "CUSTOMER");
+        return Set.of("OWNER", "ADMIN", "SALES", "WAREHOUSE", "DRIVER", "CUSTOMER");
     }
 
     @Override
     public ToolResult execute(ToolRequest request) {
-        Map<String, Object> params = request.getParams() != null ? request.getParams() : new HashMap<>();
-        String eventType = (String) params.getOrDefault("eventType", "Wedding");
-        int guestCount = params.get("guestCount") instanceof Number ? ((Number) params.get("guestCount")).intValue() : 250;
+        Map<String, Object> parameters = request.getParams() != null ? request.getParams() : Map.of();
 
-        double rentalAmount = guestCount * 19.40; // 4850 for 250 guests
-        double deliveryAmount = 750.00;
-        double setupAmount = 400.00;
-        double totalAmount = rentalAmount + deliveryAmount + setupAmount;
+        try {
+            QuoteCalculationRequest req = new QuoteCalculationRequest();
+            if (parameters.containsKey("taxRate")) {
+                req.setTaxRate(new BigDecimal(parameters.get("taxRate").toString()));
+            }
+            if (parameters.containsKey("depositPercentage")) {
+                req.setDepositPercentage(new BigDecimal(parameters.get("depositPercentage").toString()));
+            }
 
-        Map<String, Object> quoteResult = Map.of(
-            "eventType", eventType,
-            "guestCount", guestCount,
-            "rentalAmount", rentalAmount,
-            "deliveryAmount", deliveryAmount,
-            "setupAmount", setupAmount,
-            "estimatedTotal", totalAmount,
-            "currency", "USD",
-            "isDemo", true
-        );
-
-        return ToolResult.ok(quoteResult, "Quote calculated successfully");
+            QuoteCalculationResponse resp = calculationService.calculate(req);
+            return ToolResult.ok(resp, "Calculated quote total: $" + resp.getTotalAmount() + " (Deposit: $" + resp.getDepositAmount() + ")");
+        } catch (Exception e) {
+            return ToolResult.error("Failed to calculate quote: " + e.getMessage());
+        }
     }
 }

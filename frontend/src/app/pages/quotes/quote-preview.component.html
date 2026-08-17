@@ -1,0 +1,141 @@
+<div class="preview-page" *ngIf="quote">
+  <!-- Top Utility Bar (Hidden during printing) -->
+  <div class="print-bar no-print">
+    <div class="print-bar-content">
+      <span class="preview-badge">Customer Portal Preview Mode</span>
+      <div class="btn-group">
+        <button class="btn btn-outline" [routerLink]="['/quotes', quote.id]">← Back to Operations</button>
+        <button class="btn btn-primary" (click)="printQuote()">🖨️ Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Official Customer Quote Document -->
+  <div class="quote-document">
+    <!-- Document Header -->
+    <div class="doc-header">
+      <div class="brand">
+        <h1 class="company-name">EVERGREEN EVENT RENTALS</h1>
+        <p class="company-tagline">Event & Party Rental Operating Solutions</p>
+        <p class="company-address">
+          100 Event Way, Suite 400 • Dallas, TX 75201<br />
+          Phone: +1 (800) 555-RENT • Email: info&#64;evergreeneventrentals.demo
+        </p>
+      </div>
+      <div class="quote-meta">
+        <h2 class="doc-title">RENTAL QUOTATION</h2>
+        <table class="meta-table">
+          <tr>
+            <td><strong>Quote #:</strong></td>
+            <td class="text-blue">{{ quote.quoteNumber }}</td>
+          </tr>
+          <tr>
+            <td><strong>Date:</strong></td>
+            <td>{{ quote.quoteDate | date:'mediumDate' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Valid Until:</strong></td>
+            <td>{{ quote.validUntil | date:'mediumDate' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Status:</strong></td>
+            <td><span class="status-pill">{{ quote.status }}</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Customer & Event Details -->
+    <div class="details-grid">
+      <div class="detail-box">
+        <h3>PREPARED FOR</h3>
+        <p class="client-name"><strong>{{ quote.customerName || 'Emily Brown' }}</strong></p>
+        <p>{{ quote.customerEmail }}</p>
+        <p>{{ quote.customerPhone }}</p>
+      </div>
+
+      <div class="detail-box">
+        <h3>EVENT LOCATION & DATES</h3>
+        <p><strong>{{ quote.eventName || "Emily's Wedding" }}</strong></p>
+        <p>Rental Period: {{ quote.rentalStartDateTime | date:'mediumDate' }} - {{ quote.rentalEndDateTime | date:'mediumDate' }}</p>
+        <p>Venue: Dallas Garden Hall (Dallas, TX)</p>
+      </div>
+    </div>
+
+    <!-- Rental Equipment Table -->
+    <table class="equipment-table">
+      <thead>
+        <tr>
+          <th>Rental Item Description</th>
+          <th class="text-center">Qty</th>
+          <th class="text-right">Unit Rate</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of quote.items">
+          <td>
+            <strong>{{ item.description }}</strong>
+          </td>
+          <td class="text-center">{{ item.quantity }}</td>
+          <td class="text-right">{{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+          <td class="text-right amount">{{ item.lineSubtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Totals Summary -->
+    <div class="totals-section">
+      <div class="terms-column">
+        <h4>TERMS & CONDITIONS</h4>
+        <p *ngIf="quote.notes">{{ quote.notes }}</p>
+        <p *ngIf="!quote.notes">
+          Quote valid for 7 days. A 30% deposit is required upon acceptance to reserve equipment.
+        </p>
+      </div>
+
+      <div class="totals-column">
+        <table class="totals-table">
+          <tr>
+            <td>Rental Subtotal:</td>
+            <td class="text-right">{{ quote.subtotal! + (quote.discountAmount || 0) | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="quote.discountAmount! > 0" class="text-green">
+            <td>Package Discount:</td>
+            <td class="text-right">-{{ quote.discountAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td>Delivery & Pickup:</td>
+            <td class="text-right">{{ (quote.deliveryFee || 0) + (quote.pickupFee || 0) + (quote.setupFee || 0) | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr>
+            <td>Sales Tax ({{ quote.taxRate }}%):</td>
+            <td class="text-right">{{ quote.taxAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr class="grand-total">
+            <td>TOTAL:</td>
+            <td class="text-right total-amount">{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+          <tr class="deposit-highlight">
+            <td>Deposit Required ({{ quote.depositPercentage }}%):</td>
+            <td class="text-right deposit-amount">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Acceptance Footer -->
+    <div class="acceptance-footer">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p>Customer Authorized Signature</p>
+      </div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p>Date Accepted</p>
+      </div>
+    </div>
+  </div>
+</div>

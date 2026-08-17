@@ -60,6 +60,18 @@ public class MockAIProvider implements AIProvider {
 
         // Standard Intent Responses
         switch (intent) {
+            case "QUOTE_CREATION":
+                response.setMessage("Created DRAFT quote QUO-000001 for Emily Brown (Emily's Wedding).\nItems: 250 Chiavari Chairs, 25 Round Tables, 25 White Linens, 10 LED Uplights.\nSubtotal: $2,925.00 | Discount (10%): -$292.50 | Fees: $500.00 | Tax (8.25%): $258.49 | Total: $3,390.99 | Deposit Required: $1,017.30");
+                response.setSuggestedActions(List.of("View Quote", "Send Quote to Customer"));
+                response.setRequiresApproval(false);
+                break;
+
+            case "QUOTE_DISCOUNT":
+                response.setMessage("Applying a 10% discount to Emily's Wedding quote reduces subtotal by $292.50. Proposed Total: $3,390.99 (Deposit: $1,017.30, Remaining: $2,373.69).");
+                response.setSuggestedActions(List.of("Apply Discount", "Recalculate Quote"));
+                response.setRequiresApproval(false);
+                break;
+
             case "CUSTOMER_SEARCH_RESULT":
                 response.setMessage("Found customer: Emily Brown (CUS-000001).\nEmail: emily.brown@example-demo.com | Phone: +1 555-010-1001\nUpcoming event: Emily's Wedding (September 20, 2026, 250 guests at Dallas Garden Hall).");
                 response.setSuggestedActions(List.of("View Customer", "View Event", "Create Quote"));
@@ -79,13 +91,13 @@ public class MockAIProvider implements AIProvider {
                 break;
 
             case "CUSTOMER_BOOKING_STATUS":
-                response.setMessage("Emily Brown's wedding quote ($6,480) has been sent and is awaiting customer confirmation & deposit. 250 Chiavari chairs and 25 round tables are currently available.");
+                response.setMessage("Emily Brown's wedding quote ($3,390.99) has been created and is in DRAFT status. 250 Chiavari chairs and 25 round tables are currently available.");
                 response.setSuggestedActions(List.of("View Rental Workflow", "Send Follow-up"));
                 response.setRequiresApproval(false);
                 break;
 
             case "AVAILABILITY_CHECK":
-                response.setMessage("Yes! You have 300 Chiavari chairs available out of 350 total inventory for September 20, 2026. Required quantity: 250 chairs.");
+                response.setMessage("Yes! You have 465 Chiavari chairs available out of 500 total inventory for September 20, 2026. Required quantity: 250 chairs.");
                 response.setSuggestedActions(List.of("Reserve Inventory", "View Products"));
                 response.setRequiresApproval(false);
                 break;
@@ -109,14 +121,14 @@ public class MockAIProvider implements AIProvider {
                 break;
 
             case "QUOTE_CALCULATION":
-                response.setMessage("Quote summary for a 250-person wedding: Rental: $4,850 (250 Chiavari Chairs + 25 Round Tables + Linens), Delivery: $750, Setup & Teardown: $400. Estimated Total: $6,000.");
+                response.setMessage("250 Chiavari Chairs at $8 each would be $2,000 before fees, discounts, and tax.");
                 response.setSuggestedActions(List.of("Create Quote", "Send Quote to Customer"));
                 response.setRequiresApproval(false);
                 break;
 
             case "GENERAL_PRIORITIES":
             default:
-                response.setMessage("Here are today's top priorities for Evergreen Event Rentals:\n1. Emily Brown Wedding quote ($6,480) awaits confirmation\n2. 4 deliveries scheduled today across Trucks #1, #2, #4\n3. Warehouse staging required for 250 chairs and 25 tables\n4. TechCorp Annual Gala contract pending ($12,500)");
+                response.setMessage("Here are today's top priorities for Evergreen Event Rentals:\n1. Emily Brown Wedding quote (QUO-000001) in draft stage\n2. 4 deliveries scheduled today across Trucks #1, #2, #4\n3. Warehouse staging required for 250 chairs and 25 tables\n4. TechCorp Annual Gala contract pending ($12,500)");
                 response.setSuggestedActions(List.of("View Rental Workflow", "View Deliveries", "View Warehouse"));
                 response.setRequiresApproval(false);
                 break;

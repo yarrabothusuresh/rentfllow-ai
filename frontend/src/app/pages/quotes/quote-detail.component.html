@@ -1,0 +1,157 @@
+<div class="detail-container" *ngIf="quote">
+  <!-- Top Bar -->
+  <div class="top-nav">
+    <span class="back-link" routerLink="/quotes">← Back to Quotes Pipeline</span>
+    <div class="actions-group">
+      <button class="btn btn-outline" (click)="duplicateQuote()">📋 Duplicate Quote</button>
+      <button class="btn btn-outline" [routerLink]="['/quotes', quote.id, 'preview']">👁️ Customer Preview</button>
+      <button class="btn btn-primary" [routerLink]="['/quotes', quote.id, 'edit']">✏️ Edit Quote</button>
+    </div>
+  </div>
+
+  <!-- Header Banner -->
+  <div class="quote-header-card">
+    <div class="header-main">
+      <div class="title-group">
+        <span class="quote-number-lg">{{ quote.quoteNumber }}</span>
+        <span class="badge" [ngClass]="getStatusBadgeClass(quote.status)">{{ quote.status }}</span>
+      </div>
+      <p class="customer-subtitle">
+        Customer: <strong>{{ quote.customerName }}</strong> ({{ quote.customerEmail }})
+      </p>
+    </div>
+
+    <div class="header-meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Total Amount</span>
+        <span class="meta-value text-blue">{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Required Deposit ({{ quote.depositPercentage }}%)</span>
+        <span class="meta-value">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Event Date</span>
+        <span class="meta-value">{{ quote.rentalStartDateTime | date:'mediumDate' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Valid Until</span>
+        <span class="meta-value">{{ quote.validUntil | date:'mediumDate' }}</span>
+      </div>
+    </div>
+
+    <!-- Status Action Buttons -->
+    <div class="status-action-bar">
+      <span>Workflow Status Action:</span>
+      <button *ngIf="quote.status === 'DRAFT'" class="btn-status send" (click)="updateStatus('SENT')">✉️ Mark as SENT</button>
+      <button *ngIf="quote.status === 'SENT'" class="btn-status accept" (click)="updateStatus('ACCEPTED')">✅ Mark as ACCEPTED</button>
+      <button *ngIf="quote.status === 'SENT'" class="btn-status reject" (click)="updateStatus('REJECTED')">❌ Mark as REJECTED</button>
+      <button *ngIf="quote.status !== 'EXPIRED' && quote.status !== 'CANCELLED'" class="btn-status cancel" (click)="updateStatus('CANCELLED')">🚫 Cancel Quote</button>
+    </div>
+  </div>
+
+  <!-- Availability Shortage Banner -->
+  <div *ngIf="quote.hasAvailabilityShortage" class="alert-box shortage">
+    <h3>⚠️ Inventory Availability Warning</h3>
+    <p>The following items exceed available stock for event dates:</p>
+    <ul>
+      <li *ngFor="let warn of quote.shortageWarnings">{{ warn }}</li>
+    </ul>
+    <span class="disclaimer">Note: Quotes do not lock inventory until converted into a confirmed Booking.</span>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <div class="left-pane">
+      <!-- Line Items Card -->
+      <div class="info-card">
+        <h2 class="card-title">Rental Items Breakdown</h2>
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Item & SKU</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Standard Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of quote.items">
+              <td>
+                <span class="item-name">{{ item.description }}</span>
+              </td>
+              <td>{{ item.quantity }}</td>
+              <td>
+                {{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}
+                <span *ngIf="item.priceOverrideDifference" class="override-badge">
+                  ({{ item.priceOverrideDifference > 0 ? '+' : '' }}{{ item.priceOverrideDifference | currency:'USD':'symbol':'1.2-2' }})
+                </span>
+              </td>
+              <td>{{ item.standardUnitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="amount-cell">{{ item.lineSubtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Operational Notes Card -->
+      <div class="info-card" *ngIf="quote.internalNotes">
+        <h2 class="card-title">🔒 Internal Sales & Operations Notes (Private)</h2>
+        <div class="notes-box internal">
+          {{ quote.internalNotes }}
+        </div>
+      </div>
+
+      <div class="info-card" *ngIf="quote.notes">
+        <h2 class="card-title">Customer Facing Terms & Notes</h2>
+        <div class="notes-box">
+          {{ quote.notes }}
+        </div>
+      </div>
+    </div>
+
+    <div class="right-pane">
+      <!-- Pricing Summary Card -->
+      <div class="info-card summary">
+        <h2 class="card-title">Financial Breakdown</h2>
+
+        <div class="summary-line">
+          <span>Gross Subtotal:</span>
+          <span>{{ quote.subtotal! + (quote.discountAmount || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line text-green" *ngIf="quote.discountAmount! > 0">
+          <span>Discount:</span>
+          <span>-{{ quote.discountAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Logistics Fees (Delivery/Setup):</span>
+          <span>{{ (quote.deliveryFee || 0) + (quote.pickupFee || 0) + (quote.setupFee || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Sales Tax ({{ quote.taxRate }}%):</span>
+          <span>{{ quote.taxAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line total">
+          <span>Grand Total:</span>
+          <span class="total-val">{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="deposit-card">
+          <div class="deposit-row">
+            <span>Deposit Required ({{ quote.depositPercentage }}%):</span>
+            <strong class="deposit-val">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="deposit-row sub">
+            <span>Remaining Balance:</span>
+            <span>{{ quote.remainingBalance | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

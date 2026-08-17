@@ -1,0 +1,273 @@
+.builder-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.back-link {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+}
+
+.form-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 18px 0;
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+  }
+}
+
+.form-control {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &.compact {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  &.qty { width: 80px; }
+  &.price { width: 110px; }
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  th {
+    background: #f8fafc;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+}
+
+.override-tag {
+  display: block;
+  font-size: 10px;
+  color: #d97706;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.subtotal-cell {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+
+  &:hover { opacity: 1; }
+}
+
+.add-item-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+
+  .add-item-inputs {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+  }
+}
+
+.help-text {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.internal-notes {
+  background: #fffbebf5;
+  border-color: #fde68a;
+}
+
+/* Sidebar Styling */
+.summary-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 24px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #475569;
+
+  &.discount-row {
+    color: #059669;
+    font-weight: 600;
+  }
+
+  &.divider {
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #0f172a;
+  }
+
+  &.total-row {
+    padding: 16px 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+
+    .total-price {
+      font-size: 22px;
+      color: #2563eb;
+    }
+  }
+}
+
+.deposit-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 14px;
+  margin: 16px 0;
+
+  .deposit-price {
+    color: #1e40af;
+    font-size: 16px;
+  }
+
+  .balance-row {
+    font-size: 12px;
+    color: #3b82f6;
+    padding-bottom: 0;
+  }
+}
+
+.sidebar-actions {
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+
+  &.full-width { width: 100%; }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}

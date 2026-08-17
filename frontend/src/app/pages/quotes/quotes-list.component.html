@@ -1,0 +1,163 @@
+<div class="quotes-container">
+  <!-- Page Header -->
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Intelligent Rental Quotes</h1>
+      <p class="page-subtitle">Build, customize, and convert event rental quotes into profitable bookings</p>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" routerLink="/quotes/new">
+        <span class="icon">+</span> New Quote
+      </button>
+    </div>
+  </div>
+
+  <!-- Pipeline Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon icon-total">📋</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalQuotes }}</span>
+        <span class="stat-label">Total Quotes</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-draft">✏️</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ draftCount }}</span>
+        <span class="stat-label">Drafts</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-sent">✉️</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ sentCount }}</span>
+        <span class="stat-label">Sent / Viewed</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-accepted">✅</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ acceptedCount }}</span>
+        <span class="stat-label">Accepted</span>
+      </div>
+    </div>
+
+    <div class="stat-card highlight">
+      <div class="stat-icon icon-revenue">💰</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalPipelineValue | currency:'USD':'symbol':'1.2-2' }}</span>
+        <span class="stat-label">Total Pipeline Value</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls Bar: Search & Status Filters -->
+  <div class="controls-card">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search quotes by number, customer, or event name..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="filter-tabs">
+      <button class="tab-btn" [class.active]="selectedStatus === 'ALL'" (click)="onStatusFilter('ALL')">All</button>
+      <button class="tab-btn" [class.active]="selectedStatus === 'DRAFT'" (click)="onStatusFilter('DRAFT')">Drafts</button>
+      <button class="tab-btn" [class.active]="selectedStatus === 'SENT'" (click)="onStatusFilter('SENT')">Sent</button>
+      <button class="tab-btn" [class.active]="selectedStatus === 'ACCEPTED'" (click)="onStatusFilter('ACCEPTED')">Accepted</button>
+    </div>
+  </div>
+
+  <!-- Quotes Data Table -->
+  <div class="table-card">
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading rental quotes...</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredQuotes.length === 0" class="empty-state">
+      <div class="empty-icon">📜</div>
+      <h3>No rental quotes found</h3>
+      <p>Create a quote or adjust your search filter.</p>
+      <button class="btn btn-primary" routerLink="/quotes/new">+ Create First Quote</button>
+    </div>
+
+    <table *ngIf="!isLoading && filteredQuotes.length > 0" class="quotes-table">
+      <thead>
+        <tr>
+          <th>Quote #</th>
+          <th>Customer</th>
+          <th>Event</th>
+          <th>Rental Dates</th>
+          <th>Total Amount</th>
+          <th>Deposit (30%)</th>
+          <th>Status</th>
+          <th>Availability Warning</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let quote of filteredQuotes" [routerLink]="['/quotes', quote.id]" class="clickable-row">
+          <td class="quote-number-cell">
+            <span class="quote-number">{{ quote.quoteNumber }}</span>
+          </td>
+          <td>
+            <div class="customer-info">
+              <span class="customer-name">{{ quote.customerName || 'Demo Customer' }}</span>
+              <span class="customer-email" *ngIf="quote.customerEmail">{{ quote.customerEmail }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="event-name">{{ quote.eventName || 'Wedding Event' }}</span>
+          </td>
+          <td>
+            <span class="date-badge" *ngIf="quote.rentalStartDateTime">
+              {{ quote.rentalStartDateTime | date:'MMM d, y' }}
+            </span>
+          </td>
+          <td class="amount-cell">
+            <strong>{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</strong>
+          </td>
+          <td>
+            <span class="deposit-tag">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatusBadgeClass(quote.status)">
+              {{ quote.status }}
+            </span>
+          </td>
+          <td>
+            <span *ngIf="quote.hasAvailabilityShortage" class="shortage-pill warning" title="Inventory shortage detected for event dates">
+              ⚠️ Shortage
+            </span>
+            <span *ngIf="!quote.hasAvailabilityShortage" class="shortage-pill success">
+              ✓ In Stock
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-icon" [routerLink]="['/quotes', quote.id]" title="View Detail" (click)="$event.stopPropagation()">
+              👁️
+            </button>
+            <button class="btn-icon" [routerLink]="['/quotes', quote.id, 'edit']" title="Edit Quote" (click)="$event.stopPropagation()">
+              ✏️
+            </button>
+            <button class="btn-icon" [routerLink]="['/quotes', quote.id, 'preview']" title="Customer Preview" (click)="$event.stopPropagation()">
+              🔗
+            </button>
+            <button class="btn-icon" (click)="duplicateQuote(quote.id!, $event)" title="Duplicate Quote">
+              📋
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -27,12 +27,20 @@ public class AIOrchestrator {
         for (AITool tool : tools) {
             toolRegistry.put(tool.getName(), tool);
         }
-        // Register default future action tools
+        // Register default action & view fallback tools
         registerFutureActionTool("sendPaymentReminder");
         registerFutureActionTool("createCustomerAction");
         registerFutureActionTool("createQuote");
         registerFutureActionTool("sendQuote");
+        registerFutureActionTool("sendQuoteAction");
         registerFutureActionTool("reserveInventoryAction");
+        registerFutureActionTool("getBooking");
+        registerFutureActionTool("getCustomerEvents");
+        registerFutureActionTool("getEvent");
+        registerFutureActionTool("getUpcomingBookings");
+        registerFutureActionTool("calculateProfitability");
+        registerFutureActionTool("getWarehouseTasks");
+        registerFutureActionTool("getDeliveries");
     }
 
     private void registerFutureActionTool(String name) {
@@ -57,9 +65,21 @@ public class AIOrchestrator {
         String intent;
         List<String> toolsToCall = new ArrayList<>();
 
-        if (msgLower.contains("reserve") && (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("emily"))) {
+        if (msgLower.contains("send emily") || msgLower.contains("send quote") || msgLower.contains("send the quote")) {
+            intent = "ACTION_REQUIRES_APPROVAL";
+            toolsToCall.add("sendQuoteAction");
+        } else if (msgLower.contains("reserve") && (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("emily"))) {
             intent = "ACTION_REQUIRES_APPROVAL";
             toolsToCall.add("reserveInventoryAction");
+        } else if (msgLower.contains("create a quote") || msgLower.contains("create quote")) {
+            intent = "QUOTE_CREATION";
+            toolsToCall.add("createQuoteDraft");
+        } else if (msgLower.contains("discount")) {
+            intent = "QUOTE_DISCOUNT";
+            toolsToCall.add("calculateQuote");
+        } else if (msgLower.contains("how much") && (msgLower.contains("chair") || msgLower.contains("chairs"))) {
+            intent = "QUOTE_CALCULATION";
+            toolsToCall.add("calculateQuote");
         } else if (msgLower.contains("low in stock") || msgLower.contains("low stock")) {
             intent = "LOW_STOCK_INQUIRY";
             toolsToCall.add("getLowStockProducts");
@@ -82,7 +102,7 @@ public class AIOrchestrator {
         } else if (msgLower.contains("weekend") || msgLower.contains("upcoming events")) {
             intent = "UPCOMING_EVENTS";
             toolsToCall.add("getUpcomingEvents");
-        } else if (msgLower.contains("find emily") || msgLower.contains("search emily") || msgLower.contains("emily brown")) {
+        } else if (msgLower.contains("find emily") || msgLower.contains("search emily") || msgLower.contains("emily brown") || msgLower.contains("emily's wedding")) {
             if (msgLower.contains("status") || msgLower.contains("wedding")) {
                 intent = "CUSTOMER_BOOKING_STATUS";
                 toolsToCall.add("searchCustomer");
@@ -118,43 +138,34 @@ public class AIOrchestrator {
             toolsToCall.add("calculateQuote");
         } else {
             intent = "GENERAL_PRIORITIES";
-            toolsToCall.add("getUpcomingBookings");
-            toolsToCall.add("getWarehouseTasks");
         }
 
         // 2. Execute Tools with Security Validation
-        List<String> toolsUsed = new ArrayList<>();
         List<ToolResult> toolResults = new ArrayList<>();
-
         for (String toolName : toolsToCall) {
             AITool tool = toolRegistry.get(toolName);
             if (tool != null) {
-                ToolRequest toolReq = new ToolRequest(toolName, Map.of("query", msg), tenantId, request.getUserId(), role);
-                
-                // Security Check
-                ToolResult securityError = securityService.validateToolExecution(tool, toolReq, msg);
-                if (securityError != null) {
-                    reasoningSteps.add("❌ Security violation: Permission denied for tool " + toolName);
-                    toolResults.add(securityError);
-                    toolsUsed.add(toolName);
+                ToolRequest tReq = new ToolRequest(toolName, new HashMap<>(), role, tenantId, UUID.randomUUID().toString());
+                reasoningSteps.add("→ Executing tool: " + toolName + " (Allowed roles: " + tool.getAllowedRoles() + ")");
+
+                ToolResult secCheck = securityService.validateToolExecution(tool, tReq, msgLower);
+                if (secCheck != null) {
+                    toolResults.add(secCheck);
+                    reasoningSteps.add("❌ Access denied for tool: " + toolName + " (Role: " + role + ")");
                     break;
                 }
 
-                // Execute Tool
-                reasoningSteps.add("✓ Executed tool: " + toolName);
-                ToolResult result = tool.execute(toolReq);
-                toolsUsed.add(toolName);
-                toolResults.add(result);
+                ToolResult tRes = tool.execute(tReq);
+                toolResults.add(tRes);
 
-                if ("ACTION_REQUIRES_APPROVAL".equals(result.getStatus())) {
-                    reasoningSteps.add("⚠️ Tool " + toolName + " requires approval before execution");
+                if ("ACTION_REQUIRES_APPROVAL".equals(tRes.getStatus())) {
+                    reasoningSteps.add("⚠️ Action requires explicit human approval before execution");
+                    break;
                 }
             }
         }
 
-        reasoningSteps.add("✓ Generated synthesized operational response");
-
-        // 3. Delegate to Provider to produce AIResponse DTO
-        return aiProvider.generate(request, intent, toolsUsed, toolResults, reasoningSteps);
+        // 3. Delegate to AI Provider
+        return aiProvider.generate(request, intent, toolsToCall, toolResults, reasoningSteps);
     }
 }
