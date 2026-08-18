@@ -200,6 +200,26 @@ public class QuoteController {
         }
     }
 
+    @PostMapping("/{id}/accept")
+    public ResponseEntity<?> acceptQuote(
+            @PathVariable("id") UUID id,
+            @RequestBody(required = false) Map<String, Object> body,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
+
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            String role = resolveRole(roleHeader);
+            return quoteService.updateStatus(tenantId, id, QuoteStatus.ACCEPTED, role)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
+
+
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<?> duplicateQuote(
             @PathVariable("id") UUID id,

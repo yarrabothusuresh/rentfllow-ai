@@ -57,6 +57,13 @@ export class QuoteService {
     });
   }
 
+  acceptQuote(id: string, role: string = 'CUSTOMER'): Observable<Quote> {
+    return this.http.post<Quote>(`${this.apiUrl}/${id}/accept`, { accepted: true }, {
+      headers: this.getHeaders(role),
+    });
+  }
+
+
   duplicateQuote(id: string, role: string = 'OWNER'): Observable<Quote> {
     return this.http.post<Quote>(`${this.apiUrl}/${id}/duplicate`, {}, {
       headers: this.getHeaders(role),

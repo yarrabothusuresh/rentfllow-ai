@@ -30,10 +30,10 @@ class AIOrchestratorTest {
             new GetCustomerTool(repo),
             new SearchProductsTool(repo),
             new CheckAvailabilityTool(repo),
-            new GetBookingTool(repo),
+            new GetBookingTool(null),
             new CalculateQuoteTool(),
             new CalculateProfitabilityTool(repo),
-            new GetUpcomingBookingsTool(repo),
+            new GetUpcomingBookingsTool(null),
             new GetWarehouseTasksTool(repo),
             new GetDeliveriesTool(repo)
         );

@@ -129,6 +129,26 @@
         <p class="notes-text" *ngIf="event.specialInstructions">{{ event.specialInstructions }}</p>
         <p class="notes-text empty" *ngIf="!event.specialInstructions">No special loading dock or delivery instructions logged.</p>
       </div>
+
+      <!-- Booking Card (Requirement 26) -->
+      <div class="info-card" style="margin-top: 1rem; border: 1px solid rgba(16, 185, 129, 0.4);">
+        <h3 class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fas fa-file-contract text-emerald-400"></i> Event Booking</span>
+          <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 9999px;">CONFIRMED</span>
+        </h3>
+        <div style="margin-top: 0.75rem; background: rgba(15, 23, 42, 0.6); padding: 0.85rem; border-radius: 8px;">
+          <div style="font-family: monospace; font-weight: 700; color: #818cf8; font-size: 0.95rem; margin-bottom: 0.25rem;">BKG-000001</div>
+          <div style="font-size: 0.85rem; color: #e2e8f0; margin-bottom: 0.5rem;">Total: <strong class="text-emerald-400">$3,464.00</strong></div>
+          <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1; space-y: 0.2rem;">
+            <div style="color: #34d399; font-weight: 600;">✓ 250 Chairs Reserved</div>
+            <div style="color: #34d399; font-weight: 600;">✓ 25 Tables Reserved</div>
+            <div style="color: #34d399; font-weight: 600;">✓ 25 Linens Reserved</div>
+          </div>
+          <div style="margin-top: 0.75rem; text-align: right;">
+            <a routerLink="/bookings" style="font-size: 0.8rem; color: #818cf8; font-weight: 600; text-decoration: none;">View Booking Details →</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -21,6 +21,9 @@ import { QuoteBuilderComponent } from './pages/quotes/quote-builder.component';
 import { QuoteDetailComponent } from './pages/quotes/quote-detail.component';
 import { QuotePreviewComponent } from './pages/quotes/quote-preview.component';
 
+import { BookingsListComponent } from './pages/bookings/bookings-list.component';
+import { BookingDetailComponent } from './pages/bookings/booking-detail.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'ideal-customer', component: IdealCustomerComponent },
@@ -43,6 +46,8 @@ export const routes: Routes = [
   { path: 'quotes/:id', component: QuoteDetailComponent },
   { path: 'quotes/:id/edit', component: QuoteBuilderComponent },
   { path: 'quotes/:id/preview', component: QuotePreviewComponent },
+  { path: 'bookings', component: BookingsListComponent },
+  { path: 'bookings/:id', component: BookingDetailComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -65,8 +70,11 @@ export const routes: Routes = [
       { path: 'quotes/new', component: QuoteBuilderComponent },
       { path: 'quotes/:id', component: QuoteDetailComponent },
       { path: 'quotes/:id/edit', component: QuoteBuilderComponent },
-      { path: 'quotes/:id/preview', component: QuotePreviewComponent }
+      { path: 'quotes/:id/preview', component: QuotePreviewComponent },
+      { path: 'bookings', component: BookingsListComponent },
+      { path: 'bookings/:id', component: BookingDetailComponent }
     ]
   },
   { path: '**', redirectTo: '' }
 ];
+

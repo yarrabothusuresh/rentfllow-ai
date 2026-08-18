@@ -51,7 +51,7 @@
         <a routerLink="/dashboard/customers" style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Customers</a>
         <a routerLink="/dashboard/events" style="background: rgba(245, 158, 11, 0.2); color: #fde047; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Events</a>
         <a routerLink="/quotes" style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Quotes</a>
-        <a routerLink="/quotes/new" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">+ New Quote</a>
+        <a routerLink="/bookings" style="background: rgba(16, 185, 129, 0.2); color: #34d399; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Bookings</a>
       </div>
     </div>
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
@@ -66,6 +66,67 @@
         <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; margin: 0.2rem 0;">Auto CUS-000001</div>
         <div style="font-size: 0.8rem; color: #cbd5e1;">Sequenced Numbers & Duplicate Detection</div>
         <a routerLink="/dashboard/customers" style="font-size: 0.75rem; color: #34d399; text-decoration: none; margin-top: 0.3rem; display: inline-block;">Customer Directory →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING PIPELINE & UPCOMING RENTALS CARD (REQUIREMENTS 46 & 47) -->
+  <div class="booking-overview-card glass-card" style="margin-bottom: 1.5rem; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.15rem; color: #f8fafc; display: flex; align-items: center; gap: 0.5rem;">
+        <span>📋</span> Booking Pipeline & Upcoming Rentals
+      </h3>
+      <a routerLink="/bookings" style="background: #10b981; color: #ffffff; text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">View Bookings</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Pending</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #fbbf24;">3</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Confirmed</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #34d399;">12</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Deposit Pending</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #818cf8;">7</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Upcoming</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #38bdf8;">15</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Completed</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #a78bfa;">42</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Cancelled</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #f87171;">2</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 0.65rem; border-radius: 8px; text-align: center; grid-column: span 2;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Total Booking Value</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #34d399;">$125,400</div>
+      </div>
+    </div>
+
+    <!-- Upcoming Rentals Section -->
+    <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #cbd5e1;">Upcoming Rentals</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; border-left: 3px solid #10b981;">
+        <div style="font-size: 0.8rem; color: #34d399; font-weight: 700;">Sep 20</div>
+        <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Emily's Wedding</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">250 guests • Confirmed</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; border-left: 3px solid #10b981;">
+        <div style="font-size: 0.8rem; color: #34d399; font-weight: 700;">Sep 21</div>
+        <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Corporate Event</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">400 guests • Confirmed</div>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 8px; border-left: 3px solid #10b981;">
+        <div style="font-size: 0.8rem; color: #34d399; font-weight: 700;">Sep 22</div>
+        <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Birthday Party</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">100 guests • Confirmed</div>
       </div>
     </div>
   </div>

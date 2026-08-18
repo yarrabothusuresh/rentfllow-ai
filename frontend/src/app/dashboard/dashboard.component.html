@@ -15,7 +15,7 @@
       <a routerLink="/dashboard/customers" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('CUSTOMER_VIEW')">Customers</a>
       <a routerLink="/dashboard/events" routerLinkActive="active" class="nav-item">Events</a>
       <a routerLink="/quotes" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('QUOTE_VIEW')">Quotes</a>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
+      <a routerLink="/bookings" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFulfillment()">Fulfillment</div>

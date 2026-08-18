@@ -1,0 +1,136 @@
+<div class="bookings-page-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Bookings</h1>
+      <p class="page-subtitle">Manage confirmed rental commitments from quote to fulfillment.</p>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card metric-pending">
+      <div class="metric-icon">⏳</div>
+      <div class="metric-info">
+        <span class="metric-label">Pending</span>
+        <span class="metric-value">{{ pendingCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-card metric-confirmed">
+      <div class="metric-icon">✓</div>
+      <div class="metric-info">
+        <span class="metric-label">Confirmed</span>
+        <span class="metric-value">{{ confirmedCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-card metric-deposit">
+      <div class="metric-icon">💳</div>
+      <div class="metric-info">
+        <span class="metric-label">Deposit Pending</span>
+        <span class="metric-value">{{ depositPendingCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-card metric-upcoming">
+      <div class="metric-icon">📅</div>
+      <div class="metric-info">
+        <span class="metric-label">Upcoming</span>
+        <span class="metric-value">{{ upcomingCount }}</span>
+      </div>
+    </div>
+
+    <div class="metric-card metric-total">
+      <div class="metric-icon">💰</div>
+      <div class="metric-info">
+        <span class="metric-label">Total Booking Value</span>
+        <span class="metric-value">${{ totalBookingValue | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="toolbar-section card-glass">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+        placeholder="Search booking #, customer, or event..."
+        class="form-control"
+      />
+    </div>
+
+    <div class="filter-box">
+      <label>Status:</label>
+      <select [(ngModel)]="selectedStatus" (change)="onStatusChange()" class="form-select">
+        <option value="ALL">All Statuses</option>
+        <option value="PENDING">Pending</option>
+        <option value="CONFIRMED">Confirmed</option>
+        <option value="DEPOSIT_PENDING">Deposit Pending</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bookings Table -->
+  <div class="table-container card-glass">
+    <div *ngIf="isLoading" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading bookings...</p>
+    </div>
+
+    <table *ngIf="!isLoading && filteredBookings.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>Booking #</th>
+          <th>Customer</th>
+          <th>Event</th>
+          <th>Rental Date</th>
+          <th>Total</th>
+          <th>Deposit</th>
+          <th>Balance</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of filteredBookings" class="table-row" (click)="viewBooking(b.id)">
+          <td>
+            <span class="booking-num-pill">{{ b.bookingNumber }}</span>
+          </td>
+          <td>
+            <div class="customer-info">
+              <span class="fw-bold">{{ b.customerName || 'Emily Brown' }}</span>
+            </div>
+          </td>
+          <td>{{ b.eventName || 'Event' }}</td>
+          <td>
+            <span class="date-tag">{{ (b.rentalStartDateTime | date:'MMM d, yyyy') || (b.bookingDate | date:'MMM d, yyyy') }}</span>
+          </td>
+          <td class="fw-bold">${{ b.totalAmount | number:'1.2-2' }}</td>
+          <td class="text-amber">${{ (b.depositRequired || 0) | number:'1.2-2' }}</td>
+          <td class="text-emerald">${{ (b.balanceDue || b.totalAmount) | number:'1.2-2' }}</td>
+          <td>
+            <span class="badge" [ngClass]="getStatusBadgeClass(b.status)">
+              {{ b.status }}
+            </span>
+          </td>
+          <td (click)="$event.stopPropagation()">
+            <button class="btn-sm btn-secondary" [routerLink]="['/bookings', b.id]">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!isLoading && filteredBookings.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No Bookings Found</h3>
+      <p>When quotes are accepted, confirmed bookings will appear here with inventory commitments.</p>
+    </div>
+  </div>
+</div>

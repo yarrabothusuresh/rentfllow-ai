@@ -1,0 +1,307 @@
+<div class="booking-detail-container" *ngIf="!isLoading && booking">
+  <!-- Back Link & Action Bar -->
+  <div class="top-nav">
+    <a [routerLink]="['/bookings']" class="back-link">← Back to Bookings</a>
+    
+    <div class="action-buttons">
+      <!-- Actions for PENDING -->
+      <ng-container *ngIf="booking.status === 'PENDING'">
+        <button class="btn btn-primary" (click)="confirmBooking()" [disabled]="isProcessingAction">
+          ✓ Confirm Booking
+        </button>
+        <button class="btn btn-danger" (click)="openCancelModal()" [disabled]="isProcessingAction">
+          Cancel
+        </button>
+      </ng-container>
+
+      <!-- Actions for CONFIRMED -->
+      <ng-container *ngIf="booking.status === 'CONFIRMED'">
+        <a [routerLink]="['/quotes', booking.quoteId]" class="btn btn-secondary">
+          📄 View Quote
+        </a>
+        <a [routerLink]="['/inventory']" class="btn btn-secondary">
+          📦 View Inventory
+        </a>
+        <button class="btn btn-danger" (click)="openCancelModal()" [disabled]="isProcessingAction">
+          Cancel Booking
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="booking.status === 'CANCELLED'">
+        <span class="cancelled-notice">Booking Cancelled</span>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Confirmation Banner -->
+  <div *ngIf="booking.status === 'CONFIRMED'" class="confirmation-banner">
+    <div class="banner-icon">✓</div>
+    <div class="banner-content">
+      <h2>BOOKING CONFIRMED</h2>
+      <p>Booking <strong>{{ booking.bookingNumber }}</strong> for <strong>{{ booking.eventName || "Emily's Wedding" }}</strong> is confirmed. Inventory has been firmly reserved.</p>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="detail-grid">
+    <!-- Left Column: Primary Information -->
+    <div class="main-column">
+      <!-- Booking Overview Card -->
+      <div class="card-glass info-card">
+        <div class="card-header">
+          <div>
+            <div class="booking-number-row">
+              <span class="booking-num">{{ booking.bookingNumber }}</span>
+              <span class="badge" [ngClass]="getStatusBadgeClass(booking.status)">
+                {{ booking.status }}
+              </span>
+            </div>
+            <h1 class="event-title">{{ booking.eventName || "Emily's Wedding" }}</h1>
+          </div>
+          <div class="dates-pill">
+            📅 {{ (booking.rentalStartDateTime | date:'MMM d, yyyy') || (booking.bookingDate | date:'MMM d, yyyy') }} – {{ (booking.rentalEndDateTime | date:'MMM d, yyyy') }}
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Customer</span>
+            <span class="meta-value text-highlight">{{ booking.customerName || 'Emily Brown' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Quote Reference</span>
+            <span class="meta-value">{{ booking.quoteNumber || 'QUO-000001' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Booking Date</span>
+            <span class="meta-value">{{ booking.bookingDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Venue / Location</span>
+            <span class="meta-value">Dallas Garden Hall</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Timeline -->
+      <div class="card-glass section-card">
+        <h3 class="section-title">Booking Timeline</h3>
+        <div class="timeline">
+          <div class="timeline-step step-completed">
+            <div class="step-icon">✓</div>
+            <div class="step-label">Quote Accepted</div>
+          </div>
+          <div class="timeline-connector connector-completed"></div>
+
+          <div class="timeline-step step-completed">
+            <div class="step-icon">✓</div>
+            <div class="step-label">Booking Created</div>
+          </div>
+          <div class="timeline-connector" [ngClass]="booking.status === 'CONFIRMED' ? 'connector-completed' : ''"></div>
+
+          <div class="timeline-step" [ngClass]="booking.status === 'CONFIRMED' ? 'step-completed' : ''">
+            <div class="step-icon">{{ booking.status === 'CONFIRMED' ? '✓' : '3' }}</div>
+            <div class="step-label">Inventory Reserved</div>
+          </div>
+          <div class="timeline-connector" [ngClass]="booking.status === 'CONFIRMED' ? 'connector-completed' : ''"></div>
+
+          <div class="timeline-step" [ngClass]="booking.status === 'CONFIRMED' ? 'step-completed' : ''">
+            <div class="step-icon">{{ booking.status === 'CONFIRMED' ? '✓' : '4' }}</div>
+            <div class="step-label">Booking Confirmed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Line Items -->
+      <div class="card-glass section-card">
+        <h3 class="section-title">Booking Items (Price Snapshot)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product / Description</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
+              <th>Reservation Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of booking.items">
+              <td class="fw-bold">{{ item.description }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.unitPrice | number:'1.2-2' }}</td>
+              <td>${{ item.lineSubtotal | number:'1.2-2' }}</td>
+              <td>
+                <span class="res-status-pill" [ngClass]="booking.status === 'CONFIRMED' ? 'res-reserved' : 'res-pending'">
+                  ✓ {{ booking.status === 'CONFIRMED' ? 'RESERVED' : 'PENDING' }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="!booking.items || booking.items.length === 0">
+              <td colspan="5" class="text-center">No items listed.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Reserved Inventory Breakdown -->
+      <div class="card-glass section-card">
+        <h3 class="section-title">Reserved Inventory Details</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Reserved Qty</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let res of booking.reservations">
+              <td class="fw-bold">{{ res.productName || 'Rental Item' }}</td>
+              <td>{{ res.quantity }}</td>
+              <td>{{ res.startDateTime | date:'MMM d, HH:mm' }}</td>
+              <td>{{ res.endDateTime | date:'MMM d, HH:mm' }}</td>
+              <td>
+                <span class="badge badge-confirmed">{{ res.status }}</span>
+              </td>
+            </tr>
+            <tr *ngIf="!booking.reservations || booking.reservations.length === 0">
+              <td colspan="5" class="text-center text-muted">
+                {{ booking.status === 'CONFIRMED' ? 'Inventory reserved for all booking items.' : 'Inventory will be reserved upon confirmation.' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Column: Financial Summary & Payment -->
+    <div class="side-column">
+      <!-- Financial Summary -->
+      <div class="card-glass summary-card">
+        <h3 class="card-heading">Financial Summary</h3>
+
+        <div class="summary-line">
+          <span>Subtotal</span>
+          <span>${{ booking.subtotal | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line text-amber" *ngIf="(booking.discountAmount || 0) > 0">
+          <span>Discount</span>
+          <span>-${{ booking.discountAmount | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line" *ngIf="(booking.deliveryFee || 0) > 0">
+          <span>Delivery Fee</span>
+          <span>${{ booking.deliveryFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line" *ngIf="(booking.pickupFee || 0) > 0">
+          <span>Pickup Fee</span>
+          <span>${{ booking.pickupFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line" *ngIf="(booking.setupFee || 0) > 0">
+          <span>Setup Fee</span>
+          <span>${{ booking.setupFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line" *ngIf="(booking.breakdownFee || 0) > 0">
+          <span>Breakdown Fee</span>
+          <span>${{ booking.breakdownFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line" *ngIf="(booking.serviceFee || 0) > 0">
+          <span>Service Fee</span>
+          <span>${{ booking.serviceFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Sales Tax</span>
+          <span>${{ booking.taxAmount | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="summary-line total-line">
+          <span>Total Booking</span>
+          <span>${{ booking.totalAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Deposit & Payment Placeholder -->
+      <div class="card-glass payment-card">
+        <h3 class="card-heading">Payment Information</h3>
+
+        <div class="payment-status-badge">
+          STATUS: DEPOSIT PENDING
+        </div>
+
+        <div class="payment-metrics">
+          <div class="pay-row">
+            <span class="pay-label">Deposit Required</span>
+            <span class="pay-value text-amber">${{ booking.depositRequired | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="pay-row">
+            <span class="pay-label">Deposit Paid</span>
+            <span class="pay-value">${{ (booking.depositPaid || 0) | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="pay-row highlight-row">
+            <span class="pay-label">Balance Due</span>
+            <span class="pay-value text-emerald">${{ (booking.balanceDue || booking.totalAmount) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <button class="btn btn-record-deposit" disabled title="Payment module coming next">
+          💳 Record Deposit (Payment Module Coming Next)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancellation Modal -->
+  <div class="modal-backdrop" *ngIf="showCancelModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3>Cancel Booking {{ booking.bookingNumber }}</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to cancel this booking?</p>
+        <div class="warning-box">
+          <p><strong>This action will release:</strong></p>
+          <ul>
+            <li>250 Chiavari Chairs</li>
+            <li>25 Round Tables</li>
+            <li>25 White Linens</li>
+            <li>10 LED Uplights</li>
+          </ul>
+          <p class="text-sm">Reserved inventory will immediately become available to other customers.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCancelModal()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmCancelBooking()" [disabled]="isProcessingAction">
+          Approve Cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-state">
+  <div class="spinner"></div>
+  <p>Loading booking details...</p>
+</div>

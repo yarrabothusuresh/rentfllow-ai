@@ -65,7 +65,17 @@ public class AIOrchestrator {
         String intent;
         List<String> toolsToCall = new ArrayList<>();
 
-        if (msgLower.contains("send emily") || msgLower.contains("send quote") || msgLower.contains("send the quote")) {
+        if (msgLower.contains("cancel") && msgLower.contains("booking")) {
+            intent = "ACTION_REQUIRES_APPROVAL";
+            toolsToCall.add("cancelBooking");
+        } else if (msgLower.contains("convert") || (msgLower.contains("create") && msgLower.contains("booking"))) {
+            intent = "ACTION_REQUIRES_APPROVAL";
+            toolsToCall.add("createBookingFromQuote");
+        } else if (msgLower.contains("has") && msgLower.contains("booked") || (msgLower.contains("is") && msgLower.contains("booked"))) {
+            intent = "BOOKING_INQUIRY";
+            toolsToCall.add("getBooking");
+            toolsToCall.add("searchBookings");
+        } else if (msgLower.contains("send emily") || msgLower.contains("send quote") || msgLower.contains("send the quote")) {
             intent = "ACTION_REQUIRES_APPROVAL";
             toolsToCall.add("sendQuoteAction");
         } else if (msgLower.contains("reserve") && (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("emily"))) {
@@ -145,7 +155,7 @@ public class AIOrchestrator {
         for (String toolName : toolsToCall) {
             AITool tool = toolRegistry.get(toolName);
             if (tool != null) {
-                ToolRequest tReq = new ToolRequest(toolName, new HashMap<>(), role, tenantId, UUID.randomUUID().toString());
+                ToolRequest tReq = new ToolRequest(toolName, new HashMap<>(), tenantId, "user-1", role);
                 reasoningSteps.add("→ Executing tool: " + toolName + " (Allowed roles: " + tool.getAllowedRoles() + ")");
 
                 ToolResult secCheck = securityService.validateToolExecution(tool, tReq, msgLower);

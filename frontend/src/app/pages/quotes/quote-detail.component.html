@@ -3,6 +3,9 @@
   <div class="top-nav">
     <span class="back-link" routerLink="/quotes">← Back to Quotes Pipeline</span>
     <div class="actions-group">
+      <button class="btn btn-success" (click)="openCreateBookingModal()" *ngIf="quote.status === 'ACCEPTED' || quote.status === 'SENT' || quote.status === 'VIEWED'">
+        ⚡ Create Booking
+      </button>
       <button class="btn btn-outline" (click)="duplicateQuote()">📋 Duplicate Quote</button>
       <button class="btn btn-outline" [routerLink]="['/quotes', quote.id, 'preview']">👁️ Customer Preview</button>
       <button class="btn btn-primary" [routerLink]="['/quotes', quote.id, 'edit']">✏️ Edit Quote</button>
@@ -40,11 +43,12 @@
       </div>
     </div>
 
-    <!-- Status Action Buttons -->
+    <!-- Status Action Bars -->
     <div class="status-action-bar">
       <span>Workflow Status Action:</span>
       <button *ngIf="quote.status === 'DRAFT'" class="btn-status send" (click)="updateStatus('SENT')">✉️ Mark as SENT</button>
       <button *ngIf="quote.status === 'SENT'" class="btn-status accept" (click)="updateStatus('ACCEPTED')">✅ Mark as ACCEPTED</button>
+      <button *ngIf="quote.status === 'ACCEPTED'" class="btn-status create-bkg" (click)="openCreateBookingModal()">⚡ Convert to Booking</button>
       <button *ngIf="quote.status === 'SENT'" class="btn-status reject" (click)="updateStatus('REJECTED')">❌ Mark as REJECTED</button>
       <button *ngIf="quote.status !== 'EXPIRED' && quote.status !== 'CANCELLED'" class="btn-status cancel" (click)="updateStatus('CANCELLED')">🚫 Cancel Quote</button>
     </div>
@@ -60,98 +64,223 @@
     <span class="disclaimer">Note: Quotes do not lock inventory until converted into a confirmed Booking.</span>
   </div>
 
-  <!-- Content Grid -->
-  <div class="content-grid">
-    <div class="left-pane">
-      <!-- Line Items Card -->
-      <div class="info-card">
-        <h2 class="card-title">Rental Items Breakdown</h2>
-        <table class="detail-table">
+  <!-- Main Content Grid -->
+  <div class="detail-grid">
+    <!-- Left Column: Line Items & Details -->
+    <div class="main-column">
+      <div class="card-glass">
+        <h2 class="card-title">Rental Items</h2>
+        <table class="data-table">
           <thead>
             <tr>
-              <th>Item & SKU</th>
+              <th>Item Description</th>
               <th>Qty</th>
-              <th>Unit Price</th>
               <th>Standard Price</th>
+              <th>Quote Price</th>
               <th>Subtotal</th>
+              <th>Availability</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let item of quote.items">
               <td>
-                <span class="item-name">{{ item.description }}</span>
+                <div class="fw-bold">{{ item.description }}</div>
               </td>
               <td>{{ item.quantity }}</td>
+              <td class="text-muted">{{ item.standardUnitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
               <td>
-                {{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}
-                <span *ngIf="item.priceOverrideDifference" class="override-badge">
-                  ({{ item.priceOverrideDifference > 0 ? '+' : '' }}{{ item.priceOverrideDifference | currency:'USD':'symbol':'1.2-2' }})
+                <span [class.price-override]="item.priceOverrideDifference !== 0">
+                  {{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}
                 </span>
               </td>
-              <td>{{ item.standardUnitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
-              <td class="amount-cell">{{ item.lineSubtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="fw-bold">{{ item.lineSubtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td>
+                <span class="status-indicator" [class.available]="item.isAvailable" [class.unavailable]="!item.isAvailable">
+                  {{ item.isAvailable ? '✓ Available (' + item.availableQuantity + ')' : '⚠️ Shortage (' + item.availableQuantity + ' avail)' }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Operational Notes Card -->
-      <div class="info-card" *ngIf="quote.internalNotes">
-        <h2 class="card-title">🔒 Internal Sales & Operations Notes (Private)</h2>
-        <div class="notes-box internal">
-          {{ quote.internalNotes }}
-        </div>
-      </div>
-
-      <div class="info-card" *ngIf="quote.notes">
-        <h2 class="card-title">Customer Facing Terms & Notes</h2>
-        <div class="notes-box">
-          {{ quote.notes }}
+      <!-- Notes Section -->
+      <div class="card-glass">
+        <h2 class="card-title">Notes & Instructions</h2>
+        <div class="notes-grid">
+          <div class="notes-box">
+            <h3>Customer Facing Notes</h3>
+            <p>{{ quote.notes || 'No customer notes specified.' }}</p>
+          </div>
+          <div class="notes-box internal">
+            <h3>Internal Team Notes</h3>
+            <p>{{ quote.internalNotes || 'No internal notes.' }}</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="right-pane">
-      <!-- Pricing Summary Card -->
-      <div class="info-card summary">
-        <h2 class="card-title">Financial Breakdown</h2>
-
+    <!-- Right Column: Financial Summary -->
+    <div class="side-column">
+      <div class="card-glass summary-card">
+        <h2 class="card-title">Financial Summary</h2>
         <div class="summary-line">
-          <span>Gross Subtotal:</span>
-          <span>{{ quote.subtotal! + (quote.discountAmount || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span>Subtotal:</span>
+          <span>{{ quote.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
-
         <div class="summary-line text-green" *ngIf="quote.discountAmount! > 0">
           <span>Discount:</span>
           <span>-{{ quote.discountAmount | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
-
-        <div class="summary-line">
-          <span>Logistics Fees (Delivery/Setup):</span>
-          <span>{{ (quote.deliveryFee || 0) + (quote.pickupFee || 0) + (quote.setupFee || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+        <div class="summary-line" *ngIf="quote.totalFees! > 0">
+          <span>Additional Fees:</span>
+          <span>{{ quote.totalFees | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
-
         <div class="summary-line">
-          <span>Sales Tax ({{ quote.taxRate }}%):</span>
+          <span>Tax ({{ quote.taxRate }}%):</span>
           <span>{{ quote.taxAmount | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
-
         <div class="summary-line total">
-          <span>Grand Total:</span>
-          <span class="total-val">{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+          <span>Total Quote:</span>
+          <span class="text-blue">{{ quote.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
 
-        <div class="deposit-card">
-          <div class="deposit-row">
-            <span>Deposit Required ({{ quote.depositPercentage }}%):</span>
-            <strong class="deposit-val">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</strong>
-          </div>
-          <div class="deposit-row sub">
-            <span>Remaining Balance:</span>
-            <span>{{ quote.remainingBalance | currency:'USD':'symbol':'1.2-2' }}</span>
-          </div>
+        <div class="divider"></div>
+
+        <div class="summary-line deposit">
+          <span>Deposit Required:</span>
+          <span class="text-amber">{{ quote.depositAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="summary-line">
+          <span>Remaining Balance:</span>
+          <span>{{ quote.remainingBalance | currency:'USD':'symbol':'1.2-2' }}</span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Create Booking Confirmation Modal (Requirements 27 & 28) -->
+  <div class="modal-backdrop" *ngIf="showCreateBookingModal">
+    <div class="modal-card">
+      <!-- Confirmation View -->
+      <ng-container *ngIf="!createdBooking && !bookingError">
+        <div class="modal-header">
+          <h3>Create Booking</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="confirm-summary">
+            <div class="confirm-row">
+              <span class="label">Customer:</span>
+              <span class="val fw-bold">{{ quote.customerName || 'Emily Brown' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Event:</span>
+              <span class="val">{{ quote.eventName || "Emily's Wedding" }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Rental Dates:</span>
+              <span class="val">{{ quote.rentalStartDateTime | date:'MMM d, yyyy' }} – {{ quote.rentalEndDateTime | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="confirm-row highlight">
+              <span class="label">Total Amount:</span>
+              <span class="val text-blue fw-bold">${{ quote.totalAmount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <p class="notice-text">
+            Inventory availability will be rechecked before booking confirmation.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeCreateBookingModal()">Cancel</button>
+          <button class="btn btn-success" (click)="confirmCreateBooking()" [disabled]="isCreatingBooking">
+            {{ isCreatingBooking ? 'Rechecking Inventory...' : 'Confirm Booking' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Success View (Requirement 28) -->
+      <ng-container *ngIf="createdBooking">
+        <div class="modal-header header-success">
+          <span class="icon-success">✓</span>
+          <h3>BOOKING CONFIRMED</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="success-box">
+            <div class="confirm-row">
+              <span class="label">Booking #:</span>
+              <span class="val text-blue fw-bold">{{ createdBooking.bookingNumber }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Event:</span>
+              <span class="val">{{ createdBooking.eventName || "Emily's Wedding" }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Rental Dates:</span>
+              <span class="val">{{ createdBooking.rentalStartDateTime | date:'MMM d, yyyy' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Total:</span>
+              <span class="val fw-bold">${{ createdBooking.totalAmount | number:'1.2-2' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Status:</span>
+              <span class="badge badge-accepted">CONFIRMED</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Inventory:</span>
+              <span class="badge badge-accepted">✓ RESERVED</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" [routerLink]="['/inventory']" (click)="closeCreateBookingModal()">View Inventory</button>
+          <button class="btn btn-primary" [routerLink]="['/bookings', createdBooking.id]" (click)="closeCreateBookingModal()">
+            View Booking
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Shortage Error View -->
+      <ng-container *ngIf="bookingError">
+        <div class="modal-header header-error">
+          <span class="icon-error">⚠️</span>
+          <h3>BOOKING CANNOT BE CONFIRMED</h3>
+        </div>
+
+        <div class="modal-body">
+          <p class="error-msg">{{ bookingError.message }}</p>
+
+          <div class="shortage-box" *ngFor="let item of bookingError.items">
+            <h4 class="product-name">{{ item.productName || 'Chiavari Chair' }}</h4>
+            <div class="shortage-grid">
+              <div class="shortage-metric">
+                <span class="lbl">Requested</span>
+                <span class="val">{{ item.requestedQuantity }}</span>
+              </div>
+              <div class="shortage-metric">
+                <span class="lbl">Available</span>
+                <span class="val text-green">{{ item.availableQuantity }}</span>
+              </div>
+              <div class="shortage-metric">
+                <span class="lbl">Shortage</span>
+                <span class="val text-danger fw-bold">{{ item.shortage }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeCreateBookingModal()">Close</button>
+          <button class="btn btn-primary" [routerLink]="['/quotes', quote.id, 'edit']" (click)="closeCreateBookingModal()">
+            Modify Quote
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

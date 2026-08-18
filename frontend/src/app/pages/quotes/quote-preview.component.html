@@ -5,6 +5,9 @@
       <span class="preview-badge">Customer Portal Preview Mode</span>
       <div class="btn-group">
         <button class="btn btn-outline" [routerLink]="['/quotes', quote.id]">← Back to Operations</button>
+        <button class="btn btn-success" (click)="openAcceptModal()" *ngIf="quote.status !== 'ACCEPTED'">
+          ✓ Accept Quote
+        </button>
         <button class="btn btn-primary" (click)="printQuote()">🖨️ Print / Save PDF</button>
       </div>
     </div>
@@ -39,7 +42,7 @@
           </tr>
           <tr>
             <td><strong>Status:</strong></td>
-            <td><span class="status-pill">{{ quote.status }}</span></td>
+            <td><span class="status-pill" [class.accepted]="quote.status === 'ACCEPTED'">{{ quote.status }}</span></td>
           </tr>
         </table>
       </div>
@@ -126,6 +129,13 @@
       </div>
     </div>
 
+    <!-- Bottom Action CTA -->
+    <div class="cta-banner no-print" *ngIf="quote.status !== 'ACCEPTED'">
+      <button class="btn btn-hero-accept" (click)="openAcceptModal()">
+        ✓ Accept Quote & Confirm Booking
+      </button>
+    </div>
+
     <!-- Acceptance Footer -->
     <div class="acceptance-footer">
       <div class="sig-block">
@@ -136,6 +146,95 @@
         <div class="sig-line"></div>
         <p>Date Accepted</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Customer Acceptance Confirmation Modal -->
+  <div class="modal-backdrop no-print" *ngIf="showAcceptModal">
+    <div class="modal-card">
+      <!-- Standard Confirmation view -->
+      <ng-container *ngIf="!availabilityError">
+        <div class="modal-header">
+          <h3>Confirm Your Rental</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="confirm-summary">
+            <div class="confirm-row">
+              <span class="label">Customer:</span>
+              <span class="val fw-bold">{{ quote.customerName || 'Emily Brown' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Event:</span>
+              <span class="val">{{ quote.eventName || "Emily's Wedding" }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Rental Dates:</span>
+              <span class="val">{{ quote.rentalStartDateTime | date:'mediumDate' }} – {{ quote.rentalEndDateTime | date:'mediumDate' }}</span>
+            </div>
+            <div class="confirm-row highlight">
+              <span class="label">Total Amount:</span>
+              <span class="val text-emerald fw-bold">${{ quote.totalAmount | number:'1.2-2' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Deposit Required:</span>
+              <span class="val text-amber">${{ quote.depositAmount | number:'1.2-2' }}</span>
+            </div>
+            <div class="confirm-row">
+              <span class="label">Balance Due:</span>
+              <span class="val">${{ (quote.totalAmount! - quote.depositAmount!) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <p class="notice-text">
+            By accepting this quote, you are requesting confirmation of the rental. Inventory will be rechecked before the booking is confirmed.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAcceptModal()">Cancel</button>
+          <button class="btn btn-success" (click)="acceptAndConfirmBooking()" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Checking Availability...' : 'Accept & Confirm Booking' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- Availability Failure View (Requirement 7) -->
+      <ng-container *ngIf="availabilityError">
+        <div class="modal-header header-error">
+          <span class="error-icon">⚠</span>
+          <h3>BOOKING CANNOT BE CONFIRMED</h3>
+        </div>
+
+        <div class="modal-body">
+          <p class="error-msg">{{ availabilityError.message }}</p>
+
+          <div class="shortage-box" *ngFor="let item of availabilityError.items">
+            <h4 class="product-name">{{ item.productName || 'Chiavari Chair' }}</h4>
+            <div class="shortage-grid">
+              <div class="shortage-metric">
+                <span class="lbl">Requested</span>
+                <span class="val">{{ item.requestedQuantity }}</span>
+              </div>
+              <div class="shortage-metric">
+                <span class="lbl">Available</span>
+                <span class="val text-emerald">{{ item.availableQuantity }}</span>
+              </div>
+              <div class="shortage-metric">
+                <span class="lbl">Shortage</span>
+                <span class="val text-danger fw-bold">{{ item.shortage }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAcceptModal()">Review Alternatives</button>
+          <button class="btn btn-primary" [routerLink]="['/quotes', quote.id, 'edit']" (click)="closeAcceptModal()">
+            Modify Quote
+          </button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

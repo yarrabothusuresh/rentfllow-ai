@@ -60,6 +60,12 @@ public class MockAIProvider implements AIProvider {
 
         // Standard Intent Responses
         switch (intent) {
+            case "BOOKING_INQUIRY":
+                response.setMessage("Yes. Emily's Wedding is confirmed.\n\nBooking: BKG-000001\nDate: September 20, 2026\nTotal: $3,464.00\nInventory: Reserved.");
+                response.setSuggestedActions(List.of("View Booking", "View Reserved Inventory", "Cancel Booking"));
+                response.setRequiresApproval(false);
+                break;
+
             case "QUOTE_CREATION":
                 response.setMessage("Created DRAFT quote QUO-000001 for Emily Brown (Emily's Wedding).\nItems: 250 Chiavari Chairs, 25 Round Tables, 25 White Linens, 10 LED Uplights.\nSubtotal: $2,925.00 | Discount (10%): -$292.50 | Fees: $500.00 | Tax (8.25%): $258.49 | Total: $3,390.99 | Deposit Required: $1,017.30");
                 response.setSuggestedActions(List.of("View Quote", "Send Quote to Customer"));

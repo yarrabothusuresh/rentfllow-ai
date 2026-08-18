@@ -91,6 +91,7 @@ export interface Quote {
   taxRate?: number;
   taxAmount?: number;
   totalAmount?: number;
+  totalFees?: number;
   depositPercentage?: number;
   depositAmount?: number;
   remainingBalance?: number;
