@@ -16,6 +16,7 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\Customer.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetEventTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\InventoryTransactionRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\Quote.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\repository\PaymentRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\InventoryAdjustmentRequest.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\controller\LeadController.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\QuoteDiscountRepository.java
@@ -27,6 +28,7 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\QuoteItemDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\role\Role.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\service\EventService.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\AvailabilityResultDTO.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\repository\PaymentAuditRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetCustomerQuotesTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\workflow\dto\WorkflowStageDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\QuoteDiscountDTO.java
@@ -34,11 +36,13 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\EventRequirement.
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\provider\MockAIProvider.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\QuoteFeeDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\workflow\model\BookingStatus.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\dto\RecordPaymentDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\user\UserRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\auth\DataInitializer.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\workflow\model\EventStatus.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\EventRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\common\BusinessProfileController.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\dto\BookingFinancialSummaryDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\SearchCustomersTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\controller\ProductController.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\service\QuoteService.java
@@ -59,11 +63,15 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\QuoteCalculationRes
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\mock\DemoDataRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\service\AIService.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\CalculateQuoteTool.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\service\PaymentService.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetEventQuotesTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\event\EventRepository.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\model\PaymentMethod.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\CreateQuoteDraftTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\ProductCategoryDTO.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\model\PaymentStatus.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\AIRequest.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\model\PaymentAudit.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\event\dto\EventDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\auth\RoleService.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\orchestrator\AIOrchestrator.java
@@ -71,9 +79,11 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\QuoteDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\EventDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\ToolRequest.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\auth\AuthController.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\controller\PaymentController.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\InventoryReservation.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\workflow\model\LeadStatus.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\QuoteFee.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\service\PaymentDataInitializer.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\BookingUnavailableDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\exception\BookingUnavailableException.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetWarehouseTasksTool.java
@@ -91,6 +101,7 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\InventoryTransact
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\controller\BookingController.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\ProductDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\SearchBookingsTool.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\dto\PaymentDTO.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\LeadConversionResult.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetQuoteTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\BookingStatus.java
@@ -126,6 +137,7 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\EventStatus.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\controller\AIController.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\BookingItemRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\QuoteFeeRepository.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\payment\model\Payment.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\repository\QuoteRepository.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetCustomerTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\InventoryReservationDTO.java
@@ -166,6 +178,7 @@ C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\permission\PermissionCode.
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\workflow\model\InventoryStatus.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\dto\ToolResult.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\BookingItem.java
+C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\tool\GetBookingPaymentSummaryTool.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\service\QuoteDataInitializer.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\model\EventType.java
 C:\dev\rentflow-ai\backend\src\main\java\com\rentflow\ai\service\CustomerService.java

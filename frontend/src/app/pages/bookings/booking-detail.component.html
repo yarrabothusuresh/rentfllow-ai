@@ -14,9 +14,12 @@
         </button>
       </ng-container>
 
-      <!-- Actions for CONFIRMED -->
-      <ng-container *ngIf="booking.status === 'CONFIRMED'">
-        <a [routerLink]="['/quotes', booking.quoteId]" class="btn btn-secondary">
+      <!-- Actions for Active Bookings -->
+      <ng-container *ngIf="booking.status !== 'CANCELLED' && booking.status !== 'PENDING'">
+        <button class="btn btn-emerald" (click)="openRecordPaymentModal()" *ngIf="(financialSummary?.outstandingBalance || booking.balanceDue || 0) > 0">
+          💳 Record Payment
+        </button>
+        <a [routerLink]="['/quotes', booking.quoteId]" class="btn btn-secondary" *ngIf="booking.quoteId">
           📄 View Quote
         </a>
         <a [routerLink]="['/inventory']" class="btn btn-secondary">
@@ -33,7 +36,7 @@
     </div>
   </div>
 
-  <!-- Messages -->
+  <!-- Global Alert Messages -->
   <div *ngIf="successMessage" class="alert alert-success">
     {{ successMessage }}
   </div>
@@ -42,17 +45,17 @@
   </div>
 
   <!-- Confirmation Banner -->
-  <div *ngIf="booking.status === 'CONFIRMED'" class="confirmation-banner">
+  <div *ngIf="booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_PAID' || booking.status === 'PAID'" class="confirmation-banner">
     <div class="banner-icon">✓</div>
     <div class="banner-content">
       <h2>BOOKING CONFIRMED</h2>
-      <p>Booking <strong>{{ booking.bookingNumber }}</strong> for <strong>{{ booking.eventName || "Emily's Wedding" }}</strong> is confirmed. Inventory has been firmly reserved.</p>
+      <p>Booking <strong>{{ booking.bookingNumber }}</strong> for <strong>{{ booking.eventName || "Emily's Wedding" }}</strong> is confirmed. Reserved inventory committed.</p>
     </div>
   </div>
 
   <!-- Main Grid -->
   <div class="detail-grid">
-    <!-- Left Column: Primary Information -->
+    <!-- Left Column: Primary Information & Payment History -->
     <div class="main-column">
       <!-- Booking Overview Card -->
       <div class="card-glass info-card">
@@ -91,33 +94,65 @@
         </div>
       </div>
 
-      <!-- Booking Timeline -->
+      <!-- Payment History Table Card -->
       <div class="card-glass section-card">
-        <h3 class="section-title">Booking Timeline</h3>
-        <div class="timeline">
-          <div class="timeline-step step-completed">
-            <div class="step-icon">✓</div>
-            <div class="step-label">Quote Accepted</div>
+        <div class="section-header-flex">
+          <div>
+            <h3 class="section-title">Payment History</h3>
+            <p class="section-subtitle">Track received deposits, full/partial payments, and voided transactions.</p>
           </div>
-          <div class="timeline-connector connector-completed"></div>
-
-          <div class="timeline-step step-completed">
-            <div class="step-icon">✓</div>
-            <div class="step-label">Booking Created</div>
-          </div>
-          <div class="timeline-connector" [ngClass]="booking.status === 'CONFIRMED' ? 'connector-completed' : ''"></div>
-
-          <div class="timeline-step" [ngClass]="booking.status === 'CONFIRMED' ? 'step-completed' : ''">
-            <div class="step-icon">{{ booking.status === 'CONFIRMED' ? '✓' : '3' }}</div>
-            <div class="step-label">Inventory Reserved</div>
-          </div>
-          <div class="timeline-connector" [ngClass]="booking.status === 'CONFIRMED' ? 'connector-completed' : ''"></div>
-
-          <div class="timeline-step" [ngClass]="booking.status === 'CONFIRMED' ? 'step-completed' : ''">
-            <div class="step-icon">{{ booking.status === 'CONFIRMED' ? '✓' : '4' }}</div>
-            <div class="step-label">Booking Confirmed</div>
-          </div>
+          <button class="btn btn-sm btn-emerald" (click)="openRecordPaymentModal()" *ngIf="booking.status !== 'CANCELLED' && (financialSummary?.outstandingBalance || booking.balanceDue || 0) > 0">
+            + Record Payment
+          </button>
         </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Amount</th>
+              <th>Reference</th>
+              <th>Status</th>
+              <th>Recorded By</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of payments">
+              <td>{{ p.paymentDate | date:'MM/dd/yy' }}</td>
+              <td>
+                <span class="pay-method-tag">{{ getPaymentMethodLabel(p.paymentMethod) }}</span>
+              </td>
+              <td class="fw-bold" [ngClass]="p.paymentStatus === 'VOID' ? 'text-strikethrough text-muted' : 'text-emerald'">
+                ${{ p.amount | number:'1.2-2' }}
+              </td>
+              <td>
+                <code>{{ p.transactionReference || '—' }}</code>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(p.paymentStatus)">
+                  {{ p.paymentStatus }}
+                </span>
+              </td>
+              <td>{{ p.createdBy || 'System' }}</td>
+              <td class="text-right action-cell">
+                <button 
+                  class="btn-icon btn-void" 
+                  (click)="openVoidModal(p)" 
+                  [disabled]="p.paymentStatus === 'VOID'" 
+                  [title]="p.paymentStatus === 'VOID' ? 'Payment already voided' : 'Void this payment'">
+                  🚫 Void
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="!payments || payments.length === 0">
+              <td colspan="7" class="text-center text-muted empty-row">
+                No payment history recorded yet for this booking. Click "Record Payment" to add a payment.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Booking Line Items -->
@@ -140,8 +175,8 @@
               <td>${{ item.unitPrice | number:'1.2-2' }}</td>
               <td>${{ item.lineSubtotal | number:'1.2-2' }}</td>
               <td>
-                <span class="res-status-pill" [ngClass]="booking.status === 'CONFIRMED' ? 'res-reserved' : 'res-pending'">
-                  ✓ {{ booking.status === 'CONFIRMED' ? 'RESERVED' : 'PENDING' }}
+                <span class="res-status-pill" [ngClass]="booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_PAID' || booking.status === 'PAID' ? 'res-reserved' : 'res-pending'">
+                  ✓ {{ (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_PAID' || booking.status === 'PAID') ? 'RESERVED' : 'PENDING' }}
                 </span>
               </td>
             </tr>
@@ -151,127 +186,205 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Reserved Inventory Breakdown -->
-      <div class="card-glass section-card">
-        <h3 class="section-title">Reserved Inventory Details</h3>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Reserved Qty</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let res of booking.reservations">
-              <td class="fw-bold">{{ res.productName || 'Rental Item' }}</td>
-              <td>{{ res.quantity }}</td>
-              <td>{{ res.startDateTime | date:'MMM d, HH:mm' }}</td>
-              <td>{{ res.endDateTime | date:'MMM d, HH:mm' }}</td>
-              <td>
-                <span class="badge badge-confirmed">{{ res.status }}</span>
-              </td>
-            </tr>
-            <tr *ngIf="!booking.reservations || booking.reservations.length === 0">
-              <td colspan="5" class="text-center text-muted">
-                {{ booking.status === 'CONFIRMED' ? 'Inventory reserved for all booking items.' : 'Inventory will be reserved upon confirmation.' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
 
-    <!-- Right Column: Financial Summary & Payment -->
+    <!-- Right Column: Financial Summary & Payment Action Box -->
     <div class="side-column">
-      <!-- Financial Summary -->
+      <!-- Financial Summary Card -->
       <div class="card-glass summary-card">
         <h3 class="card-heading">Financial Summary</h3>
 
         <div class="summary-line">
-          <span>Subtotal</span>
-          <span>${{ booking.subtotal | number:'1.2-2' }}</span>
+          <span>Booking Total</span>
+          <span class="fw-bold">${{ (financialSummary?.bookingTotal || booking.totalAmount) | number:'1.2-2' }}</span>
         </div>
 
-        <div class="summary-line text-amber" *ngIf="(booking.discountAmount || 0) > 0">
-          <span>Discount</span>
-          <span>-${{ booking.discountAmount | number:'1.2-2' }}</span>
+        <div class="summary-line text-amber">
+          <span>Deposit Required</span>
+          <span>${{ (financialSummary?.depositRequired || booking.depositRequired) | number:'1.2-2' }}</span>
         </div>
 
-        <div class="summary-line" *ngIf="(booking.deliveryFee || 0) > 0">
-          <span>Delivery Fee</span>
-          <span>${{ booking.deliveryFee | number:'1.2-2' }}</span>
-        </div>
-
-        <div class="summary-line" *ngIf="(booking.pickupFee || 0) > 0">
-          <span>Pickup Fee</span>
-          <span>${{ booking.pickupFee | number:'1.2-2' }}</span>
-        </div>
-
-        <div class="summary-line" *ngIf="(booking.setupFee || 0) > 0">
-          <span>Setup Fee</span>
-          <span>${{ booking.setupFee | number:'1.2-2' }}</span>
-        </div>
-
-        <div class="summary-line" *ngIf="(booking.breakdownFee || 0) > 0">
-          <span>Breakdown Fee</span>
-          <span>${{ booking.breakdownFee | number:'1.2-2' }}</span>
-        </div>
-
-        <div class="summary-line" *ngIf="(booking.serviceFee || 0) > 0">
-          <span>Service Fee</span>
-          <span>${{ booking.serviceFee | number:'1.2-2' }}</span>
-        </div>
-
-        <div class="summary-line">
-          <span>Sales Tax</span>
-          <span>${{ booking.taxAmount | number:'1.2-2' }}</span>
+        <div class="summary-line text-emerald">
+          <span>Amount Paid</span>
+          <span>${{ (financialSummary?.amountPaid || booking.depositPaid || 0) | number:'1.2-2' }}</span>
         </div>
 
         <div class="divider"></div>
 
-        <div class="summary-line total-line">
-          <span>Total Booking</span>
-          <span>${{ booking.totalAmount | number:'1.2-2' }}</span>
+        <div class="summary-line total-line highlight-row">
+          <span>Outstanding Balance</span>
+          <span class="balance-due-text">${{ (financialSummary?.outstandingBalance || booking.balanceDue || 0) | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="payment-status-box">
+          <span class="pay-status-label">Financial Status:</span>
+          <span class="badge status-pill" [ngClass]="getStatusBadgeClass(financialSummary?.paymentStatus || booking.status)">
+            {{ (financialSummary?.paymentStatus || booking.status) | uppercase }}
+          </span>
+        </div>
+
+        <button 
+          class="btn btn-record-deposit w-100 mt-3" 
+          (click)="openRecordPaymentModal()" 
+          [disabled]="booking.status === 'CANCELLED' || (financialSummary?.outstandingBalance || booking.balanceDue || 0) <= 0">
+          💳 {{ (financialSummary?.outstandingBalance || booking.balanceDue || 0) <= 0 ? 'Fully Paid' : 'Record Payment' }}
+        </button>
+      </div>
+
+      <!-- Quick Info / Policy Card -->
+      <div class="card-glass info-box-card">
+        <h4>💡 Payment Policy</h4>
+        <p class="text-sm text-muted">
+          All deposits are logged atomically. Partial payments automatically recalculate the outstanding balance. Excess payments above the outstanding balance are rejected.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECORD PAYMENT DIALOG MODAL -->
+  <div class="modal-backdrop" *ngIf="showRecordPaymentModal">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <span class="modal-icon">💳</span>
+        <h3>Record Payment for {{ booking.bookingNumber }}</h3>
+        <button class="close-btn" (click)="closeRecordPaymentModal()">×</button>
+      </div>
+
+      <form (ngSubmit)="submitRecordPayment()">
+        <div class="modal-body">
+          <div *ngIf="recordPaymentError" class="alert alert-danger">
+            {{ recordPaymentError }}
+          </div>
+
+          <div class="financial-quick-overview">
+            <div class="quick-stat">
+              <span class="stat-lbl">Booking Total</span>
+              <span class="stat-val">${{ (financialSummary?.bookingTotal || booking.totalAmount) | number:'1.2-2' }}</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-lbl">Already Paid</span>
+              <span class="stat-val text-emerald">${{ (financialSummary?.amountPaid || booking.depositPaid || 0) | number:'1.2-2' }}</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-lbl">Max Allowed Payment</span>
+              <span class="stat-val text-amber">${{ (financialSummary?.outstandingBalance || booking.balanceDue || 0) | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Amount ($) *</label>
+              <input 
+                type="number" 
+                step="0.01" 
+                min="0.01" 
+                class="form-input" 
+                [(ngModel)]="recordForm.amount" 
+                name="amount" 
+                required />
+            </div>
+
+            <div class="form-group">
+              <label>Payment Method *</label>
+              <select class="form-input" [(ngModel)]="recordForm.paymentMethod" name="paymentMethod" required>
+                <option *ngFor="let method of paymentMethods" [value]="method">
+                  {{ getPaymentMethodLabel(method) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Payment Date *</label>
+              <input 
+                type="date" 
+                class="form-input" 
+                [(ngModel)]="recordForm.paymentDate" 
+                name="paymentDate" 
+                required />
+            </div>
+
+            <div class="form-group">
+              <label>Transaction Reference</label>
+              <input 
+                type="text" 
+                class="form-input" 
+                placeholder="e.g. BANK-12345 or CHK-987" 
+                [(ngModel)]="recordForm.transactionReference" 
+                name="transactionReference" />
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Notes</label>
+            <textarea 
+              rows="3" 
+              class="form-input" 
+              placeholder="e.g. Initial deposit received via Wire Transfer" 
+              [(ngModel)]="recordForm.notes" 
+              name="notes"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeRecordPaymentModal()">Cancel</button>
+          <button type="submit" class="btn btn-emerald" [disabled]="isRecordingPayment">
+            {{ isRecordingPayment ? 'Recording...' : '✓ Record Payment' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- VOID PAYMENT CONFIRMATION MODAL -->
+  <div class="modal-backdrop" *ngIf="showVoidModal && paymentToVoid">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-icon">🚫</span>
+        <h3>Void Payment of ${{ paymentToVoid.amount | number:'1.2-2' }}</h3>
+        <button class="close-btn" (click)="closeVoidModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="voidError" class="alert alert-danger">
+          {{ voidError }}
+        </div>
+
+        <p>Are you sure you want to void this payment record?</p>
+
+        <div class="warning-box">
+          <p><strong>Payment Details:</strong></p>
+          <ul>
+            <li>Amount: <strong>${{ paymentToVoid.amount | number:'1.2-2' }}</strong></li>
+            <li>Method: {{ getPaymentMethodLabel(paymentToVoid.paymentMethod) }}</li>
+            <li>Reference: <code>{{ paymentToVoid.transactionReference || 'N/A' }}</code></li>
+            <li>Recorded Date: {{ paymentToVoid.paymentDate | date:'mediumDate' }}</li>
+          </ul>
+          <p class="text-sm text-amber mt-2">
+            ⚠️ This will deduct ${{ paymentToVoid.amount | number:'1.2-2' }} from the total paid and increase the booking balance due accordingly.
+          </p>
+        </div>
+
+        <div class="form-group mt-3">
+          <label>Reason for Voiding (Optional)</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            placeholder="e.g. Check bounced or duplicate entry" 
+            [(ngModel)]="voidReason" 
+            name="voidReason" />
         </div>
       </div>
 
-      <!-- Deposit & Payment Placeholder -->
-      <div class="card-glass payment-card">
-        <h3 class="card-heading">Payment Information</h3>
-
-        <div class="payment-status-badge">
-          STATUS: DEPOSIT PENDING
-        </div>
-
-        <div class="payment-metrics">
-          <div class="pay-row">
-            <span class="pay-label">Deposit Required</span>
-            <span class="pay-value text-amber">${{ booking.depositRequired | number:'1.2-2' }}</span>
-          </div>
-
-          <div class="pay-row">
-            <span class="pay-label">Deposit Paid</span>
-            <span class="pay-value">${{ (booking.depositPaid || 0) | number:'1.2-2' }}</span>
-          </div>
-
-          <div class="pay-row highlight-row">
-            <span class="pay-label">Balance Due</span>
-            <span class="pay-value text-emerald">${{ (booking.balanceDue || booking.totalAmount) | number:'1.2-2' }}</span>
-          </div>
-        </div>
-
-        <button class="btn btn-record-deposit" disabled title="Payment module coming next">
-          💳 Record Deposit (Payment Module Coming Next)
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeVoidModal()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmVoidPayment()" [disabled]="isVoidingPayment">
+          {{ isVoidingPayment ? 'Voiding...' : 'Approve Void' }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Cancellation Modal -->
+  <!-- CANCELLATION MODAL -->
   <div class="modal-backdrop" *ngIf="showCancelModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -303,5 +416,5 @@
 
 <div *ngIf="isLoading" class="loading-state">
   <div class="spinner"></div>
-  <p>Loading booking details...</p>
+  <p>Loading booking and payment details...</p>
 </div>

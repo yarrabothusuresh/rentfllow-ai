@@ -46,11 +46,19 @@
 .btn-primary { background: #6366f1; color: #fff; }
 .btn-primary:hover { background: #4f46e5; }
 
+.btn-emerald { background: #10b981; color: #fff; }
+.btn-emerald:hover { background: #059669; }
+
 .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #f8fafc; }
 .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
 
 .btn-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
 
 /* Confirmation Banner */
 .confirmation-banner {
@@ -165,79 +173,34 @@
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-
 }
 
 .meta-value {
   font-size: 0.95rem;
   font-weight: 600;
   color: #f1f5f9;
-
 }
 
 .text-highlight { color: #818cf8; }
 
-/* Timeline */
+.section-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
 .section-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
-  margin: 0 0 1.25rem 0;
-
+  margin: 0;
 }
 
-.timeline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-}
-
-.timeline-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  z-index: 1;
-}
-
-.step-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+.section-subtitle {
+  font-size: 0.825rem;
   color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-
-}
-
-.step-completed .step-icon {
-  background: #10b981;
-  color: #fff;
-}
-
-.step-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.step-completed .step-label {
-  color: #34d399;
-}
-
-.timeline-connector {
-  flex: 1;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 -10px 1.5rem -10px;
-}
-
-.connector-completed {
-  background: #10b981;
+  margin: 0.25rem 0 0 0;
 }
 
 /* Data Tables */
@@ -261,6 +224,15 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.pay-method-tag {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
 .res-status-pill {
   font-size: 0.75rem;
   font-weight: 700;
@@ -270,6 +242,40 @@
 
 .res-reserved { background: rgba(16, 185, 129, 0.15); color: #34d399; }
 .res-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+.action-cell {
+  text-align: right;
+}
+
+.btn-icon {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-void:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.text-strikethrough {
+  text-decoration: line-through;
+}
+
+.empty-row {
+  padding: 2rem !important;
+}
 
 /* Financial Summary Column */
 .card-heading {
@@ -296,53 +302,74 @@
   margin-top: 0.5rem;
 }
 
+.balance-due-text {
+  color: #34d399;
+  font-size: 1.25rem;
+}
+
 .divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
   margin: 0.75rem 0;
 }
 
-/* Payment Card */
-.payment-status-badge {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  text-align: center;
-  padding: 0.4rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-}
-
-.pay-row {
+.payment-status-box {
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.75rem;
+  border-radius: 8px;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.6rem;
-  font-size: 0.875rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.pay-status-label {
+  font-size: 0.825rem;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .highlight-row {
   background: rgba(15, 23, 42, 0.6);
-  padding: 0.6rem;
+  padding: 0.75rem;
   border-radius: 6px;
   font-weight: 700;
-
 }
 
+.w-100 { width: 100%; }
+.mt-3 { margin-top: 1rem; }
+.mt-2 { margin-top: 0.5rem; }
+
 .btn-record-deposit {
-  width: 100%;
   padding: 0.75rem;
-  margin-top: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  color: #94a3b8;
+  background: #10b981;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
   border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-record-deposit:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-record-deposit:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #64748b;
   cursor: not-allowed;
 }
 
-/* Modal */
+.info-box-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+/* Modals */
 .modal-backdrop {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -361,16 +388,103 @@
   padding: 2rem;
   max-width: 480px;
   width: 90%;
+  color: #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.modal-lg {
+  max-width: 600px;
 }
 
 .modal-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.close-btn:hover { color: #fff; }
+
+.financial-quick-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.quick-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-lbl {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.stat-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.modal-icon { font-size: 1.75rem; }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.form-input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: #6366f1;
+}
 
 .warning-box {
   background: rgba(239, 68, 68, 0.1);
@@ -407,7 +521,18 @@
 .badge-confirmed { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 .badge-deposit-pending { background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+.badge-partially-paid { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-paid { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-cancelled { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-void { background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+.badge-secondary { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+
+.text-amber { color: #fbbf24; }
+.text-emerald { color: #34d399; }
+.text-muted { color: #94a3b8; }
+.text-right { text-align: right; }
+.fw-bold { font-weight: 700; }
 
 .alert {
   padding: 1rem;
