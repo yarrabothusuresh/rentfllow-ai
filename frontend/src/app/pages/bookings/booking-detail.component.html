@@ -229,6 +229,13 @@
           [disabled]="booking.status === 'CANCELLED' || (financialSummary?.outstandingBalance || booking.balanceDue || 0) <= 0">
           💳 {{ (financialSummary?.outstandingBalance || booking.balanceDue || 0) <= 0 ? 'Fully Paid' : 'Record Payment' }}
         </button>
+
+        <button 
+          class="btn btn-outline-primary w-100 mt-2" 
+          (click)="handleInvoiceAction()" 
+          [disabled]="booking.status === 'CANCELLED'">
+          📄 {{ associatedInvoice ? ('View Invoice (' + associatedInvoice.invoiceNumber + ')') : 'Generate Invoice' }}
+        </button>
       </div>
 
       <!-- Quick Info / Policy Card -->

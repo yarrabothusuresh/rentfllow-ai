@@ -25,6 +25,7 @@
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFinanceAdmin()">Finance & Admin</div>
+      <a routerLink="/invoices" routerLinkActive="active" class="nav-item">Invoices</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('PAYMENT_VIEW')">Payments</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('ANALYTICS_VIEW')">Analytics</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('STOREFRONT_VIEW')">Storefront</a>

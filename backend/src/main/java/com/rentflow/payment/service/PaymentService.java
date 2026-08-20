@@ -12,6 +12,8 @@ import com.rentflow.payment.model.PaymentMethod;
 import com.rentflow.payment.model.PaymentStatus;
 import com.rentflow.payment.repository.PaymentAuditRepository;
 import com.rentflow.payment.repository.PaymentRepository;
+import com.rentflow.invoice.service.InvoiceService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +30,16 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentAuditRepository paymentAuditRepository;
     private final BookingRepository bookingRepository;
+    private final InvoiceService invoiceService;
 
     public PaymentService(PaymentRepository paymentRepository,
                           PaymentAuditRepository paymentAuditRepository,
-                          BookingRepository bookingRepository) {
+                          BookingRepository bookingRepository,
+                          @Lazy InvoiceService invoiceService) {
         this.paymentRepository = paymentRepository;
         this.paymentAuditRepository = paymentAuditRepository;
         this.bookingRepository = bookingRepository;
+        this.invoiceService = invoiceService;
     }
 
     public boolean canRecordOrVoidPayment(String userRole) {
@@ -103,7 +108,10 @@ public class PaymentService {
         BigDecimal newPaidSum = currentPaid.add(savedPayment.getAmount());
         updateBookingFinancials(booking, newPaidSum, bookingTotal);
 
-        // 8. Record audit log
+        // 8. Sync associated invoice if present
+        invoiceService.syncInvoiceWithPayments(tenantId, bookingId);
+
+        // 9. Record audit log
         PaymentAudit audit = new PaymentAudit(
                 tenantId,
                 bookingId,
@@ -151,7 +159,10 @@ public class PaymentService {
         BigDecimal bookingTotal = booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO;
         updateBookingFinancials(booking, remainingPaidSum, bookingTotal);
 
-        // 5. Record audit log
+        // 5. Sync associated invoice if present
+        invoiceService.syncInvoiceWithPayments(tenantId, booking.getId());
+
+        // 6. Record audit log
         PaymentAudit audit = new PaymentAudit(
                 tenantId,
                 booking.getId(),

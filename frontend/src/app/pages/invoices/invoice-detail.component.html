@@ -1,0 +1,257 @@
+<div class="page-container" *ngIf="invoice">
+  <!-- Top Bar / Navigation -->
+  <div class="detail-header">
+    <div class="header-left">
+      <a routerLink="/invoices" class="back-link">← Back to Invoices</a>
+      <h1 class="invoice-title">Invoice {{ invoice.invoiceNumber }}</h1>
+      <span class="status-badge" [ngClass]="getStatusBadgeClass(invoice.status)">
+        {{ formatStatusText(invoice.status) }}
+      </span>
+    </div>
+    <div class="header-actions">
+      <button 
+        *ngIf="invoice.status === 'DRAFT'" 
+        class="btn btn-outline-primary" 
+        (click)="markAsSent()">
+        Mark as Sent
+      </button>
+      <button 
+        *ngIf="invoice.status !== 'PAID' && invoice.status !== 'VOID'" 
+        class="btn btn-primary" 
+        (click)="openRecordPaymentModal()">
+        Record Payment
+      </button>
+      <button 
+        *ngIf="invoice.status !== 'VOID'" 
+        class="btn btn-outline-danger" 
+        (click)="openVoidModal()">
+        Void Invoice
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Printable / Formatted Invoice Card -->
+  <div class="invoice-card card">
+    <!-- Invoice Paper Header -->
+    <div class="invoice-paper-header">
+      <div class="company-brand">
+        <h2 class="brand-name">Evergreen Event Rentals</h2>
+        <p class="brand-tagline">Premium US Party & Event Rental Solutions</p>
+        <p class="brand-address">1234 Industrial Pkwy, Suite 100 • Dallas, TX 75201</p>
+        <p class="brand-contact">billing&#64;evergreenrentals.demo • (555) 019-2831</p>
+      </div>
+
+      <div class="invoice-meta text-right">
+        <h2 class="meta-invoice-number">{{ invoice.invoiceNumber }}</h2>
+        <div class="meta-row"><span class="meta-label">Issue Date:</span> {{ invoice.issueDate | date:'MM/dd/yyyy' }}</div>
+        <div class="meta-row"><span class="meta-label">Due Date:</span> {{ invoice.dueDate | date:'MM/dd/yyyy' }}</div>
+        <div class="meta-row" *ngIf="invoice.bookingNumber"><span class="meta-label">Booking #:</span> {{ invoice.bookingNumber }}</div>
+        <div class="meta-row" *ngIf="invoice.eventName"><span class="meta-label">Event:</span> {{ invoice.eventName }}</div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Bill To Section -->
+    <div class="bill-to-section">
+      <div class="bill-to-title">BILL TO:</div>
+      <div class="customer-name font-weight-bold">{{ invoice.customerName }}</div>
+      <div class="company-name text-muted" *ngIf="invoice.companyName">{{ invoice.companyName }}</div>
+      <div class="customer-address" *ngIf="invoice.billingAddress">{{ invoice.billingAddress }}</div>
+      <div class="customer-city-state" *ngIf="invoice.city || invoice.state">
+        {{ invoice.city }}<span *ngIf="invoice.city && invoice.state">, </span>{{ invoice.state }} {{ invoice.zipCode }}
+      </div>
+      <div class="customer-contact text-muted">
+        <span *ngIf="invoice.email">{{ invoice.email }}</span>
+        <span *ngIf="invoice.email && invoice.phone"> • </span>
+        <span *ngIf="invoice.phone">{{ invoice.phone }}</span>
+      </div>
+    </div>
+
+    <!-- Snapshot Line Items Table -->
+    <div class="items-table-container">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th class="text-left">Product / Description</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Unit Price</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of invoice.items">
+            <td>
+              <div class="item-desc font-weight-bold">{{ item.description }}</div>
+            </td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-right">{{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="text-right font-weight-bold">{{ item.lineTotal | currency:'USD':'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals & Balance Summary -->
+    <div class="totals-section">
+      <div class="notes-box" *ngIf="invoice.notes">
+        <div class="notes-title">Notes / Terms:</div>
+        <p class="notes-text">{{ invoice.notes }}</p>
+      </div>
+
+      <div class="totals-table">
+        <div class="totals-row">
+          <span>Subtotal:</span>
+          <span>{{ invoice.subtotal | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row" *ngIf="invoice.discount > 0">
+          <span>Discount:</span>
+          <span class="text-success">-{{ invoice.discount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row" *ngIf="invoice.fees > 0">
+          <span>Delivery & Event Fees:</span>
+          <span>{{ invoice.fees | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row" *ngIf="invoice.tax > 0">
+          <span>Sales Tax (8.25%):</span>
+          <span>{{ invoice.tax | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row total-amount-row">
+          <span>TOTAL:</span>
+          <span>{{ invoice.totalAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row paid-row text-success">
+          <span>Amount Paid:</span>
+          <span>-{{ invoice.amountPaid | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="totals-row balance-due-row" [class.text-danger]="invoice.balanceDue > 0">
+          <span>BALANCE DUE:</span>
+          <span>{{ invoice.balanceDue | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Associated Payment History -->
+    <div class="payment-history-section" *ngIf="payments && payments.length > 0">
+      <h3 class="section-title">Payment History</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Method</th>
+            <th>Reference</th>
+            <th class="text-right">Amount</th>
+            <th class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of payments">
+            <td>{{ p.paymentDate | date:'MM/dd/yyyy' }}</td>
+            <td>{{ p.paymentMethod }}</td>
+            <td>{{ p.transactionReference || 'N/A' }}</td>
+            <td class="text-right font-weight-bold text-success">{{ p.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="p.paymentStatus === 'COMPLETED' ? 'badge-paid' : 'badge-void'">{{ p.paymentStatus }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Record Payment Modal -->
+  <div class="modal-overlay" *ngIf="showRecordPaymentModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Record Payment for Invoice {{ invoice.invoiceNumber }}</h3>
+        <button class="close-btn" (click)="closeRecordPaymentModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="recordPaymentError" class="alert alert-danger">
+          {{ recordPaymentError }}
+        </div>
+
+        <div class="form-group">
+          <label>Payment Amount ($)</label>
+          <input type="number" step="0.01" [(ngModel)]="recordForm.amount" class="form-control" />
+          <small class="text-muted">Outstanding Balance: {{ invoice.balanceDue | currency:'USD':'symbol':'1.2-2' }}</small>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select [(ngModel)]="recordForm.paymentMethod" class="form-select">
+            <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" [(ngModel)]="recordForm.paymentDate" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>Transaction Reference / Check #</label>
+          <input type="text" [(ngModel)]="recordForm.transactionReference" class="form-control" placeholder="e.g. CHK-9812 or Bank Ref" />
+        </div>
+
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea [(ngModel)]="recordForm.notes" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeRecordPaymentModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitRecordPayment()" [disabled]="isRecordingPayment">
+          {{ isRecordingPayment ? 'Recording...' : 'Submit Payment' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Void Invoice Modal -->
+  <div class="modal-overlay" *ngIf="showVoidModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="text-danger">Void Invoice {{ invoice.invoiceNumber }}</h3>
+        <button class="close-btn" (click)="closeVoidModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="warning-text">Are you sure you want to void this invoice? Voided invoices cannot be reactivated.</p>
+        
+        <div *ngIf="voidError" class="alert alert-danger">
+          {{ voidError }}
+        </div>
+
+        <div class="form-group">
+          <label>Reason for Voiding</label>
+          <textarea [(ngModel)]="voidReason" class="form-control" rows="3" placeholder="Provide reason for voiding this invoice..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeVoidModal()">Cancel</button>
+        <button class="btn btn-danger" (click)="submitVoidInvoice()" [disabled]="isVoidingInvoice">
+          {{ isVoidingInvoice ? 'Voiding...' : 'Confirm Void' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-container" *ngIf="isLoading">
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading invoice details...</p>
+  </div>
+</div>

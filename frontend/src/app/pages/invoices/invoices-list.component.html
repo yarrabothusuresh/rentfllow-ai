@@ -1,0 +1,127 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Invoice Management</h1>
+      <p class="page-subtitle">Track SaaS rental customer invoices, status transitions, payments, and outstanding balances.</p>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Total Invoiced</div>
+      <div class="metric-value">{{ totalInvoiced | currency:'USD':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Collected</div>
+      <div class="metric-value text-success">{{ totalPaid | currency:'USD':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Outstanding Balance</div>
+      <div class="metric-value text-warning">{{ totalOutstanding | currency:'USD':'symbol':'1.2-2' }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Overdue Invoices</div>
+      <div class="metric-value text-danger">{{ overdueCount }}</div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="filter-bar card">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Search by invoice #, customer name, or booking..." 
+        [(ngModel)]="searchTerm" 
+        (keyup.enter)="onFilterChange()"
+      />
+    </div>
+
+    <div class="filter-controls">
+      <label class="filter-label">Status:</label>
+      <select class="form-select" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+        <option value="ALL">All Statuses</option>
+        <option value="DRAFT">Draft</option>
+        <option value="SENT">Sent</option>
+        <option value="PARTIALLY_PAID">Partially Paid</option>
+        <option value="PAID">Paid</option>
+        <option value="OVERDUE">Overdue</option>
+        <option value="VOID">Void</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" (click)="onFilterChange()">Filter</button>
+    </div>
+  </div>
+
+  <!-- Error alert -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading invoices...</p>
+  </div>
+
+  <!-- Invoices Table -->
+  <div *ngIf="!isLoading" class="table-card card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Customer</th>
+            <th>Booking / Event</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th class="text-right">Total</th>
+            <th class="text-right">Paid</th>
+            <th class="text-right">Balance</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of filteredInvoices">
+            <td class="font-weight-bold">
+              <a [routerLink]="['/invoices', inv.id]" class="invoice-link">{{ inv.invoiceNumber }}</a>
+            </td>
+            <td>
+              <div class="customer-name">{{ inv.customerName || 'N/A' }}</div>
+              <div class="company-sub text-muted" *ngIf="inv.companyName">{{ inv.companyName }}</div>
+            </td>
+            <td>
+              <div class="event-name">{{ inv.eventName || 'Rental Booking' }}</div>
+              <div class="booking-sub text-muted">{{ inv.bookingNumber }}</div>
+            </td>
+            <td>{{ inv.issueDate | date:'MM/dd/yyyy' }}</td>
+            <td>{{ inv.dueDate | date:'MM/dd/yyyy' }}</td>
+            <td class="text-right font-weight-bold">{{ inv.totalAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="text-right text-success">{{ inv.amountPaid | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="text-right font-weight-bold" [class.text-danger]="inv.balanceDue > 0 && inv.status === 'OVERDUE'" [class.text-warning]="inv.balanceDue > 0 && inv.status !== 'OVERDUE'">
+              {{ inv.balanceDue | currency:'USD':'symbol':'1.2-2' }}
+            </td>
+            <td class="text-center">
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(inv.status)">
+                {{ formatStatusText(inv.status) }}
+              </span>
+            </td>
+            <td class="text-center">
+              <a [routerLink]="['/invoices', inv.id]" class="btn btn-outline btn-xs">View Detail</a>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="filteredInvoices.length === 0">
+            <td colspan="10" class="empty-state">
+              <p class="empty-text">No invoices found matching the current criteria.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

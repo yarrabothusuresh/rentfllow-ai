@@ -16,6 +16,7 @@ com\rentflow\ai\dto\BookingItemDTO.class
 com\rentflow\permission\PermissionCode.class
 com\rentflow\ai\dto\ProductDTO.class
 com\rentflow\ai\dto\LeadConversionRequest.class
+com\rentflow\invoice\dto\InvoiceItemDTO.class
 com\rentflow\ai\provider\AIProvider.class
 com\rentflow\workflow\dto\WorkflowTransitionResponse.class
 com\rentflow\ai\tool\GetEventQuotesTool.class
@@ -38,6 +39,7 @@ com\rentflow\ai\tool\SearchCustomerTool.class
 com\rentflow\ai\model\ProductStatus.class
 com\rentflow\auth\DataInitializer.class
 com\rentflow\workflow\dto\WorkflowStageDTO.class
+com\rentflow\invoice\model\InvoiceAudit.class
 com\rentflow\event\Event.class
 com\rentflow\ai\model\FeeType.class
 com\rentflow\ai\tool\GetLowStockProductsTool.class
@@ -173,6 +175,7 @@ com\rentflow\ai\model\Product.class
 com\rentflow\ai\controller\ProductController.class
 com\rentflow\workflow\WorkflowController$1.class
 com\rentflow\auth\AuthController$RoleDto.class
+com\rentflow\invoice\model\Invoice.class
 com\rentflow\ai\model\InventoryReservation.class
 com\rentflow\ai\dto\ToolRequest.class
 com\rentflow\ai\repository\QuoteDiscountRepository.class

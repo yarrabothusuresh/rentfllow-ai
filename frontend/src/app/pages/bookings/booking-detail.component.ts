@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
 import { PaymentService } from '../../services/payment.service';
+import { InvoiceService } from '../../services/invoice.service';
+import { Invoice } from '../../models/invoice.models';
 import { Booking, BookingStatus } from '../../models/booking.models';
 import { Payment, PaymentMethod, PaymentStatus, BookingFinancialSummary } from '../../models/payment.models';
 
@@ -19,6 +21,7 @@ export class BookingDetailComponent implements OnInit {
   booking: Booking | null = null;
   payments: Payment[] = [];
   financialSummary: BookingFinancialSummary | null = null;
+  associatedInvoice: Invoice | null = null;
 
   isLoading = true;
   errorMessage: string | null = null;
@@ -60,7 +63,8 @@ export class BookingDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private bookingService: BookingService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private invoiceService: InvoiceService
   ) {}
 
   ngOnInit(): void {
@@ -80,6 +84,7 @@ export class BookingDetailComponent implements OnInit {
       next: (data) => {
         this.booking = data;
         this.loadPaymentsAndSummary(id);
+        this.loadAssociatedInvoice(id);
       },
       error: (err) => {
         console.error('Failed to load booking', err);
@@ -87,6 +92,33 @@ export class BookingDetailComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  loadAssociatedInvoice(bookingId: string): void {
+    this.invoiceService.getBookingInvoice(bookingId).subscribe({
+      next: (inv) => {
+        this.associatedInvoice = inv;
+      },
+      error: () => {
+        this.associatedInvoice = null;
+      }
+    });
+  }
+
+  handleInvoiceAction(): void {
+    if (!this.bookingId) return;
+    if (this.associatedInvoice) {
+      this.router.navigate(['/invoices', this.associatedInvoice.id]);
+    } else {
+      this.invoiceService.createInvoiceFromBooking(this.bookingId).subscribe({
+        next: (created) => {
+          this.router.navigate(['/invoices', created.id]);
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.error || 'Failed to generate invoice.';
+        }
+      });
+    }
   }
 
   loadPaymentsAndSummary(id: string): void {

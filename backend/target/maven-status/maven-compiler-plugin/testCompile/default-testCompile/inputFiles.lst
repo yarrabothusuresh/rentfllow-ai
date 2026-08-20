@@ -6,4 +6,6 @@ C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\ai\BookingManagementFounda
 C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\ai\CrmFoundationTest.java
 C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\payment\PaymentServiceTest.java
 C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\ai\AIOrchestratorTest.java
+C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\invoice\InvoiceServiceTest.java
 C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\ai\QuoteEngineFoundationTest.java
+C:\dev\rentflow-ai\backend\src\test\java\com\rentflow\invoice\InvoiceControllerTest.java

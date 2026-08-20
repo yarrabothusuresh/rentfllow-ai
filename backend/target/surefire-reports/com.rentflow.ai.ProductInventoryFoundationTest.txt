@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.rentflow.ai.ProductInventoryFoundationTest
 -------------------------------------------------------------------------------
-Tests run: 15, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.934 s <<< FAILURE! -- in com.rentflow.ai.ProductInventoryFoundationTest
-com.rentflow.ai.ProductInventoryFoundationTest.test4_AvailabilityCalculationUnavailable -- Time elapsed: 0.015 s <<< FAILURE!
+Tests run: 15, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.524 s <<< FAILURE! -- in com.rentflow.ai.ProductInventoryFoundationTest
+com.rentflow.ai.ProductInventoryFoundationTest.test4_AvailabilityCalculationUnavailable -- Time elapsed: 0.009 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: expected: <165> but was: <465>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -15,7 +15,7 @@ org.opentest4j.AssertionFailedError: expected: <165> but was: <465>
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
 
-com.rentflow.ai.ProductInventoryFoundationTest.test5_DateOverlap -- Time elapsed: 0.016 s <<< FAILURE!
+com.rentflow.ai.ProductInventoryFoundationTest.test5_DateOverlap -- Time elapsed: 0.007 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: expected: <300> but was: <0>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
@@ -28,7 +28,7 @@ org.opentest4j.AssertionFailedError: expected: <300> but was: <0>
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
 	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
 
-com.rentflow.ai.ProductInventoryFoundationTest.test3_AvailabilityCalculationAvailable -- Time elapsed: 0.015 s <<< FAILURE!
+com.rentflow.ai.ProductInventoryFoundationTest.test3_AvailabilityCalculationAvailable -- Time elapsed: 0.008 s <<< FAILURE!
 org.opentest4j.AssertionFailedError: expected: <300> but was: <0>
 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
 	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
