@@ -1,0 +1,104 @@
+<div class="container-fluid py-3">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-info" role="status">
+      <span class="visually-hidden">Loading dashboard...</span>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && dashboard">
+    <!-- Welcome Header -->
+    <div class="card-glass welcome-banner mb-4 p-4">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h2 class="welcome-title">Welcome, <span class="text-info">{{ dashboard.companyName || dashboard.customerName }}</span></h2>
+          <p class="welcome-subtitle text-muted mb-0">Your rental portal dashboard & event proposals summary</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <a routerLink="/portal/quotes" class="btn btn-info me-2">📄 Review Proposals</a>
+          <a routerLink="/portal/requests" class="btn btn-outline-light">💬 Contact Support</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Event Banner -->
+    <div *ngIf="dashboard.upcomingEvent" class="card-glass upcoming-event-card mb-4 p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="badge bg-info text-dark font-monospace">UPCOMING EVENT</span>
+        <span class="badge bg-success">{{ dashboard.upcomingEvent.status }}</span>
+      </div>
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h3 class="event-name mb-1">{{ dashboard.upcomingEvent.eventName }}</h3>
+          <p class="event-meta text-muted mb-2">
+            📅 {{ dashboard.upcomingEvent.eventDate }} • 📍 {{ dashboard.upcomingEvent.venueName || 'Grand Ballroom' }} ({{ dashboard.upcomingEvent.city || 'Dallas' }})
+          </p>
+          <div *ngIf="dashboard.upcomingEvent.requirements" class="requirements-pills d-flex flex-wrap gap-2">
+            <span *ngFor="let req of dashboard.upcomingEvent.requirements" class="badge bg-secondary">
+              {{ req }}
+            </span>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <a [routerLink]="['/portal/events', dashboard.upcomingEvent.id]" class="btn btn-outline-info">View Event Details →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Metric Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">📄</span>
+          <div class="metric-val text-info">{{ dashboard.activeQuotesCount }}</div>
+          <div class="metric-lbl text-muted">Active Proposals</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">📅</span>
+          <div class="metric-val text-success">{{ dashboard.activeBookingsCount }}</div>
+          <div class="metric-lbl text-muted">Active Bookings</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">💳</span>
+          <div class="metric-val text-warning">${{ dashboard.outstandingBalance | number:'1.2-2' }}</div>
+          <div class="metric-lbl text-muted">Outstanding Balance</div>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">🧾</span>
+          <div class="metric-val text-light">{{ dashboard.invoicesCount }}</div>
+          <div class="metric-lbl text-muted">Total Invoices</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity Feed -->
+    <div class="card-glass p-4">
+      <h4 class="card-title text-light mb-3">Recent Activity</h4>
+      <div *ngIf="dashboard.recentActivities.length === 0" class="text-muted">No recent activity logged.</div>
+      <div class="list-group list-group-flush bg-transparent">
+        <div *ngFor="let act of dashboard.recentActivities" class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center py-3">
+          <div>
+            <span class="badge bg-secondary me-2">{{ act.type }}</span>
+            <strong class="me-2">{{ act.title }}</strong>
+            <span class="text-muted">{{ act.description }}</span>
+          </div>
+          <small class="text-muted">{{ act.timestamp }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

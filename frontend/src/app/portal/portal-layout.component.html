@@ -1,0 +1,48 @@
+<div class="portal-wrapper">
+  <!-- Customer Portal Navbar -->
+  <header class="portal-navbar">
+    <div class="navbar-container">
+      <div class="brand-brand flex-align">
+        <a routerLink="/portal/dashboard" class="logo-text">
+          <span class="logo-accent">RentFlow</span> AI
+          <span class="badge portal-badge">Customer Portal</span>
+        </a>
+      </div>
+
+      <nav class="portal-nav-links">
+        <a routerLink="/portal/dashboard" routerLinkActive="active" class="nav-item">🏠 Dashboard</a>
+        <a routerLink="/portal/events" routerLinkActive="active" class="nav-item">🎉 Events</a>
+        <a routerLink="/portal/quotes" routerLinkActive="active" class="nav-item">📄 Proposals</a>
+        <a routerLink="/portal/bookings" routerLinkActive="active" class="nav-item">📅 Bookings</a>
+        <a routerLink="/portal/invoices" routerLinkActive="active" class="nav-item">💳 Invoices</a>
+        <a routerLink="/portal/requests" routerLinkActive="active" class="nav-item">💬 Support</a>
+        <a routerLink="/portal/profile" routerLinkActive="active" class="nav-item">👤 Profile</a>
+      </nav>
+
+      <div class="portal-user-meta">
+        <div class="user-info text-right" *ngIf="customer">
+          <span class="user-name">{{ customer.customerName }}</span>
+          <small class="company-name d-block text-muted">{{ customer.companyName || 'ABC Events LLC' }}</small>
+        </div>
+        <app-notification-bell [isPortal]="true"></app-notification-bell>
+        <button class="btn btn-sm btn-outline-secondary ms-2" (click)="switchToAdmin()" title="Switch to Internal Staff View">
+          🏢 Employee Admin
+        </button>
+        <button class="btn btn-sm btn-outline-danger ms-2" (click)="logout()">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Container -->
+  <main class="portal-main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="portal-footer">
+    <div class="container text-center text-muted py-3">
+      <small>© 2026 Evergreen Event Rentals • Powered by RentFlow AI Customer Portal</small>
+    </div>
+  </footer>
+</div>

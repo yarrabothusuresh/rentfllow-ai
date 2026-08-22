@@ -1,0 +1,49 @@
+<div class="preferences-section">
+  <div class="section-header">
+    <h3>Notification Channel Preferences</h3>
+    <p>Configure channel delivery matrix for automated business events (In-App, Email, SMS)</p>
+  </div>
+
+  <div class="alert alert-success" *ngIf="savedSuccess">
+    <i class="ph ph-check-circle"></i> Notification preferences saved successfully!
+  </div>
+
+  <div class="table-card">
+    <table class="data-table" *ngIf="!loading && preferences.length > 0">
+      <thead>
+        <tr>
+          <th>Event Type</th>
+          <th class="text-center">In-App</th>
+          <th class="text-center">Email (Mock)</th>
+          <th class="text-center">SMS (Mock)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of preferences">
+          <td>
+            <div class="event-name font-semibold">{{ p.notificationType }}</div>
+          </td>
+          <td class="text-center">
+            <input type="checkbox" [(ngModel)]="p.inAppEnabled" class="toggle-checkbox" />
+          </td>
+          <td class="text-center">
+            <input type="checkbox" [(ngModel)]="p.emailEnabled" class="toggle-checkbox" />
+          </td>
+          <td class="text-center">
+            <input type="checkbox" [(ngModel)]="p.smsEnabled" class="toggle-checkbox" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="loading-state" *ngIf="loading">
+      <i class="ph ph-spinner spin"></i> Loading preferences...
+    </div>
+
+    <div class="card-footer">
+      <button class="btn btn-primary" (click)="savePreferences()" [disabled]="saving">
+        <i class="ph" [ngClass]="saving ? 'ph-spinner spin' : 'ph-floppy-disk'"></i> Save Preferences
+      </button>
+    </div>
+  </div>
+</div>

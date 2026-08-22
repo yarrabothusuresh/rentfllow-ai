@@ -116,15 +116,10 @@ public class AIOrchestrator {
             if (msgLower.contains("status") || msgLower.contains("wedding")) {
                 intent = "CUSTOMER_BOOKING_STATUS";
                 toolsToCall.add("searchCustomer");
-                toolsToCall.add("searchCustomers");
                 toolsToCall.add("getBooking");
-                toolsToCall.add("getCustomerEvents");
-                toolsToCall.add("getEvent");
             } else {
                 intent = "CUSTOMER_SEARCH_RESULT";
                 toolsToCall.add("searchCustomer");
-                toolsToCall.add("searchCustomers");
-                toolsToCall.add("getCustomerEvents");
             }
         } else if (msgLower.contains("chair") || msgLower.contains("chairs") || msgLower.contains("availability")) {
             intent = "AVAILABILITY_CHECK";

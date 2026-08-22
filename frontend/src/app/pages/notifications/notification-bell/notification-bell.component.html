@@ -1,0 +1,52 @@
+<div class="notification-bell-wrapper">
+  <button class="bell-btn" (click)="toggleDropdown()" title="Notifications">
+    <i class="ph ph-bell"></i>
+    <span class="unread-badge" *ngIf="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+  </button>
+
+  <div class="bell-dropdown" *ngIf="dropdownOpen">
+    <div class="dropdown-header">
+      <div class="header-title">
+        <i class="ph ph-bell-simple-ringing"></i>
+        <span>Notifications</span>
+        <span class="count-pill" *ngIf="unreadCount > 0">{{ unreadCount }} new</span>
+      </div>
+      <button class="btn-link" *ngIf="unreadCount > 0" (click)="markAllRead($event)">Mark all read</button>
+    </div>
+
+    <div class="dropdown-body">
+      <div class="loading-state" *ngIf="loading">
+        <i class="ph ph-spinner spin"></i> Loading notifications...
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && recentNotifications.length === 0">
+        <i class="ph ph-bell-slash"></i>
+        <p>No notifications yet</p>
+      </div>
+
+      <div class="notification-item"
+           *ngFor="let n of recentNotifications"
+           [class.unread]="!n.readAt"
+           (click)="markAsRead(n, $event)">
+        <div class="item-icon" [ngClass]="n.channel.toLowerCase()">
+          <i class="ph" [ngClass]="getChannelIcon(n.channel)"></i>
+        </div>
+        <div class="item-content">
+          <div class="item-title">{{ n.title }}</div>
+          <div class="item-msg">{{ n.message }}</div>
+          <div class="item-meta">
+            <span class="meta-time">{{ n.createdAt | date:'shortTime' }}</span>
+            <span class="meta-type">{{ n.type }}</span>
+          </div>
+        </div>
+        <div class="unread-dot" *ngIf="!n.readAt"></div>
+      </div>
+    </div>
+
+    <div class="dropdown-footer">
+      <a [routerLink]="isPortal ? '/portal/notifications' : '/notifications'" class="view-all-link" (click)="dropdownOpen = false">
+        View All Notifications <i class="ph ph-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>

@@ -20,7 +20,7 @@ public class QuoteDiscount {
     @Column(nullable = false)
     private DiscountType type = DiscountType.PERCENTAGE;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(name = "discount_value", precision = 10, scale = 2, nullable = false)
     private BigDecimal value = BigDecimal.ZERO;
 
     @Column(precision = 10, scale = 2, nullable = false)

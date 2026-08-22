@@ -27,8 +27,44 @@ import { BookingDetailComponent } from './pages/bookings/booking-detail.componen
 import { InvoicesListComponent } from './pages/invoices/invoices-list.component';
 import { InvoiceDetailComponent } from './pages/invoices/invoice-detail.component';
 
+import { PortalLayoutComponent } from './portal/portal-layout.component';
+import { PortalLoginComponent } from './portal/portal-login.component';
+import { PortalDashboardComponent } from './portal/portal-dashboard.component';
+import { PortalEventsListComponent } from './portal/portal-events-list.component';
+import { PortalEventDetailComponent } from './portal/portal-event-detail.component';
+import { PortalQuotesListComponent } from './portal/portal-quotes-list.component';
+import { PortalQuoteDetailComponent } from './portal/portal-quote-detail.component';
+import { PortalBookingsListComponent } from './portal/portal-bookings-list.component';
+import { PortalBookingDetailComponent } from './portal/portal-booking-detail.component';
+import { PortalInvoicesListComponent } from './portal/portal-invoices-list.component';
+import { PortalInvoiceDetailComponent } from './portal/portal-invoice-detail.component';
+import { PortalProfileComponent } from './portal/portal-profile.component';
+import { PortalRequestsComponent } from './portal/portal-requests.component';
+
+import { NotificationsListComponent } from './pages/notifications/notifications-list/notifications-list.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
+  { path: 'portal/login', component: PortalLoginComponent },
+  {
+    path: 'portal',
+    component: PortalLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: PortalDashboardComponent },
+      { path: 'events', component: PortalEventsListComponent },
+      { path: 'events/:id', component: PortalEventDetailComponent },
+      { path: 'quotes', component: PortalQuotesListComponent },
+      { path: 'quotes/:id', component: PortalQuoteDetailComponent },
+      { path: 'bookings', component: PortalBookingsListComponent },
+      { path: 'bookings/:id', component: PortalBookingDetailComponent },
+      { path: 'invoices', component: PortalInvoicesListComponent },
+      { path: 'invoices/:id', component: PortalInvoiceDetailComponent },
+      { path: 'profile', component: PortalProfileComponent },
+      { path: 'requests', component: PortalRequestsComponent },
+      { path: 'notifications', component: NotificationsListComponent }
+    ]
+  },
   { path: 'ideal-customer', component: IdealCustomerComponent },
   { path: 'user-roles', component: UserRolesComponent },
   { path: 'workflow-demo', component: WorkflowDemoComponent },
@@ -53,6 +89,7 @@ export const routes: Routes = [
   { path: 'bookings/:id', component: BookingDetailComponent },
   { path: 'invoices', component: InvoicesListComponent },
   { path: 'invoices/:id', component: InvoiceDetailComponent },
+  { path: 'notifications', component: NotificationsListComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -79,7 +116,8 @@ export const routes: Routes = [
       { path: 'bookings', component: BookingsListComponent },
       { path: 'bookings/:id', component: BookingDetailComponent },
       { path: 'invoices', component: InvoicesListComponent },
-      { path: 'invoices/:id', component: InvoiceDetailComponent }
+      { path: 'invoices/:id', component: InvoiceDetailComponent },
+      { path: 'notifications', component: NotificationsListComponent }
     ]
   },
   { path: '**', redirectTo: '' }

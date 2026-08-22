@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProfileService } from '../services/profile.service';
 import { BusinessProfile } from '../models/business-profile.model';
 import { RoleStateService, RoleType } from '../services/role-state.service';
 
+import { NotificationBellComponent } from '../pages/notifications/notification-bell/notification-bell.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule],
+  imports: [RouterModule, CommonModule, FormsModule, NotificationBellComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -24,7 +26,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private profileService: ProfileService,
-    private roleStateService: RoleStateService
+    private roleStateService: RoleStateService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -38,6 +41,9 @@ export class DashboardComponent implements OnInit {
 
   switchRole(role: any) {
     this.roleStateService.setRole(role as RoleType);
+    if (role === 'CUSTOMER') {
+      this.router.navigate(['/portal/dashboard']);
+    }
   }
 
   hasPermission(permission: string): boolean {

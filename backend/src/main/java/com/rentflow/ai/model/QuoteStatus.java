@@ -10,6 +10,8 @@ public enum QuoteStatus {
     SENT,
     VIEWED,
     ACCEPTED,
+    CHANGE_REQUESTED,
+    DECLINED,
     REJECTED,
     EXPIRED,
     CANCELLED;

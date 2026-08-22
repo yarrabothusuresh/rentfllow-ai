@@ -1,0 +1,39 @@
+.card-glass {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-title {
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.event-name {
+  color: #f0f6fc;
+  font-weight: 700;
+}
+
+.metric-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+}
+
+.metric-icon {
+  font-size: 1.75rem;
+}
+
+.metric-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.metric-lbl {
+  font-size: 0.85rem;
+}

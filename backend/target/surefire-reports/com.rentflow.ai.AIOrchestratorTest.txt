@@ -1,17 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.rentflow.ai.AIOrchestratorTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.337 s <<< FAILURE! -- in com.rentflow.ai.AIOrchestratorTest
-com.rentflow.ai.AIOrchestratorTest.test1_StatusOfEmilyBrownWedding -- Time elapsed: 0.024 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: expected: <CUSTOMER_BOOKING_STATUS> but was: <ACTION_REQUIRES_APPROVAL>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
-	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
-	at com.rentflow.ai.AIOrchestratorTest.test1_StatusOfEmilyBrownWedding(AIOrchestratorTest.java:57)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
-
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.196 s -- in com.rentflow.ai.AIOrchestratorTest

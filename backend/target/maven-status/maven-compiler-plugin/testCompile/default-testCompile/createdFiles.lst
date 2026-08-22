@@ -1,8 +1,16 @@
 com\rentflow\ai\BookingManagementFoundationTest$ListHelper.class
+com\rentflow\invoice\InvoiceServiceTest.class
+com\rentflow\notification\CustomerPortalNotificationTest.class
+com\rentflow\notification\NotificationServiceTest.class
+com\rentflow\ai\BookingManagementFoundationTest.class
+com\rentflow\payment\PaymentControllerTest.class
 com\rentflow\ai\QuoteEngineFoundationTest.class
+com\rentflow\invoice\InvoiceControllerTest.class
 com\rentflow\event\EventControllerTest.class
+com\rentflow\portal\CustomerPortalSecurityTest.class
 com\rentflow\workflow\WorkflowControllerTest.class
 com\rentflow\ai\ProductInventoryFoundationTest.class
-com\rentflow\ai\BookingManagementFoundationTest.class
+com\rentflow\payment\PaymentServiceTest.class
+com\rentflow\portal\CustomerPortalServiceTest.class
 com\rentflow\ai\AIOrchestratorTest.class
 com\rentflow\ai\CrmFoundationTest.class

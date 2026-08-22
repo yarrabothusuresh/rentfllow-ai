@@ -1,0 +1,55 @@
+<div class="login-wrapper">
+  <div class="login-card shadow-lg">
+    <div class="brand-header text-center mb-4">
+      <h2 class="logo-title"><span class="accent-text">RentFlow</span> AI</h2>
+      <span class="badge portal-badge">Customer Portal</span>
+      <p class="subtitle mt-2 text-muted">View proposals, bookings, invoices & event details</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onLogin()">
+      <div class="mb-3">
+        <label for="email" class="form-label text-light">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          class="form-control portal-input" 
+          [(ngModel)]="email" 
+          placeholder="name@example.com" 
+          required />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label text-light">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control portal-input" 
+          [(ngModel)]="password" 
+          placeholder="••••••••" 
+          required />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 btn-login" [disabled]="isLoading">
+        {{ isLoading ? 'Logging in...' : 'Sign In to Customer Portal' }}
+      </button>
+    </form>
+
+    <div class="demo-buttons mt-4 pt-3 border-top border-secondary">
+      <p class="text-center text-muted small mb-2">Quick Demo Login Shortcuts:</p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-info flex-fill" (click)="fillDemoCustomerA()">
+          🔑 Login Customer A (ABC Events)
+        </button>
+        <button class="btn btn-sm btn-outline-warning flex-fill" (click)="fillDemoCustomerB()">
+          🔒 Login Customer B (XYZ Events)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

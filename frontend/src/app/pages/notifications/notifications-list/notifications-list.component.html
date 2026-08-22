@@ -1,0 +1,255 @@
+<div class="notifications-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <i class="ph ph-bell-simple-ringing text-accent"></i> Communications & Notifications
+      </h1>
+      <p class="page-subtitle">Manage automated event notifications, template dispatches, and channel rules</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="openAIDraftModal()">
+        <i class="ph ph-sparkle text-purple"></i> Draft Message with AI
+      </button>
+      <button class="btn btn-primary" (click)="markAllAsRead()">
+        <i class="ph ph-check-square-offset"></i> Mark All as Read
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">
+      <i class="ph ph-tray"></i> Notifications Activity
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'templates'" (click)="activeTab = 'templates'">
+      <i class="ph ph-file-code"></i> Notification Templates
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'preferences'" (click)="activeTab = 'preferences'">
+      <i class="ph ph-sliders"></i> Channel Preferences
+    </button>
+  </div>
+
+  <!-- TAB 1: ALL NOTIFICATIONS -->
+  <div class="tab-content" *ngIf="activeTab === 'all'">
+    <!-- Filter Bar -->
+    <div class="filter-card">
+      <div class="filter-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="unreadOnly" (change)="onFilterChange()" />
+          <span>Unread Only</span>
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <label>Channel:</label>
+        <select [(ngModel)]="selectedChannel" (change)="onFilterChange()" class="form-control">
+          <option value="">All Channels</option>
+          <option value="IN_APP">In-App</option>
+          <option value="EMAIL">Email (Mock)</option>
+          <option value="SMS">SMS (Mock)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Type:</label>
+        <select [(ngModel)]="selectedType" (change)="onFilterChange()" class="form-control">
+          <option value="">All Types</option>
+          <option value="QUOTE_SENT">Quote Sent</option>
+          <option value="QUOTE_ACCEPTED">Quote Accepted</option>
+          <option value="QUOTE_CHANGE_REQUESTED">Quote Change Requested</option>
+          <option value="BOOKING_CONFIRMED">Booking Confirmed</option>
+          <option value="PAYMENT_RECEIVED">Payment Received</option>
+          <option value="INVOICE_SENT">Invoice Sent</option>
+          <option value="CUSTOMER_REQUEST_CREATED">Customer Request</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Status:</label>
+        <select [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="form-control">
+          <option value="">All Statuses</option>
+          <option value="SENT">Sent</option>
+          <option value="DELIVERED">Delivered</option>
+          <option value="READ">Read</option>
+          <option value="FAILED">Failed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <table class="data-table" *ngIf="!loading && notifications.length > 0">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Type</th>
+            <th>Channel</th>
+            <th>Recipient</th>
+            <th>Subject / Title</th>
+            <th>Retries</th>
+            <th>Date & Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of notifications"
+              [class.unread-row]="!n.readAt"
+              (click)="selectNotification(n)">
+            <td>
+              <span class="badge" [ngClass]="getStatusClass(n.status)">
+                {{ n.status }}
+              </span>
+            </td>
+            <td>
+              <span class="type-pill">{{ n.type }}</span>
+            </td>
+            <td>
+              <span class="channel-badge" [ngClass]="n.channel.toLowerCase()">
+                <i class="ph" [ngClass]="n.channel === 'EMAIL' ? 'ph-envelope' : (n.channel === 'SMS' ? 'ph-chat-circle-text' : 'ph-bell-simple')"></i>
+                {{ n.channel }}
+              </span>
+            </td>
+            <td>
+              <div class="recipient-cell">
+                <span class="recipient-name">{{ n.recipientName || 'System' }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="title-cell">
+                <div class="title-text">{{ n.title }}</div>
+                <div class="msg-snippet">{{ n.message }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="retry-badge" *ngIf="n.retryCount > 0" [class.max-retry]="n.retryCount >= 3">
+                {{ n.retryCount }}/3
+              </span>
+              <span *ngIf="n.retryCount === 0" class="text-muted">-</span>
+            </td>
+            <td class="text-muted text-sm">
+              {{ n.createdAt | date:'medium' }}
+            </td>
+            <td>
+              <div class="action-buttons" (click)="$event.stopPropagation()">
+                <button class="btn-icon danger" *ngIf="n.status === 'FAILED' && n.retryCount < 3" (click)="retry(n, $event)" title="Retry Sending">
+                  <i class="ph ph-arrow-counter-clockwise"></i>
+                </button>
+                <button class="btn-icon" *ngIf="!n.readAt" (click)="markAsRead(n, $event)" title="Mark Read">
+                  <i class="ph ph-check"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-table" *ngIf="!loading && notifications.length === 0">
+        <i class="ph ph-bell-slash"></i>
+        <p>No notifications found matching filter criteria</p>
+      </div>
+
+      <div class="loading-spinner" *ngIf="loading">
+        <i class="ph ph-spinner spin"></i> Loading notifications...
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" *ngIf="totalPages > 1">
+        <span class="page-info">Showing page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalElements }} total)</span>
+        <div class="page-controls">
+          <button class="btn-page" [disabled]="currentPage === 0" (click)="changePage(currentPage - 1)">
+            <i class="ph ph-caret-left"></i> Previous
+          </button>
+          <button class="btn-page" [disabled]="currentPage + 1 >= totalPages" (click)="changePage(currentPage + 1)">
+            Next <i class="ph ph-caret-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: TEMPLATES -->
+  <div class="tab-content" *ngIf="activeTab === 'templates'">
+    <app-notification-templates></app-notification-templates>
+  </div>
+
+  <!-- TAB 3: PREFERENCES -->
+  <div class="tab-content" *ngIf="activeTab === 'preferences'">
+    <app-notification-preferences></app-notification-preferences>
+  </div>
+
+  <!-- DETAIL DRAWER -->
+  <div class="drawer-overlay" *ngIf="selectedNotification" (click)="selectedNotification = null">
+    <div class="drawer-panel" (click)="$event.stopPropagation()">
+      <div class="drawer-header">
+        <h3>Notification Details</h3>
+        <button class="btn-close" (click)="selectedNotification = null"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="drawer-body">
+        <div class="detail-group">
+          <label>Title:</label>
+          <div class="detail-val font-semibold">{{ selectedNotification.title }}</div>
+        </div>
+        <div class="detail-group">
+          <label>Message Body:</label>
+          <div class="detail-box">{{ selectedNotification.message }}</div>
+        </div>
+        <div class="detail-grid">
+          <div><label>Type:</label> <span>{{ selectedNotification.type }}</span></div>
+          <div><label>Channel:</label> <span>{{ selectedNotification.channel }}</span></div>
+          <div><label>Status:</label> <span class="badge" [ngClass]="getStatusClass(selectedNotification.status)">{{ selectedNotification.status }}</span></div>
+          <div><label>Priority:</label> <span>{{ selectedNotification.priority }}</span></div>
+        </div>
+        <div class="detail-group" *ngIf="selectedNotification.failureReason">
+          <label class="text-danger">Failure Reason:</label>
+          <div class="alert alert-danger">{{ selectedNotification.failureReason }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI DRAFT MODAL -->
+  <div class="modal-overlay" *ngIf="aiDraftModalOpen">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="ph ph-sparkle text-purple"></i> Draft Notification with AI Copilot</h3>
+        <button class="btn-close" (click)="aiDraftModalOpen = false"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Notification Type</label>
+            <select [(ngModel)]="aiDraftType" class="form-control">
+              <option value="INVOICE_OVERDUE">Invoice Overdue Reminder</option>
+              <option value="QUOTE_SENT">Quote Follow-up</option>
+              <option value="BOOKING_CONFIRMED">Booking Confirmation</option>
+              <option value="PAYMENT_RECEIVED">Payment Receipt</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Channel</label>
+            <select [(ngModel)]="aiDraftChannel" class="form-control">
+              <option value="EMAIL">Email</option>
+              <option value="SMS">SMS</option>
+              <option value="IN_APP">In-App</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-purple btn-block margin-v" (click)="generateAIDraft()" [disabled]="aiDraftLoading">
+          <i class="ph" [ngClass]="aiDraftLoading ? 'ph-spinner spin' : 'ph-magic-wand'"></i>
+          {{ aiDraftLoading ? 'Drafting...' : 'Generate AI Message' }}
+        </button>
+
+        <div class="ai-output" *ngIf="aiDraftResult">
+          <h4>Generated Draft:</h4>
+          <div class="output-box">
+            <div class="output-subject"><strong>Subject:</strong> {{ aiDraftResult.subject }}</div>
+            <hr />
+            <div class="output-body">{{ aiDraftResult.body }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

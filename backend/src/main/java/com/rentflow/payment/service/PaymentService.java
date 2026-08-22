@@ -24,22 +24,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.rentflow.ai.repository.CustomerRepository;
+import com.rentflow.ai.model.Customer;
+import com.rentflow.notification.event.PaymentReceivedEvent;
+import org.springframework.context.ApplicationEventPublisher;
+
 @Service
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentAuditRepository paymentAuditRepository;
     private final BookingRepository bookingRepository;
+    private final CustomerRepository customerRepository;
     private final InvoiceService invoiceService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PaymentService(PaymentRepository paymentRepository,
                           PaymentAuditRepository paymentAuditRepository,
                           BookingRepository bookingRepository,
-                          @Lazy InvoiceService invoiceService) {
+                          CustomerRepository customerRepository,
+                          @Lazy InvoiceService invoiceService,
+                          ApplicationEventPublisher eventPublisher) {
         this.paymentRepository = paymentRepository;
         this.paymentAuditRepository = paymentAuditRepository;
         this.bookingRepository = bookingRepository;
+        this.customerRepository = customerRepository;
         this.invoiceService = invoiceService;
+        this.eventPublisher = eventPublisher;
     }
 
     public boolean canRecordOrVoidPayment(String userRole) {
@@ -124,6 +135,25 @@ public class PaymentService {
                         savedPayment.getTransactionReference() != null ? savedPayment.getTransactionReference() : "N/A")
         );
         paymentAuditRepository.save(audit);
+
+        String customerName = "Valued Customer";
+        if (booking.getCustomerId() != null) {
+            Optional<Customer> c = customerRepository.findById(booking.getCustomerId());
+            if (c.isPresent()) {
+                Customer cust = c.get();
+                customerName = cust.getCompanyName() != null && !cust.getCompanyName().isBlank() ? cust.getCompanyName() : cust.getFirstName();
+            }
+        }
+        eventPublisher.publishEvent(new PaymentReceivedEvent(
+                tenantId,
+                savedPayment.getId(),
+                bookingId,
+                booking.getBookingNumber(),
+                booking.getCustomerId(),
+                customerName,
+                savedPayment.getAmount(),
+                booking.getBalanceDue()
+        ));
 
         return mapToDTO(savedPayment);
     }

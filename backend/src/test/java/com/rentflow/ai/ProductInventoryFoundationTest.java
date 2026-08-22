@@ -57,6 +57,15 @@ class ProductInventoryFoundationTest {
     @BeforeEach
     void setUp() {
         tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
+        UUID sampleResId = UUID.fromString("77777777-7777-7777-7777-777777777777");
+        if (!reservationRepository.existsById(sampleResId)) {
+            InventoryReservation res = new InventoryReservation(
+                    sampleResId, tenantId, CatalogDataInitializer.CHIAVARI_CHAIR_ID, UUID.fromString("d3b07384-d113-4601-a71f-488667c48564"), null,
+                    300, LocalDateTime.of(2026, 9, 20, 10, 0), LocalDateTime.of(2026, 9, 22, 18, 0),
+                    ReservationStatus.RESERVED
+            );
+            reservationRepository.save(res);
+        }
     }
 
     private HttpHeaders createHeaders(String role, String tenant) {
