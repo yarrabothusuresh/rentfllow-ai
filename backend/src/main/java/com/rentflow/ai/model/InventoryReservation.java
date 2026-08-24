@@ -38,6 +38,15 @@ public class InventoryReservation {
     @Column(nullable = false)
     private ReservationStatus status = ReservationStatus.RESERVED;
 
+    private UUID inventoryItemId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationType reservationType = ReservationType.BOOKING;
+
+    private String createdBy;
+    private LocalDateTime expiresAt;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -94,6 +103,18 @@ public class InventoryReservation {
 
     public ReservationStatus getStatus() { return status; }
     public void setStatus(ReservationStatus status) { this.status = status; }
+
+    public UUID getInventoryItemId() { return inventoryItemId; }
+    public void setInventoryItemId(UUID inventoryItemId) { this.inventoryItemId = inventoryItemId; }
+
+    public ReservationType getReservationType() { return reservationType; }
+    public void setReservationType(ReservationType reservationType) { this.reservationType = reservationType; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

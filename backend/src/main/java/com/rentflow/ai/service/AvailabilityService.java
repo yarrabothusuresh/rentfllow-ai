@@ -82,6 +82,56 @@ public class AvailabilityService {
         return result;
     }
 
+    public com.rentflow.ai.dto.BulkAvailabilityResultDTO checkBulkAvailability(String tenantId, com.rentflow.ai.dto.BulkAvailabilityRequestDTO request) {
+        if (request == null || request.getItems() == null) {
+            com.rentflow.ai.dto.BulkAvailabilityResultDTO empty = new com.rentflow.ai.dto.BulkAvailabilityResultDTO();
+            empty.setAvailable(true);
+            empty.setItems(List.of());
+            return empty;
+        }
+
+        LocalDateTime start = request.getStartDateTime() != null ? request.getStartDateTime() : LocalDateTime.now();
+        LocalDateTime end = request.getEndDateTime() != null ? request.getEndDateTime() : start.plusDays(1);
+
+        boolean overallAvailable = true;
+        List<com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult> itemResults = new java.util.ArrayList<>();
+
+        for (com.rentflow.ai.dto.BulkAvailabilityRequestDTO.ItemRequest item : request.getItems()) {
+            AvailabilityResultDTO single = checkAvailability(tenantId, item.getProductId(), item.getQuantity(), start, end);
+            com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult res = new com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult();
+            res.setProductId(single.getProductId());
+            res.setProductName(single.getProductName());
+            res.setSku(single.getSku());
+            res.setRequestedQuantity(single.getRequestedQuantity());
+            res.setAvailableQuantity(single.getAvailableQuantity());
+            res.setShortageQuantity(single.getShortage());
+            res.setAvailable(single.isAvailable());
+            itemResults.add(res);
+
+            if (!single.isAvailable()) {
+                overallAvailable = false;
+            }
+        }
+
+        com.rentflow.ai.dto.BulkAvailabilityResultDTO bulkResult = new com.rentflow.ai.dto.BulkAvailabilityResultDTO();
+        bulkResult.setAvailable(overallAvailable);
+        bulkResult.setItems(itemResults);
+        return bulkResult;
+    }
+
+    public List<AvailabilityResultDTO> getProductAvailabilityTimeline(String tenantId, UUID productId, int days) {
+        LocalDateTime now = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        List<AvailabilityResultDTO> timeline = new java.util.ArrayList<>();
+
+        for (int i = 0; i < Math.max(1, days); i++) {
+            LocalDateTime dayStart = now.plusDays(i).withHour(8);
+            LocalDateTime dayEnd = now.plusDays(i).withHour(22);
+            AvailabilityResultDTO dayResult = checkAvailability(tenantId, productId, 1, dayStart, dayEnd);
+            timeline.add(dayResult);
+        }
+        return timeline;
+    }
+
     public InventoryReservationDTO mapReservationToDTO(InventoryReservation r) {
         InventoryReservationDTO dto = new InventoryReservationDTO();
         dto.setId(r.getId());
@@ -93,6 +143,10 @@ public class AvailabilityService {
         dto.setStartDateTime(r.getStartDateTime());
         dto.setEndDateTime(r.getEndDateTime());
         dto.setStatus(r.getStatus());
+        dto.setInventoryItemId(r.getInventoryItemId());
+        dto.setReservationType(r.getReservationType());
+        dto.setCreatedBy(r.getCreatedBy());
+        dto.setExpiresAt(r.getExpiresAt());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setUpdatedAt(r.getUpdatedAt());
 

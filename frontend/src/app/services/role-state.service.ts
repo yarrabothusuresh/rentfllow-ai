@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-export type RoleType = 'OWNER' | 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'DRIVER' | 'CUSTOMER';
+export type RoleType = 'OWNER' | 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'WAREHOUSE_MANAGER' | 'WAREHOUSE_OPERATOR' | 'FINANCE' | 'DRIVER' | 'CUSTOMER';
 
 export interface DemoUser {
   id: string;
@@ -26,6 +26,8 @@ export class RoleStateService {
     { id: '22222222-2222-2222-2222-222222222222', name: 'Sarah Miller', role: 'ADMIN' },
     { id: '33333333-3333-3333-3333-333333333333', name: 'Mike Johnson', role: 'SALES' },
     { id: '44444444-4444-4444-4444-444444444444', name: 'Robert Smith', role: 'WAREHOUSE' },
+    { id: '44444444-4444-4444-4444-444444444445', name: 'James Operator', role: 'WAREHOUSE_OPERATOR' },
+    { id: '44444444-4444-4444-4444-444444444446', name: 'Alex Manager', role: 'WAREHOUSE_MANAGER' },
     { id: '55555555-5555-5555-5555-555555555555', name: 'David Wilson', role: 'DRIVER' },
     { id: '66666666-6666-6666-6666-666666666666', name: 'Emily Brown', role: 'CUSTOMER' }
   ];
@@ -55,11 +57,22 @@ export class RoleStateService {
       'DASHBOARD_VIEW', 'AI_COPILOT_USE', 'CUSTOMER_VIEW', 'CUSTOMER_CREATE', 'CUSTOMER_UPDATE',
       'LEAD_VIEW', 'LEAD_CREATE', 'LEAD_UPDATE', 'PRODUCT_VIEW', 'INVENTORY_VIEW', 'QUOTE_VIEW',
       'QUOTE_CREATE', 'QUOTE_UPDATE', 'QUOTE_SEND', 'BOOKING_VIEW', 'BOOKING_CREATE', 'BOOKING_UPDATE',
-      'DELIVERY_VIEW'
+      'DELIVERY_VIEW', 'WAREHOUSE_VIEW'
     ],
     WAREHOUSE: [
       'DASHBOARD_VIEW', 'PRODUCT_VIEW', 'INVENTORY_VIEW', 'INVENTORY_UPDATE', 'BOOKING_VIEW',
       'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE', 'DELIVERY_VIEW'
+    ],
+    WAREHOUSE_MANAGER: [
+      'DASHBOARD_VIEW', 'PRODUCT_VIEW', 'INVENTORY_VIEW', 'INVENTORY_UPDATE', 'BOOKING_VIEW',
+      'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE', 'DELIVERY_VIEW'
+    ],
+    WAREHOUSE_OPERATOR: [
+      'DASHBOARD_VIEW', 'PRODUCT_VIEW', 'INVENTORY_VIEW', 'BOOKING_VIEW',
+      'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE'
+    ],
+    FINANCE: [
+      'DASHBOARD_VIEW', 'BOOKING_VIEW', 'PAYMENT_VIEW', 'PAYMENT_CREATE', 'INVOICE_VIEW', 'WAREHOUSE_VIEW'
     ],
     DRIVER: [
       'DASHBOARD_VIEW', 'BOOKING_VIEW', 'DELIVERY_VIEW', 'DELIVERY_UPDATE'

@@ -17,6 +17,11 @@ public class InventoryReservationDTO {
     private LocalDateTime endDateTime;
     @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private ReservationStatus status;
+    private UUID inventoryItemId;
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
+    private com.rentflow.ai.model.ReservationType reservationType;
+    private String createdBy;
+    private LocalDateTime expiresAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -54,6 +59,18 @@ public class InventoryReservationDTO {
 
     public ReservationStatus getStatus() { return status; }
     public void setStatus(ReservationStatus status) { this.status = status; }
+
+    public UUID getInventoryItemId() { return inventoryItemId; }
+    public void setInventoryItemId(UUID inventoryItemId) { this.inventoryItemId = inventoryItemId; }
+
+    public com.rentflow.ai.model.ReservationType getReservationType() { return reservationType; }
+    public void setReservationType(com.rentflow.ai.model.ReservationType reservationType) { this.reservationType = reservationType; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

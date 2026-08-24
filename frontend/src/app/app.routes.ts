@@ -42,6 +42,18 @@ import { PortalProfileComponent } from './portal/portal-profile.component';
 import { PortalRequestsComponent } from './portal/portal-requests.component';
 
 import { NotificationsListComponent } from './pages/notifications/notifications-list/notifications-list.component';
+import { WarehouseDashboardComponent } from './pages/warehouse/warehouse-dashboard.component';
+import { WarehouseOrdersListComponent } from './pages/warehouse/warehouse-orders-list.component';
+import { WarehouseOrderDetailComponent } from './pages/warehouse/warehouse-order-detail.component';
+import { WarehousePickListComponent } from './pages/warehouse/warehouse-pick-list.component';
+import { WarehousePackingComponent } from './pages/warehouse/warehouse-packing.component';
+import { WarehouseShortagesComponent } from './pages/warehouse/warehouse-shortages.component';
+
+import { InventoryDashboardComponent } from './pages/inventory/inventory-dashboard.component';
+import { InventoryAvailabilityCalendarComponent } from './pages/inventory/inventory-availability-calendar.component';
+import { InventoryReservationsListComponent } from './pages/inventory/inventory-reservations-list.component';
+import { InventoryProductAvailabilityComponent } from './pages/inventory/inventory-product-availability.component';
+import { InventoryConflictsComponent } from './pages/inventory/inventory-conflicts.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -90,6 +102,18 @@ export const routes: Routes = [
   { path: 'invoices', component: InvoicesListComponent },
   { path: 'invoices/:id', component: InvoiceDetailComponent },
   { path: 'notifications', component: NotificationsListComponent },
+  { path: 'warehouse/dashboard', component: WarehouseDashboardComponent },
+  { path: 'warehouse/orders', component: WarehouseOrdersListComponent },
+  { path: 'warehouse/orders/:id', component: WarehouseOrderDetailComponent },
+  { path: 'warehouse/pick', component: WarehousePickListComponent },
+  { path: 'warehouse/packing', component: WarehousePackingComponent },
+  { path: 'warehouse/shortages', component: WarehouseShortagesComponent },
+  { path: 'inventory/dashboard', component: InventoryDashboardComponent },
+  { path: 'inventory/availability', component: InventoryAvailabilityCalendarComponent },
+  { path: 'inventory/reservations', component: InventoryReservationsListComponent },
+  { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
+  { path: 'inventory/conflicts', component: InventoryConflictsComponent },
+  { path: 'inventory/products/:id/availability', component: InventoryProductAvailabilityComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -107,7 +131,13 @@ export const routes: Routes = [
       { path: 'products/new', component: ProductFormComponent },
       { path: 'products/:id', component: ProductDetailComponent },
       { path: 'products/:id/edit', component: ProductFormComponent },
-      { path: 'inventory', component: InventoryOverviewComponent },
+      { path: 'inventory', component: InventoryDashboardComponent },
+      { path: 'inventory/dashboard', component: InventoryDashboardComponent },
+      { path: 'inventory/availability', component: InventoryAvailabilityCalendarComponent },
+      { path: 'inventory/reservations', component: InventoryReservationsListComponent },
+      { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
+      { path: 'inventory/conflicts', component: InventoryConflictsComponent },
+      { path: 'inventory/products/:id/availability', component: InventoryProductAvailabilityComponent },
       { path: 'quotes', component: QuotesListComponent },
       { path: 'quotes/new', component: QuoteBuilderComponent },
       { path: 'quotes/:id', component: QuoteDetailComponent },
@@ -117,7 +147,13 @@ export const routes: Routes = [
       { path: 'bookings/:id', component: BookingDetailComponent },
       { path: 'invoices', component: InvoicesListComponent },
       { path: 'invoices/:id', component: InvoiceDetailComponent },
-      { path: 'notifications', component: NotificationsListComponent }
+      { path: 'notifications', component: NotificationsListComponent },
+      { path: 'warehouse/dashboard', component: WarehouseDashboardComponent },
+      { path: 'warehouse/orders', component: WarehouseOrdersListComponent },
+      { path: 'warehouse/orders/:id', component: WarehouseOrderDetailComponent },
+      { path: 'warehouse/pick', component: WarehousePickListComponent },
+      { path: 'warehouse/packing', component: WarehousePackingComponent },
+      { path: 'warehouse/shortages', component: WarehouseShortagesComponent }
     ]
   },
   { path: '**', redirectTo: '' }

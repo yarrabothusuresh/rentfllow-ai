@@ -1,23 +1,40 @@
-/* You can add global styles to this file, and also import other style files */
+/* RentFlow AI Modern SaaS Design System (Matched with docs/UX.html) */
 
 :root {
-  --primary-color: #0f172a;
-  --secondary-color: #3b82f6;
-  --accent-color: #10b981;
-  --background-color: #f8fafc;
-  --surface-color: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-color: #e2e8f0;
-  
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 16px;
-  
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --bg: #F6F7FB;
+  --surface: #FFFFFF;
+  --surface-alt: #F0F1F7;
+  --border: #E4E6F0;
+  --navy: #0F172A;
+  --navy-soft: #3D4459;
+  --muted: #8B90A6;
+  --indigo: #4F46E5;
+  --indigo-dark: #3730A3;
+  --violet: #7C3AED;
+  --grad: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --warning: #D97706;
+  --warning-bg: #FFFBEB;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+  --info-bg: #EEF2FF;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 6px 20px -8px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 20px 50px -12px rgba(15, 23, 42, 0.22);
+  --sidebar-w: 232px;
+
+  /* Backward Compatibility Theme Variables */
+  --primary-color: #0F172A;
+  --secondary-color: #4F46E5;
+  --accent-color: #059669;
+  --background-color: #F6F7FB;
+  --surface-color: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #3D4459;
+  --border-color: #E4E6F0;
 }
 
 * {
@@ -27,11 +44,22 @@
 }
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--background-color);
-  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--navy);
   line-height: 1.5;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lexend', sans-serif;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 a {
@@ -44,43 +72,187 @@ button {
   font-family: inherit;
 }
 
-.btn-primary {
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: var(--border-radius-md);
+/* Card Styling */
+.card, .glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-pad {
+  padding: 20px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
   font-weight: 600;
-  font-size: 1rem;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-size: 13.5px;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: all 0.15s ease;
   
   &:hover {
-    background-color: #2563eb;
+    background: #000;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-accent {
+  background: var(--grad);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+
+  &:hover {
+    filter: brightness(1.06);
     transform: translateY(-1px);
   }
 }
 
 .btn-secondary {
-  background-color: white;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 12px 24px;
-  border-radius: var(--border-radius-md);
+  background: var(--surface);
+  color: var(--navy);
+  border: 1px solid var(--border);
+  padding: 9px 16px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.2s ease;
   
   &:hover {
-    background-color: var(--background-color);
-    border-color: #cbd5e1;
+    background: var(--surface-alt);
   }
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+.btn-ghost {
+  background: transparent;
+  color: var(--navy-soft);
+  border: none;
+
+  &:hover {
+    background: var(--surface-alt);
+  }
 }
 
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-green {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-amber {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.badge-red {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.badge-indigo {
+  background: var(--info-bg);
+  color: var(--indigo);
+}
+
+.badge-gray {
+  background: var(--surface-alt);
+  color: var(--navy-soft);
+}
+
+/* Global SVG Constraints */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+/* Tailwind Utility Compatibility Rules */
+.flex { display: flex !important; }
+.flex-col { flex-direction: column !important; }
+.flex-row { flex-direction: row !important; }
+.items-center { align-items: center !important; }
+.justify-between { justify-content: space-between !important; }
+.justify-center { justify-content: center !important; }
+.flex-1 { flex: 1 1 0% !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 0.75rem !important; }
+.gap-4 { gap: 1rem !important; }
+.gap-6 { gap: 1.5rem !important; }
+.grid { display: grid !important; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 0.75rem !important; }
+.p-4 { padding: 1rem !important; }
+.p-5 { padding: 1.25rem !important; }
+.p-6 { padding: 1.5rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.px-5 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+.rounded-xl { border-radius: 0.75rem !important; }
+.rounded-2xl { border-radius: 1rem !important; }
+.rounded-full { border-radius: 9999px !important; }
+.bg-slate-900 { background-color: #0f172a !important; }
+.bg-slate-950 { background-color: #020617 !important; }
+.border-slate-800 { border-color: #e2e8f0 !important; }
+.text-white { color: #ffffff !important; }
+.text-slate-300 { color: #3d4459 !important; }
+.text-slate-400 { color: #8b90a6 !important; }
+.text-emerald-400 { color: #059669 !important; }
+.text-indigo-400 { color: #4f46e5 !important; }
+.font-bold { font-weight: 700 !important; }
+.font-semibold { font-weight: 600 !important; }
+
+svg.w-3, .w-3 { width: 0.75rem !important; }
+svg.h-3, .h-3 { height: 0.75rem !important; }
+svg.w-3\.5, .w-3\.5 { width: 0.875rem !important; }
+svg.h-3\.5, .h-3\.5 { height: 0.875rem !important; }
+svg.w-4, .w-4 { width: 1rem !important; }
+svg.h-4, .h-4 { height: 1rem !important; }
+svg.w-5, .w-5 { width: 1.25rem !important; }
+svg.h-5, .h-5 { height: 1.25rem !important; }
+svg.w-6, .w-6 { width: 1.5rem !important; }
+svg.h-6, .h-6 { height: 1.5rem !important; }
+svg.w-8, .w-8 { width: 2rem !important; }
+svg.h-8, .h-8 { height: 2rem !important; }
+svg.w-10, .w-10 { width: 2.5rem !important; }
+svg.h-10, .h-10 { height: 2.5rem !important; }
+svg.w-12, .w-12 { width: 3rem !important; }
+svg.h-12, .h-12 { height: 3rem !important; }
+svg.w-16, .w-16 { width: 4rem !important; }
+svg.h-16, .h-16 { height: 4rem !important; }

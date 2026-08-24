@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.core.annotation.Order;
+
 @Component
+@Order(1)
 public class CatalogDataInitializer implements CommandLineRunner {
 
     private final ProductCategoryRepository categoryRepository;
@@ -39,7 +42,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
 
-        if (categoryRepository.count() > 0 || productRepository.count() > 0) {
+        if (categoryRepository.count() > 0 && productRepository.findById(CHIAVARI_CHAIR_ID).isPresent()) {
             return;
         }
         initCategoriesAndProducts(tenantId);
@@ -70,7 +73,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("8.00"), new BigDecimal("65.00"),
                 500, 20, 10, 5
         );
-        chiavari.setImageUrl("https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80");
+        chiavari.setImageUrl("https://images.unsplash.com/photo-1503602642458-232111445657?w=500&q=80");
 
         Product whiteFolding = new Product(
                 WHITE_FOLDING_CHAIR_ID, tenantId, "WFC-002", "White Folding Chair",
@@ -79,6 +82,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("3.50"), new BigDecimal("30.00"),
                 800, 10, 5, 0
         );
+        whiteFolding.setImageUrl("https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80");
 
         Product roundTable = new Product(
                 ROUND_TABLE_ID, tenantId, "TBL-060", "Round Table 60\"",
@@ -87,6 +91,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("14.00"), new BigDecimal("120.00"),
                 60, 2, 1, 0
         );
+        roundTable.setImageUrl("https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=500&q=80");
 
         Product cocktailTable = new Product(
                 UUID.fromString("44444444-4444-4444-4444-444444444444"), tenantId, "TBL-CKT", "Cocktail Table",
@@ -95,6 +100,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("12.00"), new BigDecimal("95.00"),
                 40, 1, 0, 0
         );
+        cocktailTable.setImageUrl("https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=500&q=80");
 
         Product linen = new Product(
                 UUID.fromString("55555555-5555-5555-5555-555555555555"), tenantId, "LIN-WHT", "White Table Linen",
@@ -103,6 +109,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("10.00"), new BigDecimal("45.00"),
                 150, 5, 2, 1
         );
+        linen.setImageUrl("https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80");
 
         Product uplight = new Product(
                 UUID.fromString("66666666-6666-6666-6666-666666666666"), tenantId, "LGT-LED", "LED Uplight",
@@ -111,6 +118,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("25.00"), new BigDecimal("180.00"),
                 50, 3, 1, 0
         );
+        uplight.setImageUrl("https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80");
 
         Product bistroChair = new Product(
                 UUID.fromString("77777777-7777-7777-7777-777777777777"), tenantId, "CHR-BST", "Bistro Chair",
@@ -119,6 +127,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("6.50"), new BigDecimal("50.00"),
                 200, 5, 2, 0
         );
+        bistroChair.setImageUrl("https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=80");
 
         Product tent = new Product(
                 UUID.fromString("88888888-8888-8888-8888-888888888888"), tenantId, "TNT-2020", "20x20 Tent",
@@ -127,6 +136,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("350.00"), new BigDecimal("2500.00"),
                 10, 1, 0, 0
         );
+        tent.setImageUrl("https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=500&q=80");
 
         Product danceFloor = new Product(
                 UUID.fromString("99999999-9999-9999-9999-999999999999"), tenantId, "DNC-FLR", "Dance Floor",
@@ -135,6 +145,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("450.00"), new BigDecimal("3200.00"),
                 8, 0, 0, 0
         );
+        danceFloor.setImageUrl("https://images.unsplash.com/photo-1545128485-c400e7702796?w=500&q=80");
 
         Product stage = new Product(
                 UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), tenantId, "STG-PLT", "Stage Platform",
@@ -143,6 +154,7 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 new BigDecimal("75.00"), new BigDecimal("600.00"),
                 15, 1, 0, 0
         );
+        stage.setImageUrl("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80");
 
         productRepository.saveAll(List.of(
                 chiavari, whiteFolding, roundTable, cocktailTable, linen,

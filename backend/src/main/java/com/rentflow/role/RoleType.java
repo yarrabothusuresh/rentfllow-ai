@@ -5,6 +5,9 @@ public enum RoleType {
     ADMIN,
     SALES,
     WAREHOUSE,
+    WAREHOUSE_MANAGER,
+    WAREHOUSE_OPERATOR,
+    FINANCE,
     DRIVER,
     CUSTOMER
 }

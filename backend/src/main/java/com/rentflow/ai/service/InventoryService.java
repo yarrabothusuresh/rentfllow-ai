@@ -138,15 +138,27 @@ public class InventoryService {
         Product product = productRepository.findByTenantIdAndId(tenantId, dto.getProductId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
+        LocalDateTime start = dto.getStartDateTime() != null ? dto.getStartDateTime() : LocalDateTime.now();
+        LocalDateTime end = dto.getEndDateTime() != null ? dto.getEndDateTime() : start.plusDays(2);
+
+        // Atomic Availability Check
+        AvailabilityResultDTO avail = availabilityService.checkAvailability(tenantId, dto.getProductId(), dto.getQuantity(), start, end);
+        if (avail.getAvailableQuantity() < dto.getQuantity()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only " + avail.getAvailableQuantity() + " units are available for the selected rental period.");
+        }
+
         InventoryReservation r = new InventoryReservation();
         r.setTenantId(tenantId);
         r.setProductId(dto.getProductId());
         r.setEventId(dto.getEventId());
         r.setBookingId(dto.getBookingId());
         r.setQuantity(dto.getQuantity());
-        r.setStartDateTime(dto.getStartDateTime() != null ? dto.getStartDateTime() : LocalDateTime.now());
-        r.setEndDateTime(dto.getEndDateTime() != null ? dto.getEndDateTime() : LocalDateTime.now().plusDays(2));
+        r.setStartDateTime(start);
+        r.setEndDateTime(end);
         r.setStatus(dto.getStatus() != null ? dto.getStatus() : ReservationStatus.RESERVED);
+        r.setReservationType(dto.getReservationType() != null ? dto.getReservationType() : ReservationType.BOOKING);
+        r.setCreatedBy(createdBy != null ? createdBy : "System");
+        r.setExpiresAt(dto.getExpiresAt());
 
         InventoryReservation saved = reservationRepository.save(r);
 
@@ -163,6 +175,94 @@ public class InventoryService {
         transactionRepository.save(tx);
 
         return availabilityService.mapReservationToDTO(saved);
+    }
+
+    public List<InventoryReservationDTO> createBatchReservations(String tenantId, BatchReservationRequestDTO request, String createdBy) {
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+            return List.of();
+        }
+
+        LocalDateTime start = request.getStartDateTime() != null ? request.getStartDateTime() : LocalDateTime.now();
+        LocalDateTime end = request.getEndDateTime() != null ? request.getEndDateTime() : start.plusDays(2);
+
+        // Step 1: Pre-validate all items
+        for (BatchReservationRequestDTO.ItemRequest item : request.getItems()) {
+            AvailabilityResultDTO avail = availabilityService.checkAvailability(tenantId, item.getProductId(), item.getQuantity(), start, end);
+            if (avail.getAvailableQuantity() < item.getQuantity()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only " + avail.getAvailableQuantity() + " units of " + avail.getProductName() + " are available for the selected rental period.");
+            }
+        }
+
+        // Step 2: Create reservations atomically
+        List<InventoryReservationDTO> createdList = new java.util.ArrayList<>();
+        for (BatchReservationRequestDTO.ItemRequest item : request.getItems()) {
+            InventoryReservationDTO dto = new InventoryReservationDTO();
+            dto.setProductId(item.getProductId());
+            dto.setBookingId(request.getBookingId());
+            dto.setEventId(request.getEventId());
+            dto.setQuantity(item.getQuantity());
+            dto.setStartDateTime(start);
+            dto.setEndDateTime(end);
+            dto.setStatus(ReservationStatus.RESERVED);
+            dto.setReservationType(request.getReservationType() != null ? request.getReservationType() : ReservationType.BOOKING);
+            createdList.add(createReservation(tenantId, dto, createdBy));
+        }
+
+        return createdList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryReservationDTO> getReservations(String tenantId, String status, String search) {
+        List<InventoryReservation> list = reservationRepository.findByTenantId(tenantId);
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("ALL")) {
+            try {
+                ReservationStatus reqStatus = ReservationStatus.valueOf(status.toUpperCase());
+                list = list.stream().filter(r -> r.getStatus() == reqStatus).collect(Collectors.toList());
+            } catch (Exception ignored) {}
+        }
+
+        return list.stream()
+                .map(availabilityService::mapReservationToDTO)
+                .filter(dto -> {
+                    if (search == null || search.isBlank()) return true;
+                    String s = search.toLowerCase();
+                    return (dto.getProductName() != null && dto.getProductName().toLowerCase().contains(s)) ||
+                           (dto.getEventName() != null && dto.getEventName().toLowerCase().contains(s)) ||
+                           (dto.getId() != null && dto.getId().toString().toLowerCase().contains(s));
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<InventoryReservationDTO> getReservationById(String tenantId, UUID id) {
+        return reservationRepository.findByTenantIdAndId(tenantId, id)
+                .map(availabilityService::mapReservationToDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InventoryConflictDTO> getConflicts(String tenantId) {
+        List<Product> products = productRepository.findByTenantId(tenantId);
+        List<InventoryConflictDTO> conflicts = new java.util.ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime horizon = now.plusDays(30);
+
+        for (Product p : products) {
+            AvailabilityResultDTO avail = availabilityService.checkAvailability(tenantId, p.getId(), 1, now, horizon);
+            if (avail.getQuantityReserved() > p.getQuantityOwned() || avail.getShortage() > 0) {
+                InventoryConflictDTO conflict = new InventoryConflictDTO();
+                conflict.setProductId(p.getId());
+                conflict.setProductName(p.getName());
+                conflict.setSku(p.getSku());
+                conflict.setRequestedQuantity(avail.getRequestedQuantity());
+                conflict.setAvailableQuantity(avail.getAvailableQuantity());
+                conflict.setShortageQuantity(Math.max(1, avail.getShortage()));
+                conflict.setEventDate(now);
+                conflict.setPriority("HIGH");
+                conflicts.add(conflict);
+            }
+        }
+        return conflicts;
     }
 
     public Optional<InventoryReservationDTO> releaseReservation(String tenantId, UUID reservationId, String createdBy) {

@@ -3,6 +3,7 @@ com\rentflow\notification\service\SafeTemplateRenderer.class
 com\rentflow\ai\controller\CustomerController.class
 com\rentflow\ai\model\CustomerType.class
 com\rentflow\ai\service\AIService.class
+com\rentflow\warehouse\service\DefaultInventoryIdentificationServiceImpl.class
 com\rentflow\workflow\model\LeadStatus.class
 com\rentflow\ai\model\TransactionType.class
 com\rentflow\ai\model\QuoteStatus.class
@@ -13,6 +14,7 @@ com\rentflow\notification\dto\NotificationResult.class
 com\rentflow\ai\model\QuoteItem.class
 com\rentflow\ai\dto\EventRequirementDTO.class
 com\rentflow\notification\event\InvoiceSentEvent.class
+com\rentflow\ai\dto\BulkAvailabilityResultDTO$ItemResult.class
 com\rentflow\ai\tool\GetInventorySummaryTool.class
 com\rentflow\user\User.class
 com\rentflow\workflow\model\InventoryStatus.class
@@ -21,8 +23,11 @@ com\rentflow\notification\model\NotificationPriority.class
 com\rentflow\permission\PermissionCode.class
 com\rentflow\portal\dto\CustomerLoginRequestDTO.class
 com\rentflow\ai\dto\ProductDTO.class
+com\rentflow\ai\dto\InventoryConflictDTO.class
+com\rentflow\ai\dto\BulkAvailabilityRequestDTO.class
 com\rentflow\ai\dto\LeadConversionRequest.class
 com\rentflow\portal\dto\CustomerPortalDashboardDTO$RecentActivityDTO.class
+com\rentflow\warehouse\model\WarehouseOrderItemStatus.class
 com\rentflow\invoice\dto\InvoiceItemDTO.class
 com\rentflow\payment\model\PaymentMethod.class
 com\rentflow\ai\provider\AIProvider.class
@@ -34,6 +39,7 @@ com\rentflow\ai\dto\ProductCategoryDTO.class
 com\rentflow\ai\dto\InventoryAdjustmentRequest.class
 com\rentflow\notification\model\NotificationType.class
 com\rentflow\ai\tool\GetBookingTool.class
+com\rentflow\warehouse\repository\WarehouseLocationRepository.class
 com\rentflow\role\RoleRepository.class
 com\rentflow\tenant\TenantRepository.class
 com\rentflow\ai\tool\CalculateProfitabilityTool.class
@@ -65,8 +71,10 @@ com\rentflow\ai\model\FeeType.class
 com\rentflow\ai\tool\GetLowStockProductsTool.class
 com\rentflow\ai\model\Booking.class
 com\rentflow\portal\dto\CustomerPortalQuoteDTO.class
+com\rentflow\warehouse\model\WarehouseOrderPriority.class
 com\rentflow\notification\event\InvoiceCreatedEvent.class
 com\rentflow\notification\provider\MockSmsNotificationProvider.class
+com\rentflow\ai\dto\BulkAvailabilityRequestDTO$ItemRequest.class
 com\rentflow\ai\model\Event.class
 com\rentflow\invoice\repository\InvoiceRepository.class
 com\rentflow\notification\dto\NotificationRequestDTO.class
@@ -80,10 +88,13 @@ com\rentflow\notification\dto\NotificationUnreadCountDTO.class
 com\rentflow\ai\model\QuoteFee.class
 com\rentflow\ai\service\InventoryService.class
 com\rentflow\notification\service\NotificationTemplateService.class
+com\rentflow\warehouse\dto\CompleteWorkflowRequestDTO.class
+com\rentflow\warehouse\dto\AssignWarehouseOrderDTO.class
 com\rentflow\event\EventRepository.class
 com\rentflow\ai\service\CatalogDataInitializer.class
 com\rentflow\payment\model\Payment.class
 com\rentflow\payment\model\PaymentAudit.class
+com\rentflow\ai\service\InventoryAlternativeService.class
 com\rentflow\ai\tool\GetWarehouseTasksTool.class
 com\rentflow\notification\listener\NotificationEventListener.class
 com\rentflow\invoice\repository\InvoiceAuditRepository.class
@@ -92,7 +103,10 @@ com\rentflow\notification\repository\NotificationTemplateRepository.class
 com\rentflow\ai\controller\QuoteController.class
 com\rentflow\ai\dto\AvailabilityResultDTO.class
 com\rentflow\ai\model\ProductCategory.class
+com\rentflow\warehouse\model\WarehouseOrderItem.class
 com\rentflow\ai\controller\AIController.class
+com\rentflow\ai\dto\BulkAvailabilityResultDTO.class
+com\rentflow\warehouse\model\WarehouseOrderStatus.class
 com\rentflow\notification\service\NotificationDataInitializer.class
 com\rentflow\ai\tool\GetDeliveriesTool.class
 com\rentflow\notification\dto\AIDraftDTO.class
@@ -108,6 +122,7 @@ com\rentflow\ai\dto\LeadDTO.class
 com\rentflow\ai\mock\DemoDataRepository.class
 com\rentflow\notification\service\AIDraftServiceImpl.class
 com\rentflow\portal\model\RequestType.class
+com\rentflow\ai\dto\BatchReservationRequestDTO.class
 com\rentflow\ai\model\LeadStatus.class
 com\rentflow\portal\dto\CreateCustomerRequestDTO.class
 com\rentflow\notification\event\BookingCancelledEvent.class
@@ -115,6 +130,7 @@ com\rentflow\ai\model\CustomerStatus.class
 com\rentflow\payment\dto\PaymentDTO.class
 com\rentflow\ai\controller\InventoryController.class
 com\rentflow\auth\RoleService.class
+com\rentflow\warehouse\dto\PackItemRequestDTO.class
 com\rentflow\ai\dto\BookingUnavailableDTO.class
 com\rentflow\auth\PermissionService.class
 com\rentflow\ai\model\ReservationStatus.class
@@ -122,24 +138,31 @@ com\rentflow\portal\dto\CustomerRequestDTO.class
 com\rentflow\workflow\model\BookingStatus.class
 com\rentflow\notification\dto\NotificationDTO.class
 com\rentflow\invoice\repository\InvoiceItemRepository.class
+com\rentflow\ai\model\ReservationType.class
 com\rentflow\ai\repository\LeadRepository.class
+com\rentflow\warehouse\repository\WarehouseAuditRepository.class
+com\rentflow\warehouse\dto\WarehouseOrderItemDTO.class
 com\rentflow\notification\event\BookingConfirmedEvent.class
 com\rentflow\workflow\WorkflowController.class
 com\rentflow\payment\controller\PaymentController.class
 com\rentflow\ai\model\QuoteDiscount.class
 com\rentflow\ai\tool\GetCustomerQuotesTool.class
 com\rentflow\portal\model\RequestStatus.class
+com\rentflow\warehouse\model\WarehouseAudit.class
 com\rentflow\ai\controller\ProductCategoryController.class
 com\rentflow\ai\controller\LeadController.class
 com\rentflow\ai\service\QuoteDataInitializer.class
 com\rentflow\portal\repository\CustomerUserRepository.class
 com\rentflow\notification\service\NotificationService.class
 com\rentflow\user\UserRepository.class
+com\rentflow\warehouse\dto\WarehouseLocationDTO.class
+com\rentflow\warehouse\service\InventoryIdentificationService.class
 com\rentflow\ai\dto\QuoteCalculationRequest.class
 com\rentflow\icp\IcpController.class
 com\rentflow\ai\tool\FutureActionTool.class
 com\rentflow\icp\IcpService.class
 com\rentflow\notification\service\NotificationPreferenceService.class
+com\rentflow\warehouse\model\WarehouseLocation.class
 com\rentflow\ai\tool\SearchLeadsTool.class
 com\rentflow\ai\repository\InventoryReservationRepository.class
 com\rentflow\workflow\dto\WorkflowTransitionRequest.class
@@ -151,6 +174,7 @@ com\rentflow\payment\repository\PaymentRepository.class
 com\rentflow\ai\model\PricingStrategy.class
 com\rentflow\notification\repository\NotificationPreferenceRepository.class
 com\rentflow\ai\model\Lead.class
+com\rentflow\warehouse\service\WarehouseService.class
 com\rentflow\portal\dto\CustomerProfileDTO.class
 com\rentflow\workflow\model\DeliveryStatus.class
 com\rentflow\ai\service\CrmDataInitializer.class
@@ -166,6 +190,7 @@ com\rentflow\ai\dto\InventoryReservationDTO.class
 com\rentflow\portal\dto\CustomerPortalEventDTO.class
 com\rentflow\ai\repository\QuoteRepository.class
 com\rentflow\workflow\model\WorkflowStage.class
+com\rentflow\ai\dto\InventoryConflictDTO$AlternativeProductDTO.class
 com\rentflow\portal\model\CustomerUser.class
 com\rentflow\ai\repository\EventRepository.class
 com\rentflow\ai\tool\GetCustomerEventsTool.class
@@ -178,9 +203,12 @@ com\rentflow\tenant\Tenant.class
 com\rentflow\ai\dto\ToolResult.class
 com\rentflow\ai\model\Customer.class
 com\rentflow\portal\dto\CustomerPortalDashboardDTO.class
+com\rentflow\warehouse\repository\WarehouseOrderItemRepository.class
 com\rentflow\ai\model\InventoryTransaction.class
+com\rentflow\warehouse\dto\PickItemRequestDTO.class
 com\rentflow\portal\model\CustomerRequest.class
 com\rentflow\notification\service\AIDraftService.class
+com\rentflow\warehouse\dto\WarehouseOrderDTO.class
 com\rentflow\ai\provider\MockAIProvider.class
 com\rentflow\auth\AuthController$PermissionDto.class
 com\rentflow\invoice\dto\InvoiceDTO.class
@@ -193,6 +221,7 @@ com\rentflow\invoice\model\InvoiceStatus.class
 com\rentflow\notification\event\QuoteChangeRequestedEvent.class
 com\rentflow\ai\model\LeadSource.class
 com\rentflow\invoice\service\InvoiceService.class
+com\rentflow\warehouse\dto\WarehouseDashboardDTO.class
 com\rentflow\ai\tool\GetQuoteTool.class
 com\rentflow\ai\tool\GetLeadTool.class
 com\rentflow\ai\dto\AvailabilityCheckRequest.class
@@ -207,6 +236,7 @@ com\rentflow\invoice\service\TaxService.class
 com\rentflow\ai\dto\LeadConversionResult.class
 com\rentflow\ai\model\DiscountType.class
 com\rentflow\ai\tool\SendQuoteActionTool.class
+com\rentflow\warehouse\model\WarehouseOrder.class
 com\rentflow\notification\repository\NotificationRepository.class
 com\rentflow\workflow\WorkflowStateMachine.class
 com\rentflow\invoice\service\InvoiceDocumentService.class
@@ -214,6 +244,7 @@ com\rentflow\permission\Permission.class
 com\rentflow\ai\tool\CancelBookingTool.class
 com\rentflow\notification\model\NotificationPreference.class
 com\rentflow\notification\provider\SmsNotificationProvider.class
+com\rentflow\warehouse\service\WarehouseDataInitializer.class
 com\rentflow\ai\service\CustomerService.class
 com\rentflow\ai\dto\InventorySummaryDTO.class
 com\rentflow\notification\controller\CustomerPortalNotificationController.class
@@ -225,6 +256,7 @@ com\rentflow\ai\dto\QuoteFeeDTO.class
 com\rentflow\notification\model\NotificationChannel.class
 com\rentflow\ai\model\EventStatus.class
 com\rentflow\notification\model\Notification.class
+com\rentflow\warehouse\service\WarehouseService$1.class
 com\rentflow\ai\service\LeadService.class
 com\rentflow\ai\model\BookingItem.class
 com\rentflow\ai\dto\QuoteDuplicateRequest.class
@@ -240,6 +272,7 @@ com\rentflow\ai\tool\GetBookingInventoryTool.class
 com\rentflow\notification\repository\NotificationAuditRepository.class
 com\rentflow\ai\model\ProductType.class
 com\rentflow\ai\tool\AITool.class
+com\rentflow\warehouse\repository\WarehouseOrderRepository.class
 com\rentflow\ai\tool\SearchBookingsTool.class
 com\rentflow\ai\dto\AIResponse.class
 com\rentflow\ai\service\BookingService.class
@@ -252,6 +285,8 @@ com\rentflow\ai\dto\InventoryTransactionDTO.class
 com\rentflow\auth\AuthController$UserPermissionsDto.class
 com\rentflow\icp\IcpProfile.class
 com\rentflow\ai\repository\BookingItemRepository.class
+com\rentflow\warehouse\controller\WarehouseController.class
+com\rentflow\ai\service\InventoryDataInitializer.class
 com\rentflow\ai\tool\GetEventTool.class
 com\rentflow\notification\model\NotificationStatus.class
 com\rentflow\ai\repository\ProductRepository.class
@@ -263,6 +298,7 @@ com\rentflow\ai\orchestrator\AIOrchestrator.class
 com\rentflow\notification\service\AIDraftServiceImpl$1.class
 com\rentflow\payment\service\PaymentService.class
 com\rentflow\invoice\service\InvoiceDataInitializer.class
+com\rentflow\ai\dto\BatchReservationRequestDTO$ItemRequest.class
 com\rentflow\portal\dto\CustomerPortalBookingDTO.class
 com\rentflow\ai\model\Product.class
 com\rentflow\ai\controller\ProductController.class

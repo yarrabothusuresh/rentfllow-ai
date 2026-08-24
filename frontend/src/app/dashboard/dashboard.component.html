@@ -19,9 +19,10 @@
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFulfillment()">Fulfillment</div>
-      <a routerLink="/inventory" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory</a>
+      <a routerLink="/dashboard/inventory/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory Control</a>
+      <a routerLink="/dashboard/inventory/availability" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Availability Calendar</a>
       <a routerLink="/products" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse</a>
+      <a routerLink="/warehouse/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse Operations</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFinanceAdmin()">Finance & Admin</div>
@@ -67,6 +68,9 @@
           <option value="ADMIN">Admin</option>
           <option value="SALES">Sales</option>
           <option value="WAREHOUSE">Warehouse</option>
+          <option value="WAREHOUSE_MANAGER">Warehouse Manager</option>
+          <option value="WAREHOUSE_OPERATOR">Warehouse Operator</option>
+          <option value="FINANCE">Finance</option>
           <option value="DRIVER">Driver</option>
           <option value="CUSTOMER">Customer</option>
         </select>

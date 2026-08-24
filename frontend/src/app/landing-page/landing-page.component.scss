@@ -352,7 +352,7 @@
 // 4. Problems Section
 .problems {
   padding: 6rem 4rem;
-  background-color: #fafbfd;
+  background-color: #f8fafc;
 
   .problem-grid {
     display: grid;
@@ -362,15 +362,16 @@
     .problem-card {
       padding: 2rem;
       position: relative;
-      background: white;
-      border-color: var(--border-color);
-      box-shadow: var(--shadow-sm);
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
       .problem-num {
         font-size: 2.5rem;
         font-weight: 800;
         color: #ef4444;
-        opacity: 0.15;
+        opacity: 0.25;
         position: absolute;
         top: 1rem;
         right: 1.5rem;
@@ -380,12 +381,12 @@
         font-size: 1.2rem;
         font-weight: 700;
         margin-bottom: 0.75rem;
-        color: var(--primary-color);
+        color: #0f172a;
         padding-right: 2rem;
       }
 
       p {
-        color: var(--text-secondary);
+        color: #475569;
         font-size: 0.95rem;
         line-height: 1.5;
       }
@@ -396,13 +397,14 @@
 // 5. Solution Section (Interactive Stepper)
 .solution {
   padding: 6rem 4rem;
-  background-color: white;
+  background-color: #ffffff;
 
   .solution-stepper {
     max-width: 1000px;
     margin: 0 auto;
     background: #f8fafc;
-    border: 1px solid var(--border-color);
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
     padding: 2rem;
     overflow: hidden;
 
@@ -414,8 +416,8 @@
       justify-content: center;
 
       .stepper-btn {
-        background: white;
-        border: 1px solid var(--border-color);
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
         border-radius: var(--border-radius-sm);
         padding: 0.5rem 1rem;
         display: flex;
@@ -427,27 +429,27 @@
         .step-num-lbl {
           font-size: 0.75rem;
           font-weight: 700;
-          color: var(--text-secondary);
+          color: #64748b;
         }
 
         .step-name {
           font-size: 0.9rem;
           font-weight: 600;
-          color: var(--text-primary);
+          color: #0f172a;
         }
 
         &:hover {
-          border-color: #cbd5e1;
+          border-color: #94a3b8;
           background-color: #f1f5f9;
         }
 
         &.active {
-          background-color: var(--secondary-color);
-          border-color: var(--secondary-color);
-          box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+          background-color: #2563eb;
+          border-color: #2563eb;
+          box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 
           .step-num-lbl, .step-name {
-            color: white;
+            color: #ffffff;
           }
         }
       }
@@ -457,30 +459,28 @@
       display: flex;
       align-items: flex-start;
       gap: 1.5rem;
-      background: white;
-      padding: 1.75rem;
-      border-radius: var(--border-radius-md);
-      border: 1px solid var(--border-color);
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
 
       .explanation-icon {
         font-size: 2rem;
-        line-height: 1;
-        padding: 0.5rem;
-        background-color: #eff6ff;
-        border-radius: var(--border-radius-sm);
       }
 
       .explanation-content {
         h3 {
-          font-size: 1.25rem;
+          font-size: 1.15rem;
           font-weight: 700;
-          color: var(--primary-color);
+          color: #0f172a;
           margin-bottom: 0.5rem;
         }
+
         p {
-          font-size: 1.05rem;
-          color: var(--text-secondary);
+          color: #334155;
+          font-size: 0.95rem;
           line-height: 1.5;
+          margin: 0;
         }
       }
     }
@@ -538,8 +538,10 @@
 
     .simulation-card {
       padding: 2rem;
-      background-color: white;
-      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
 
@@ -549,18 +551,18 @@
         align-items: center;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid #e2e8f0;
 
         h3 {
           font-size: 1.25rem;
           font-weight: 700;
-          color: var(--primary-color);
+          color: #0f172a;
         }
 
         .btn-simulate {
-          background-color: transparent;
+          background-color: #f8fafc;
           border: 1px solid #cbd5e1;
-          color: var(--text-primary);
+          color: #334155;
           padding: 0.4rem 0.8rem;
           border-radius: var(--border-radius-sm);
           font-size: 0.8rem;
@@ -568,14 +570,15 @@
           transition: all 0.2s;
 
           &:hover {
-            background-color: #f8fafc;
-            border-color: var(--text-primary);
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            color: #0f172a;
           }
 
           &.btn-success-sim:hover {
             background-color: #eff6ff;
-            border-color: var(--secondary-color);
-            color: var(--secondary-color);
+            border-color: #2563eb;
+            color: #1d4ed8;
           }
         }
       }
@@ -598,8 +601,8 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background-color: #e2e8f0;
-            color: #64748b;
+            background-color: #cbd5e1;
+            color: #1e293b;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -609,7 +612,7 @@
 
           .step-text {
             font-size: 0.95rem;
-            color: var(--text-secondary);
+            color: #334155;
             font-weight: 500;
           }
 
@@ -620,12 +623,12 @@
 
             .step-bullet {
               background-color: #ef4444;
-              color: white;
+              color: #ffffff;
             }
 
             .step-text {
               color: #b91c1c;
-              font-weight: 600;
+              font-weight: 700;
             }
           }
         }
@@ -637,13 +640,13 @@
           border-color: #bfdbfe;
 
           .step-bullet {
-            background-color: var(--secondary-color);
-            color: white;
+            background-color: #2563eb;
+            color: #ffffff;
           }
 
           .step-text {
-            color: var(--secondary-color);
-            font-weight: 600;
+            color: #1e40af;
+            font-weight: 700;
           }
         }
       }

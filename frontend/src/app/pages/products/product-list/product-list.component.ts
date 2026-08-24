@@ -10,7 +10,8 @@ import { Product, ProductCategory, ProductStatus } from '../../../models/catalog
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './product-list.component.html'
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.scss']
 })
 export class ProductListComponent implements OnInit {
   products: Product[] = [];
@@ -107,5 +108,23 @@ export class ProductListComponent implements OnInit {
       default:
         return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
+  }
+
+  getProductImage(p: Product): string {
+    if (p.imageUrl && p.imageUrl.trim().length > 0) {
+      return p.imageUrl;
+    }
+    const sku = (p.sku || '').toUpperCase();
+    if (sku.includes('CHI')) return 'https://images.unsplash.com/photo-1503602642458-232111445657?w=500&q=80';
+    if (sku.includes('WFC')) return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80';
+    if (sku.includes('TBL-060')) return 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=500&q=80';
+    if (sku.includes('TBL-CKT')) return 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=500&q=80';
+    if (sku.includes('LIN')) return 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80';
+    if (sku.includes('LGT')) return 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80';
+    if (sku.includes('CHR')) return 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=80';
+    if (sku.includes('TNT')) return 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=500&q=80';
+    if (sku.includes('DNC')) return 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=500&q=80';
+    if (sku.includes('STG')) return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
+    return 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=500&q=80';
   }
 }

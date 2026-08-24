@@ -18,9 +18,15 @@ public interface InventoryReservationRepository extends JpaRepository<InventoryR
     Optional<InventoryReservation> findByTenantIdAndId(String tenantId, UUID id);
     List<InventoryReservation> findByTenantIdAndProductId(String tenantId, UUID productId);
     List<InventoryReservation> findByTenantIdAndEventId(String tenantId, UUID eventId);
+    List<InventoryReservation> findByTenantIdAndBookingId(String tenantId, UUID bookingId);
+    List<InventoryReservation> findByTenantIdAndStatusIn(String tenantId, List<ReservationStatus> statuses);
+    List<InventoryReservation> findByTenantIdAndStatusAndExpiresAtBefore(String tenantId, ReservationStatus status, LocalDateTime now);
 
     @Query("SELECT r FROM InventoryReservation r WHERE r.tenantId = :tenantId AND r.productId = :productId AND " +
-           "(r.status = com.rentflow.ai.model.ReservationStatus.RESERVED OR r.status = com.rentflow.ai.model.ReservationStatus.PENDING) AND " +
+           "(r.status = com.rentflow.ai.model.ReservationStatus.RESERVED OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.CONFIRMED OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.PENDING OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.HOLD) AND " +
            "r.startDateTime < :requestedEnd AND r.endDateTime > :requestedStart")
     List<InventoryReservation> findOverlappingReservations(
             @Param("tenantId") String tenantId,

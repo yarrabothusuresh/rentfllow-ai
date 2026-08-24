@@ -1,0 +1,3592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentFlow AI — Your Rental Business, On Autopilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F6F7FB;
+            --surface: #FFFFFF;
+            --surface-alt: #F0F1F7;
+            --border: #E4E6F0;
+            --navy: #0F172A;
+            --navy-soft: #3D4459;
+            --muted: #8B90A6;
+            --indigo: #4F46E5;
+            --indigo-dark: #3730A3;
+            --violet: #7C3AED;
+            --grad: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            --success: #059669;
+            --success-bg: #ECFDF5;
+            --warning: #D97706;
+            --warning-bg: #FFFBEB;
+            --danger: #DC2626;
+            --danger-bg: #FEF2F2;
+            --info-bg: #EEF2FF;
+            --radius: 14px;
+            --radius-sm: 9px;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+            --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 6px 20px -8px rgba(15, 23, 42, 0.10);
+            --shadow-lg: 0 20px 50px -12px rgba(15, 23, 42, 0.22);
+            --sidebar-w: 232px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--navy);
+            -webkit-font-smoothing: antialiased;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Lexend', sans-serif;
+            margin: 0;
+            color: var(--navy);
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        ::selection {
+            background: #DDD6FE;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D6D9E6;
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--indigo);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.001ms !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        /* ---------- utility ---------- */
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-4 {
+            gap: 4px;
+        }
+
+        .gap-8 {
+            gap: 8px;
+        }
+
+        .gap-12 {
+            gap: 12px;
+        }
+
+        .gap-16 {
+            gap: 16px;
+        }
+
+        .gap-24 {
+            gap: 24px;
+        }
+
+        .wrap {
+            flex-wrap: wrap;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .navy-soft {
+            color: var(--navy-soft);
+        }
+
+        .bold {
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge-green {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .badge-amber {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .badge-red {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge-indigo {
+            background: var(--info-bg);
+            color: var(--indigo);
+        }
+
+        .badge-gray {
+            background: var(--surface-alt);
+            color: var(--navy-soft);
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-pad {
+            padding: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-weight: 600;
+            font-size: 13.5px;
+            transition: all .15s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--navy);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #000;
+            transform: translateY(-1px);
+        }
+
+        .btn-accent {
+            background: var(--grad);
+            color: #fff;
+            box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
+        }
+
+        .btn-accent:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--navy);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-alt);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--navy-soft);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface-alt);
+        }
+
+        .btn-sm {
+            padding: 6px 11px;
+            font-size: 12.5px;
+            border-radius: 8px;
+        }
+
+        .btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .input,
+        select.input,
+        textarea.input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--navy);
+        }
+
+        textarea.input {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .input:focus {
+            border-color: var(--indigo);
+        }
+
+        label.field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--navy-soft);
+            margin-bottom: 6px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            border: none;
+            margin: 0;
+        }
+
+        .icon {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+        }
+
+        .icon-sm {
+            width: 14px;
+            height: 14px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--muted);
+            font-weight: 600;
+            padding: 0 14px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+            vertical-align: middle;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr.clickable:hover {
+            background: var(--surface-alt);
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--grad);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12.5px;
+            flex-shrink: 0;
+        }
+
+        .progress-track {
+            height: 7px;
+            background: var(--surface-alt);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--grad);
+            border-radius: 99px;
+            transition: width .5s ease;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .page-head {
+            margin-bottom: 22px;
+        }
+
+        .page-head .sub {
+            color: var(--muted);
+            font-size: 13.5px;
+            margin-top: 3px;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 700;
+            font-family: 'Lexend', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--navy-soft);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .tag-chip svg {
+            width: 11px;
+            height: 11px;
+        }
+
+        .stagger>* {
+            animation: fadeUp .38s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            position: relative;
+        }
+
+        .pulse-dot::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: .7;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(2.6);
+            }
+        }
+
+        /* ---------- Landing ---------- */
+        #landing {
+            min-height: 100vh;
+            background:
+                radial-gradient(1100px 500px at 15% -10%, #EEF0FF 0%, transparent 60%),
+                radial-gradient(900px 500px at 100% 0%, #F3EEFF 0%, transparent 55%),
+                var(--bg);
+        }
+
+        .landing-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 48px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: 'Lexend';
+            font-weight: 700;
+            font-size: 17px;
+        }
+
+        .brand-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: var(--grad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 6px 14px -5px rgba(79, 70, 229, .6);
+        }
+
+        .landing-hero {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 70px 48px 40px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 56px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--info-bg);
+            color: var(--indigo);
+            font-size: 12.5px;
+            font-weight: 700;
+            padding: 6px 13px;
+            border-radius: 99px;
+            margin-bottom: 22px;
+        }
+
+        .hero-title {
+            font-size: 56px;
+            line-height: 1.04;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        .hero-title .grad-text {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 17px;
+            color: var(--navy-soft);
+            margin-top: 22px;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .hero-ctas .btn {
+            padding: 13px 22px;
+            font-size: 14.5px;
+        }
+
+        .trust-row {
+            display: flex;
+            gap: 26px;
+            margin-top: 44px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .workflow-visual {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-visual::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 160px;
+            height: 160px;
+            background: var(--grad);
+            opacity: .12;
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+
+        .wf-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            animation: wfIn .5s ease forwards;
+        }
+
+        .wf-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .wf-step .n {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            background: var(--grad);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .wf-arrow {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 1px 0;
+        }
+
+        @keyframes wfIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .compare-wrap {
+            max-width: 1280px;
+            margin: 20px auto 90px;
+            padding: 0 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .compare-card {
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .compare-card.old {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .compare-card.new {
+            background: var(--navy);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .compare-card.new::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--grad);
+            opacity: .16;
+        }
+
+        .compare-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .compare-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+        }
+
+        .compare-flow .step {
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .compare-card.old .step {
+            background: var(--surface-alt);
+            margin-bottom: 4px;
+            color: var(--navy-soft);
+        }
+
+        .compare-card.new .step {
+            background: rgba(255, 255, 255, 0.08);
+            margin-bottom: 4px;
+        }
+
+        .compare-flow .arr {
+            text-align: center;
+            font-size: 11px;
+            opacity: .5;
+            padding: 1px 0;
+        }
+
+        .feature-strip {
+            max-width: 1280px;
+            margin: 0 auto 90px;
+            padding: 0 48px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .feature-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 16px;
+        }
+
+        .feature-tile .fi {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: var(--info-bg);
+            color: var(--indigo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .feature-tile h4 {
+            font-size: 13.5px;
+        }
+
+        .feature-tile p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+
+        /* ---------- App shell ---------- */
+        #app-shell {
+            display: none;
+            height: 100vh;
+        }
+
+        #app-shell.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            background: var(--navy);
+            color: #E3E5F0;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 12px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar .brand {
+            color: #fff;
+            padding: 6px 10px 22px;
+        }
+
+        .nav-group-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #6B7290;
+            padding: 14px 12px 6px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 9px 12px;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #C4C7DA;
+            margin-bottom: 1px;
+            transition: all .12s;
+        }
+
+        .nav-item svg {
+            width: 16px;
+            height: 16px;
+            opacity: .85;
+            flex-shrink: 0;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            box-shadow: inset 2px 0 0 var(--violet);
+        }
+
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .topbar {
+            height: 60px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            gap: 16px;
+        }
+
+        .search-fake {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 8px 13px;
+            color: var(--muted);
+            font-size: 13px;
+            width: 280px;
+        }
+
+        .topbar-icons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--navy-soft);
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-alt);
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid var(--surface);
+        }
+
+        .page-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 26px 30px 60px;
+        }
+
+        .demo-mode-btn {
+            background: var(--grad);
+            color: #fff;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 9px;
+            font-size: 12.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ---------- Dashboard ---------- */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .kpi-card {
+            padding: 16px 17px;
+        }
+
+        .kpi-label {
+            font-size: 11.5px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+        .kpi-trend {
+            font-size: 11.5px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .ai-insight-panel {
+            background: var(--navy);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .ai-insight-panel::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -30px;
+            width: 220px;
+            height: 220px;
+            background: var(--grad);
+            opacity: .28;
+            border-radius: 50%;
+            filter: blur(30px);
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, .1);
+            padding: 5px 11px;
+            border-radius: 99px;
+            font-size: 11.5px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .ai-sparkle {
+            width: 14px;
+            height: 14px;
+        }
+
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 18px;
+        }
+
+        /* ---------- Chat / Copilot ---------- */
+        .copilot-wrap {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px);
+        }
+
+        .chat-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 4px 20px;
+        }
+
+        .chat-row {
+            display: flex;
+            gap: 11px;
+            margin-bottom: 18px;
+            max-width: 800px;
+        }
+
+        .chat-row.user {
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+
+        .chat-bubble {
+            padding: 13px 16px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+
+        .chat-row.ai .chat-bubble {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+
+        .chat-row.user .chat-bubble {
+            background: var(--navy);
+            color: #fff;
+            border-top-right-radius: 4px;
+        }
+
+        .chat-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-row.ai .chat-avatar {
+            background: var(--grad);
+            color: #fff;
+        }
+
+        .chat-row.user .chat-avatar {
+            background: var(--surface-alt);
+            color: var(--navy-soft);
+        }
+
+        .tool-trace {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .suggested-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .prompt-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 9px 14px;
+            border-radius: 11px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--navy-soft);
+        }
+
+        .prompt-chip:hover {
+            border-color: var(--indigo);
+            color: var(--indigo);
+        }
+
+        .chat-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            gap: 10px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .typing-dots span {
+            width: 5px;
+            height: 5px;
+            background: var(--muted);
+            border-radius: 50%;
+            animation: tdot 1.1s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes tdot {
+
+            0%,
+            60%,
+            100% {
+                opacity: .3;
+                transform: scale(.8);
+            }
+
+            30% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ---------- Kanban ---------- */
+        .kanban {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 250px;
+            gap: 14px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .kanban-col {
+            background: var(--surface-alt);
+            border-radius: 14px;
+            padding: 12px;
+            min-height: 200px;
+        }
+
+        .kanban-col-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--navy-soft);
+        }
+
+        .kanban-count {
+            background: var(--surface);
+            border-radius: 99px;
+            padding: 1px 8px;
+            font-size: 11px;
+        }
+
+        .lead-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px 13px;
+            margin-bottom: 9px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .lead-card:hover {
+            border-color: var(--indigo);
+            transform: translateY(-1px);
+        }
+
+        .lead-card .lname {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .lead-card .lmeta {
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .lead-card .lamt {
+            font-family: 'IBM Plex Mono';
+            font-weight: 600;
+            font-size: 12.5px;
+            margin-top: 8px;
+            color: var(--indigo-dark);
+        }
+
+        /* ---------- Drawer / Modal ---------- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: stretch;
+            justify-content: flex-end;
+            z-index: 200;
+            backdrop-filter: blur(1px);
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .drawer {
+            width: 460px;
+            max-width: 92vw;
+            background: var(--surface);
+            height: 100%;
+            overflow-y: auto;
+            box-shadow: -16px 0 40px rgba(0, 0, 0, 0.15);
+            animation: drawerIn .28s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        @keyframes drawerIn {
+            from {
+                transform: translateX(24px);
+                opacity: .6;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .drawer-head {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 2;
+        }
+
+        .drawer-body {
+            padding: 22px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 560px;
+            max-width: 92vw;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: var(--surface);
+            border-radius: 18px;
+            box-shadow: var(--shadow-lg);
+            animation: modalIn .22s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.97) translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-head {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 22px;
+        }
+
+        /* ---------- Search modal ---------- */
+        .search-modal {
+            width: 600px;
+            max-width: 92vw;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin-top: 80px;
+        }
+
+        .search-input-row {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-input-row input {
+            border: none;
+            outline: none;
+            font-size: 16px;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .search-result-group {
+            padding: 8px;
+        }
+
+        .search-result-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            padding: 8px 10px 4px;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 10px;
+            border-radius: 9px;
+        }
+
+        .search-result-item:hover {
+            background: var(--surface-alt);
+        }
+
+        /* ---------- Toasts ---------- */
+        #toast-wrap {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .toast {
+            background: var(--navy);
+            color: #fff;
+            padding: 13px 18px;
+            border-radius: 11px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toastIn .28s cubic-bezier(.16, 1, .3, 1);
+            max-width: 340px;
+        }
+
+        .toast.success {
+            background: #065F46;
+        }
+
+        .toast.info {
+            background: var(--navy);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .toast.leaving {
+            animation: toastOut .22s ease forwards;
+        }
+
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+        }
+
+        /* ---------- Storefront ---------- */
+        #storefront {
+            background: #FCFCFD;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sf-topbar {
+            background: var(--navy);
+            color: #fff;
+            text-align: center;
+            font-size: 12px;
+            padding: 7px;
+            font-weight: 500;
+        }
+
+        .sf-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 44px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: #FCFCFDee;
+            backdrop-filter: blur(8px);
+            z-index: 20;
+        }
+
+        .sf-nav-links {
+            display: flex;
+            gap: 26px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--navy-soft);
+        }
+
+        .sf-hero {
+            padding: 80px 44px 60px;
+            text-align: center;
+            background: radial-gradient(700px 300px at 50% 0%, #EFEBFF 0%, transparent 60%);
+        }
+
+        .sf-hero h1 {
+            font-size: 44px;
+            max-width: 700px;
+            margin: 0 auto;
+            letter-spacing: -0.02em;
+        }
+
+        .sf-hero p {
+            color: var(--navy-soft);
+            font-size: 16px;
+            margin: 18px auto 0;
+            max-width: 520px;
+        }
+
+        .sf-cat-strip {
+            display: flex;
+            gap: 12px;
+            padding: 0 44px 50px;
+            overflow-x: auto;
+        }
+
+        .sf-cat-pill {
+            flex-shrink: 0;
+            padding: 10px 18px;
+            border-radius: 99px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .sf-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 0 44px 70px;
+        }
+
+        .sf-product {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .sf-product-img {
+            height: 130px;
+            background: linear-gradient(135deg, #EEF0FF, #F3EEFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+        }
+
+        .sf-product-body {
+            padding: 14px;
+        }
+
+        .sf-product h4 {
+            font-size: 13.5px;
+        }
+
+        .sf-product .price {
+            font-family: 'IBM Plex Mono';
+            font-weight: 600;
+            color: var(--indigo-dark);
+            margin-top: 6px;
+            font-size: 13px;
+        }
+
+        .cart-fab {
+            position: fixed;
+            bottom: 26px;
+            right: 26px;
+            background: var(--navy);
+            color: #fff;
+            padding: 13px 20px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 13.5px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            z-index: 60;
+        }
+
+        .sf-chat-bubble {
+            position: fixed;
+            bottom: 26px;
+            left: 26px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--grad);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 24px -8px rgba(124, 58, 237, .6);
+            z-index: 60;
+        }
+
+        .sf-chat-panel {
+            position: fixed;
+            bottom: 92px;
+            left: 26px;
+            width: 340px;
+            max-height: 440px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            z-index: 61;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .sf-chat-panel.active {
+            display: flex;
+        }
+
+        .sf-chat-head {
+            background: var(--navy);
+            color: #fff;
+            padding: 13px 16px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .sf-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+        }
+
+        .sf-chat-inputrow {
+            border-top: 1px solid var(--border);
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ---------- misc pages ---------- */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface-alt);
+            padding: 4px;
+            border-radius: 11px;
+            width: fit-content;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy-soft);
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--navy);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 26px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .tl-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .tl-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+
+        .tl-item.done::before {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .tl-item.current::before {
+            background: var(--indigo);
+            border-color: var(--indigo);
+            box-shadow: 0 0 0 4px var(--info-bg);
+        }
+
+        .route-card {
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            padding: 15px;
+        }
+
+        .integration-card {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .switch {
+            width: 38px;
+            height: 22px;
+            border-radius: 99px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .switch.on {
+            background: var(--indigo);
+            border-color: var(--indigo);
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .15s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .switch.on::after {
+            left: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state .ei {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 14px;
+            color: var(--muted);
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 9px;
+            height: 160px;
+        }
+
+        .chart-bars .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            gap: 6px;
+        }
+
+        .chart-bars .bar {
+            width: 100%;
+            border-radius: 6px 6px 2px 2px;
+            background: var(--grad);
+        }
+
+        .chart-bars .bar-label {
+            font-size: 10.5px;
+            color: var(--muted);
+        }
+
+        .demo-tour {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--navy);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 14px;
+            box-shadow: var(--shadow-lg);
+            z-index: 400;
+            display: none;
+            align-items: center;
+            gap: 16px;
+            max-width: 560px;
+        }
+
+        .demo-tour.active {
+            display: flex;
+        }
+
+        .demo-tour .step-badge {
+            background: var(--grad);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 11.5px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        @media(max-width:1100px) {
+            .kpi-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .dash-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .landing-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .compare-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-strip {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .sf-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media(max-width:760px) {
+            .sidebar {
+                display: none;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sf-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-fake {
+                width: 150px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .compare-wrap,
+            .feature-strip,
+            .landing-hero {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .landing-nav {
+                padding: 18px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= LANDING ================= -->
+    <div id="landing">
+        <div class="landing-nav">
+            <div class="brand">
+                <div class="brand-mark">R</div>RentFlow AI
+            </div>
+            <div class="flex gap-16 items-center">
+                <span class="muted" style="font-size:13.5px;font-weight:600;">Product</span>
+                <span class="muted" style="font-size:13.5px;font-weight:600;">Pricing</span>
+                <span class="muted" style="font-size:13.5px;font-weight:600;">Customers</span>
+                <button class="btn btn-secondary btn-sm" data-action="go-storefront">View Storefront</button>
+            </div>
+        </div>
+
+        <div class="landing-hero">
+            <div>
+                <div class="eyebrow">✦ AI-native rental operating system</div>
+                <h1 class="hero-title">Your rental business.<br><span class="grad-text">On autopilot.</span></h1>
+                <p class="hero-sub">AI-powered rental commerce, operations and profitability — from the first customer
+                    inquiry to the final pickup. Built for tents, tables, chairs, linens, lighting and every event
+                    rental in between.</p>
+                <div class="hero-ctas">
+                    <button class="btn btn-accent" data-action="start-demo">Start Demo →</button>
+                    <button class="btn btn-secondary" data-action="watch-ai-demo">▶ Watch AI Demo</button>
+                </div>
+                <div class="trust-row">
+                    <span>TRUSTED BY 400+ RENTAL COMPANIES</span>
+                    <span>•</span><span>DALLAS · AUSTIN · DENVER · NASHVILLE</span>
+                </div>
+            </div>
+            <div class="workflow-visual">
+                <p class="muted bold"
+                    style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:14px;">Live
+                    workflow</p>
+                <div id="wf-steps"></div>
+            </div>
+        </div>
+
+        <div class="compare-wrap">
+            <div class="compare-card old">
+                <div class="compare-title">TRADITIONAL RENTAL SOFTWARE</div>
+                <div class="compare-flow">
+                    <div class="step">User</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Find the right screen</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Enter data manually</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Check inventory by hand</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Calculate pricing</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Create quote</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Send</div>
+                </div>
+            </div>
+            <div class="compare-card new">
+                <div class="compare-title">⚡ RENTFLOW AI</div>
+                <div class="compare-flow">
+                    <div class="step">User</div>
+                    <div class="arr">↓</div>
+                    <div class="step">Ask AI</div>
+                    <div class="arr">↓</div>
+                    <div class="step">AI understands the request</div>
+                    <div class="arr">↓</div>
+                    <div class="step">AI checks live business data</div>
+                    <div class="arr">↓</div>
+                    <div class="step">AI recommends a profitable plan</div>
+                    <div class="arr">↓</div>
+                    <div class="step">User approves</div>
+                    <div class="arr">↓</div>
+                    <div class="step">AI executes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-strip">
+            <div class="feature-tile">
+                <div class="fi">☎</div>
+                <h4>AI Sales Agent</h4>
+                <p>Answers calls, checks availability and books leads while you run events.</p>
+            </div>
+            <div class="feature-tile">
+                <div class="fi">✎</div>
+                <h4>AI Quote Generator</h4>
+                <p>Builds margin-protected quotes in seconds from a one-line request.</p>
+            </div>
+            <div class="feature-tile">
+                <div class="fi">▤</div>
+                <h4>Smart Inventory</h4>
+                <p>Real-time utilization across every chair, tent and linen you own.</p>
+            </div>
+            <div class="feature-tile">
+                <div class="fi">▦</div>
+                <h4>Automated Operations</h4>
+                <p>Pick lists, routes and warehouse tasks generated automatically.</p>
+            </div>
+            <div class="feature-tile">
+                <div class="fi">◈</div>
+                <h4>Profit Intelligence</h4>
+                <p>Know your true margin on every event, every product, every zone.</p>
+            </div>
+        </div>
+
+        <div style="text-align:center;padding-bottom:70px;">
+            <button class="btn btn-accent" style="padding:15px 30px;font-size:15px;" data-action="start-demo">Start
+                Interactive Demo →</button>
+            <p class="muted" style="margin-top:12px;font-size:12.5px;">No signup needed — explore Evergreen Event
+                Rentals' live workspace.</p>
+        </div>
+    </div>
+
+    <!-- ================= APP SHELL ================= -->
+    <div id="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">R</div>RentFlow AI
+            </div>
+            <div id="nav-list"></div>
+            <div style="margin-top:auto;padding:12px 10px 4px;">
+                <div class="flex items-center gap-8"
+                    style="padding:10px;border-radius:10px;background:rgba(255,255,255,.06);">
+                    <div class="avatar" style="width:28px;height:28px;font-size:11px;">EE</div>
+                    <div style="min-width:0;">
+                        <div style="font-size:12.5px;font-weight:700;color:#fff;">Evergreen Rentals</div>
+                        <div style="font-size:11px;color:#8B90A6;">Dallas, TX</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-col">
+            <div class="topbar">
+                <div class="flex items-center gap-12">
+                    <button class="search-fake" data-action="open-search">
+                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="M21 21l-4.3-4.3" />
+                        </svg>
+                        Search customers, quotes, bookings…
+                        <span class="mono" style="margin-left:auto;font-size:10.5px;opacity:.6;">⌘K</span>
+                    </button>
+                </div>
+                <div class="topbar-icons">
+                    <button class="demo-mode-btn" data-action="toggle-demo">✦ Demo Mode</button>
+                    <button class="icon-btn" data-action="open-copilot" title="AI Assistant">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+                            <circle cx="12" cy="12" r="3.2" />
+                        </svg>
+                    </button>
+                    <button class="icon-btn" data-action="open-notifs" title="Notifications">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9" />
+                            <path d="M10 21a2 2 0 004 0" />
+                        </svg>
+                        <span class="notif-dot"></span>
+                    </button>
+                    <button class="icon-btn" title="Help">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2 1.7-2 3.3" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                    </button>
+                    <div class="avatar" style="cursor:pointer;">JM</div>
+                </div>
+            </div>
+            <div class="page-scroll" id="page-scroll"></div>
+        </div>
+    </div>
+
+    <!-- overlays -->
+    <div class="overlay" id="drawer-overlay">
+        <div class="drawer" id="drawer-content"></div>
+    </div>
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-box" id="modal-content"></div>
+    </div>
+    <div class="modal-overlay" id="search-overlay">
+        <div class="search-modal" id="search-content"></div>
+    </div>
+    <div id="toast-wrap"></div>
+    <div class="demo-tour" id="demo-tour"></div>
+
+    <script>
+        /* =====================================================================
+           ICONS
+        ===================================================================== */
+        const ICONS = {
+            dashboard: '<path d="M3 13h6V3H3v10zM3 21h6v-4H3v4zM11 21h10V11H11v10zM11 3v6h10V3H11z"/>',
+            copilot: '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/>',
+            leads: '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/>',
+            customers: '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.8 13.6c2.8.3 4.7 2.5 4.7 5.6"/>',
+            quotes: '<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6M9 9h2"/>',
+            bookings: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+            calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/>',
+            inventory: '<path d="M21 8L12 3 3 8l9 5 9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/>',
+            products: '<path d="M20 7L12 3 4 7l8 4 8-4z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M4 7l8 4 8-4"/>',
+            warehouse: '<path d="M3 21V9l9-6 9 6v12H3z"/><path d="M9 21v-8h6v8"/>',
+            delivery: '<rect x="1" y="7" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/>',
+            payments: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/>',
+            analytics: '<path d="M4 20V10M11 20V4M18 20v-7"/>',
+            storefront: '<path d="M4 8l1.5-4h13L20 8"/><path d="M4 8v12h16V8"/><path d="M9 20v-6h6v6"/>',
+            integrations: '<circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M9 6h6M6 9v6M18 9v6M9 18h6"/>',
+            settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.9 2.9l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.9-2.9l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.9-2.9l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.6V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.9 2.9l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.6 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+            phone: '<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .3 2 .7 2.9a2 2 0 01-.4 2.1L8 10.1a16 16 0 006 6l1.4-1.4a2 2 0 012.1-.4c.9.4 1.9.6 2.9.7a2 2 0 011.6 2z"/>',
+            bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
+            search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+            bell: '<path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/>',
+            check: '<path d="M20 6L9 17l-5-5"/>',
+            x: '<path d="M18 6L6 18M6 6l12 12"/>',
+            chevronR: '<path d="M9 18l6-6-6-6"/>',
+            chevronD: '<path d="M6 9l6 6 6-6"/>',
+            truck: '<rect x="1" y="7" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/>',
+            cart: '<circle cx="9" cy="21" r="1.4"/><circle cx="19" cy="21" r="1.4"/><path d="M1 1h4l2.4 13.2a2 2 0 002 1.8h9.2a2 2 0 002-1.6L22 6H6"/>',
+            sparkle: '<path d="M12 2l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/><path d="M19 15l1 2.5L22.5 18.5 20 19.5 19 22 18 19.5 15.5 18.5 18 17.5z"/>',
+            send: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+            plus: '<path d="M12 5v14M5 12h14"/>',
+            arrowUp: '<path d="M18 15l-6-6-6 6"/>',
+            clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+            mapPin: '<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>',
+            edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>',
+            trash: '<path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/>',
+            download: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>',
+            filter: '<path d="M22 3H2l8 9.5V19l4 2v-8.5z"/>'
+        };
+        function ic(name, cls) { cls = cls || 'icon'; return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`; }
+
+        /* =====================================================================
+           DATA
+        ===================================================================== */
+        function uid(prefix) { return prefix + Math.random().toString(36).slice(2, 7).toUpperCase(); }
+        function money(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+        function moneyD(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function initials(name) { return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
+
+        const CATEGORIES = ['Chairs', 'Tables', 'Tents', 'Linens', 'Lighting', 'AV Equipment', 'Décor', 'Furniture'];
+        const PRODUCT_SEED = [
+            { name: 'White Chiavari Chair', cat: 'Chairs', price: 8.5, repl: 95, emoji: '🪑' },
+            { name: 'Gold Chiavari Chair', cat: 'Chairs', price: 9.5, repl: 105, emoji: '🪑' },
+            { name: 'Clear Ghost Chair', cat: 'Chairs', price: 12, repl: 140, emoji: '🪑' },
+            { name: 'Cross-Back Wood Chair', cat: 'Chairs', price: 7.5, repl: 80, emoji: '🪑' },
+            { name: 'Folding Garden Chair', cat: 'Chairs', price: 3.25, repl: 34, emoji: '🪑' },
+            { name: '60" Round Table', cat: 'Tables', price: 18, repl: 210, emoji: '🍽️' },
+            { name: '72" Round Table', cat: 'Tables', price: 22, repl: 245, emoji: '🍽️' },
+            { name: '8ft Banquet Table', cat: 'Tables', price: 16, repl: 175, emoji: '🍽️' },
+            { name: 'Farm Table 8ft', cat: 'Tables', price: 45, repl: 520, emoji: '🍽️' },
+            { name: 'Cocktail High-Top Table', cat: 'Tables', price: 20, repl: 160, emoji: '🍽️' },
+            { name: '20x40 Frame Tent', cat: 'Tents', price: 850, repl: 9200, emoji: '⛺' },
+            { name: '30x60 Frame Tent', cat: 'Tents', price: 1650, repl: 18500, emoji: '⛺' },
+            { name: '20x20 Pole Tent', cat: 'Tents', price: 620, repl: 6800, emoji: '⛺' },
+            { name: 'Clear Top Tent 20x40', cat: 'Tents', price: 1250, repl: 14200, emoji: '⛺' },
+            { name: 'White Polyester Linen', cat: 'Linens', price: 14, repl: 38, emoji: '🧵' },
+            { name: 'Ivory Satin Linen', cat: 'Linens', price: 18, repl: 44, emoji: '🧵' },
+            { name: 'Sequin Table Runner', cat: 'Linens', price: 12, repl: 29, emoji: '🧵' },
+            { name: 'Black Spandex Linen', cat: 'Linens', price: 16, repl: 41, emoji: '🧵' },
+            { name: 'Burlap Table Runner', cat: 'Linens', price: 8, repl: 19, emoji: '🧵' },
+            { name: 'LED Uplight', cat: 'Lighting', price: 35, repl: 180, emoji: '💡' },
+            { name: 'String Light Set 48ft', cat: 'Lighting', price: 60, repl: 220, emoji: '💡' },
+            { name: 'Chandelier Centerpiece', cat: 'Lighting', price: 120, repl: 980, emoji: '💡' },
+            { name: 'Gobo Monogram Light', cat: 'Lighting', price: 95, repl: 650, emoji: '💡' },
+            { name: 'Wireless Mic & Speaker', cat: 'AV Equipment', price: 150, repl: 1200, emoji: '🎤' },
+            { name: 'Projector & Screen', cat: 'AV Equipment', price: 180, repl: 1600, emoji: '🎤' },
+            { name: 'DJ Sound System', cat: 'AV Equipment', price: 320, repl: 3400, emoji: '🎤' },
+            { name: 'Gold Charger Plate', cat: 'Décor', price: 2.5, repl: 14, emoji: '✨' },
+            { name: 'Floral Arch', cat: 'Décor', price: 280, repl: 1900, emoji: '✨' },
+            { name: 'Backdrop Drapery Set', cat: 'Décor', price: 210, repl: 1400, emoji: '✨' },
+            { name: 'Neon "Mr & Mrs" Sign', cat: 'Décor', price: 150, repl: 900, emoji: '✨' },
+            { name: 'Lounge Sofa Set', cat: 'Furniture', price: 340, repl: 2800, emoji: '🛋️' },
+            { name: 'Bar Cart', cat: 'Furniture', price: 85, repl: 620, emoji: '🛋️' },
+            { name: 'Portable Dance Floor 16x16', cat: 'Furniture', price: 480, repl: 5200, emoji: '🛋️' }
+        ];
+        const products = PRODUCT_SEED.map((p, i) => {
+            const total = [80, 60, 45, 120, 300, 340, 260, 180, 110, 150, 10, 4, 6, 3, 900, 650, 400, 500, 700, 80, 50, 20, 15, 25, 18, 4000, 20, 15, 10, 8, 25, 3][i] || (150 + Math.floor(Math.random() * 400));
+            const reserved = Math.floor(total * (0.35 + Math.random() * 0.4));
+            const maintenance = Math.floor(total * 0.04);
+            const damaged = Math.floor(total * 0.015);
+            const available = Math.max(total - reserved - maintenance - damaged, 0);
+            return {
+                id: uid('PRD'), name: p.name, cat: p.cat, price: p.price, repl: p.repl, emoji: p.emoji,
+                sku: 'RF-' + p.cat.slice(0, 3).toUpperCase() + '-' + (1000 + i),
+                total, reserved, maintenance, damaged, available,
+                deposit: Math.round(p.repl * 0.2),
+                util: Math.round((reserved / total) * 100),
+                desc: `Premium ${p.name.toLowerCase()} — cleaned, inspected and ready for delivery. A top seller in the ${p.cat} category for Dallas-area weddings and corporate events.`
+            };
+        });
+
+        const FIRST = ['Sarah', 'Mike', 'Jessica', 'David', 'Emily', 'Chris', 'Amanda', 'Ryan', 'Laura', 'Kevin', 'Natalie', 'Brian', 'Rachel', 'Tom', 'Priya', 'Carlos', 'Megan', 'Jordan', 'Alicia', 'Derek'];
+        const LAST = ['Johnson', 'Thompson', 'Martinez', 'Chen', 'Williams', 'Davis', 'Rodriguez', 'Patel', 'Brooks', 'Foster', 'Bennett', 'Coleman', 'Hughes', 'Reyes', 'Sanders'];
+        const COMPANIES = ['ABC Weddings', 'The Grand Dallas', 'Hilton Dallas Events', 'Oak Venue', 'Sunset Gardens', 'Dallas Corp Events', 'Turtle Creek Events', 'Highland Park Social', 'Magnolia Barn', 'Prestonwood Country Club'];
+        const VENUES = ['The Grand Dallas', 'Hilton Dallas Downtown', 'Oak Venue', 'Sunset Gardens Dallas', 'Magnolia Barn', 'Turtle Creek Estate', 'Prestonwood Country Club', 'Highland Park Social Hall', 'Dallas Arboretum', 'The Room on Main'];
+        const EVENT_TYPES = ['Wedding', 'Corporate Event', 'Birthday Party', 'Quinceañera', 'Baby Shower', 'Charity Gala', 'Graduation Party', 'Anniversary'];
+
+        function randPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function randInt(a, b) { return Math.floor(a + Math.random() * (b - a)); }
+
+        const customerNames = [];
+        for (let i = 0; i < 9; i++) customerNames.push(FIRST[i] + ' ' + LAST[i]);
+        COMPANIES.forEach(c => customerNames.push(c));
+        customerNames.push('Meredith Owens'); customerNames.push('Grace Family Foundation');
+
+        const customers = customerNames.map((name, i) => {
+            const events = randInt(1, 14);
+            const ltv = events * randInt(2200, 9800);
+            const outstanding = Math.random() < 0.35 ? randInt(400, 4800) : 0;
+            return {
+                id: uid('CUS'), name, isCompany: COMPANIES.includes(name) || name.includes('Foundation'),
+                email: name.toLowerCase().replace(/[^a-z ]/g, '').split(' ').join('.') + '@example.com',
+                phone: '(214) 555-' + randInt(1000, 9999),
+                events, ltv, outstanding,
+                lastEvent: `Aug ${randInt(1, 9)}`,
+                rating: randInt(4, 5),
+                address: `${randInt(100, 9999)} ${randPick(['Main St', 'Oak Ave', 'Turtle Creek Blvd', 'Preston Rd', 'Elm St'])}, Dallas, TX`
+            };
+        });
+
+        const leadStages = ['New', 'Contacted', 'Qualified', 'Quote Sent', 'Negotiation', 'Booked', 'Lost'];
+        const leads = [];
+        for (let i = 0; i < 14; i++) {
+            const first = randPick(FIRST), last = randPick(LAST);
+            leads.push({
+                id: uid('LEAD'),
+                name: i === 0 ? 'Sarah Johnson' : (i === 1 ? 'Mike Thompson' : first + ' ' + last),
+                company: Math.random() < 0.3 ? randPick(COMPANIES) : null,
+                eventType: i === 0 ? 'Wedding' : (i === 1 ? 'Corporate Event' : randPick(EVENT_TYPES)),
+                guests: i === 0 ? 250 : (i === 1 ? 400 : randInt(30, 320)),
+                amount: i === 0 ? 6480 : (i === 1 ? 9200 : randInt(1200, 14000)),
+                date: i === 0 ? 'Sep 20' : (i === 1 ? 'Sep 24' : `${randPick(['Sep', 'Oct', 'Nov'])} ${randInt(1, 28)}`),
+                stage: i < 2 ? 'Quote Sent' : randPick(leadStages),
+                phone: '(214) 555-' + randInt(1000, 9999),
+                email: (first + '.' + last).toLowerCase() + '@example.com',
+                lastActivity: `${randInt(1, 6)}d ago`,
+                notes: []
+            });
+        }
+
+        const quoteStatuses = ['Draft', 'Sent', 'Viewed', 'Accepted', 'Rejected', 'Expired'];
+        const quotes = [];
+        for (let i = 0; i < 17; i++) {
+            const cust = randPick(customers);
+            const amt = randInt(1200, 15000);
+            const marginPct = randInt(42, 62);
+            quotes.push({
+                id: 'Q-' + (10450 + i), custId: cust.id, custName: cust.name,
+                event: randPick(EVENT_TYPES), date: `${randPick(['Sep', 'Oct', 'Nov'])} ${randInt(1, 28)}, 2026`,
+                amount: amt, margin: marginPct, status: i < 3 ? 'Sent' : randPick(quoteStatuses)
+            });
+        }
+
+        const bookingStatuses = ['Confirmed', 'Preparing', 'Ready for Delivery', 'Delivered', 'Setup Complete', 'Picked Up', 'Returned', 'Completed'];
+        const bookings = [];
+        for (let i = 0; i < 24; i++) {
+            const cust = randPick(customers);
+            const rev = randInt(2200, 18500);
+            const cost = Math.round(rev * (0.32 + Math.random() * 0.14));
+            bookings.push({
+                id: 'BK-' + (8800 + i), custId: cust.id, custName: cust.name,
+                venue: randPick(VENUES), date: `${randPick(['Aug', 'Sep', 'Oct'])} ${randInt(1, 28)}, 2026`,
+                revenue: rev, cost, margin: Math.round(((rev - cost) / rev) * 100),
+                paymentStatus: randPick(['Paid', 'Partial', 'Pending']),
+                opStatus: i < 6 ? bookingStatuses[i] : randPick(bookingStatuses),
+                eventType: randPick(EVENT_TYPES),
+                crew: randPick(['Team A', 'Team B', 'Team C']),
+                deliveryTime: `${randInt(7, 11)}:00 AM`, pickupTime: `${randInt(9, 11)}:00 PM`,
+                contractSigned: Math.random() < 0.85, depositPaid: Math.random() < 0.8, inventoryReserved: Math.random() < 0.7
+            });
+        }
+
+        const payments = [];
+        for (let i = 0; i < 22; i++) {
+            const cust = randPick(customers);
+            const amt = randInt(400, 7200);
+            payments.push({
+                id: uid('INV'), custName: cust.name, invoice: 'INV-' + (5500 + i), amount: amt,
+                due: `${randPick(['Aug', 'Sep'])} ${randInt(1, 28)}`,
+                status: randPick(['Paid', 'Partial', 'Pending', 'Overdue'])
+            });
+        }
+
+        const notifications = [
+            { icon: 'payments', title: 'Payment overdue', body: 'ABC Weddings — $4,200 due 2 days ago', time: '12m ago', tone: 'red' },
+            { icon: 'inventory', title: 'Inventory shortage', body: 'White Chiavari Chairs short by 30 for Saturday', time: '38m ago', tone: 'amber' },
+            { icon: 'quotes', title: 'Quote accepted', body: 'Sarah Johnson accepted Q-10482 ($6,480)', time: '1h ago', tone: 'green' },
+            { icon: 'leads', title: 'New inquiry', body: 'Mike Thompson — Corporate Event, 400 guests', time: '2h ago', tone: 'indigo' },
+            { icon: 'delivery', title: 'Delivery conflict', body: 'Truck #3 double-booked for 11:30 AM Saturday', time: '3h ago', tone: 'red' },
+            { icon: 'copilot', title: 'AI recommendation', body: 'Raise weekend pricing 8–12% based on demand', time: '5h ago', tone: 'indigo' }
+        ];
+
+        const CART = []; // {productId, qty}
+        let cartMeta = { date: '', delivery: true };
+
+        /* =====================================================================
+           STATE
+        ===================================================================== */
+        const state = {
+            screen: 'landing', // landing | app | storefront
+            page: 'dashboard',
+            drawer: null,
+            modal: null,
+            demoMode: false,
+            demoStep: 0,
+            chatHistory: [], // copilot
+            sfChatHistory: [],
+            sfChatOpen: false,
+            productFilter: 'All',
+            leadDrawerId: null,
+            custDrawerId: null,
+            quoteModalId: null,
+            bookingDrawerId: null,
+            productDrawerId: null,
+            calendarView: 'Month',
+            generatedQuote: null,
+            phoneStep: 0
+        };
+
+        const NAV = [
+            {
+                group: 'Workspace', items: [
+                    ['dashboard', 'Dashboard', 'dashboard'],
+                    ['copilot', 'AI Copilot', 'copilot'],
+                ]
+            },
+            {
+                group: 'Sales', items: [
+                    ['leads', 'Leads', 'leads'],
+                    ['customers', 'Customers', 'customers'],
+                    ['quotes', 'Quotes', 'quotes'],
+                    ['bookings', 'Bookings', 'bookings'],
+                    ['calendar', 'Calendar', 'calendar'],
+                ]
+            },
+            {
+                group: 'Operations', items: [
+                    ['inventory', 'Inventory', 'inventory'],
+                    ['products', 'Products', 'products'],
+                    ['warehouse', 'Warehouse', 'warehouse'],
+                    ['delivery', 'Delivery', 'delivery'],
+                ]
+            },
+            {
+                group: 'Business', items: [
+                    ['payments', 'Payments', 'payments'],
+                    ['analytics', 'Analytics', 'analytics'],
+                    ['storefront-admin', 'Storefront', 'storefront'],
+                    ['integrations', 'Integrations', 'integrations'],
+                    ['settings', 'Settings', 'settings'],
+                ]
+            }
+        ];
+
+        /* =====================================================================
+           TOASTS
+        ===================================================================== */
+        function toast(msg, type) {
+            type = type || 'success';
+            const wrap = document.getElementById('toast-wrap');
+            const el = document.createElement('div');
+            el.className = 'toast ' + type;
+            el.innerHTML = (type === 'success' ? ic('check', 'icon-sm') : ic('sparkle', 'icon-sm')) + '<span>' + msg + '</span>';
+            wrap.appendChild(el);
+            setTimeout(() => { el.classList.add('leaving'); setTimeout(() => el.remove(), 250); }, 3200);
+        }
+
+        /* =====================================================================
+           ROUTER / RENDER
+        ===================================================================== */
+        function go(page) { state.page = page; closeDrawer(); closeModal(); render(); document.getElementById('page-scroll').scrollTop = 0; }
+
+        function showApp() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('storefront') && (document.getElementById('storefront').style.display = 'none');
+            document.getElementById('app-shell').classList.add('active');
+            state.screen = 'app';
+            render();
+        }
+
+        function render() {
+            renderNav();
+            const el = document.getElementById('page-scroll');
+            el.innerHTML = PAGES[state.page] ? PAGES[state.page]() : '';
+            renderDrawer();
+            renderModal();
+        }
+
+        function renderNav() {
+            const wrap = document.getElementById('nav-list');
+            wrap.innerHTML = NAV.map(g => `
+    <div class="nav-group-label">${g.group}</div>
+    ${g.items.map(([key, label, icon]) => `
+      <div class="nav-item ${state.page === key ? 'active' : ''}" data-action="go" data-page="${key}">
+        ${ic(icon)}<span>${label}</span>
+      </div>`).join('')}
+  `).join('');
+        }
+
+        /* =====================================================================
+           SHARED WIDGETS
+        ===================================================================== */
+        function kpiCard(label, value, trend, positive) {
+            return `<div class="card kpi-card">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-value">${value}</div>
+    ${trend ? `<div class="kpi-trend" style="color:${positive ? 'var(--success)' : 'var(--danger)'}">${positive ? '↑' : '↓'} ${trend}</div>` : ''}
+  </div>`;
+        }
+        function statusBadge(status) {
+            const map = {
+                'Confirmed': 'indigo', 'Preparing': 'amber', 'Ready for Delivery': 'amber', 'Delivered': 'indigo', 'Setup Complete': 'indigo',
+                'Picked Up': 'gray', 'Returned': 'gray', 'Completed': 'green',
+                'Paid': 'green', 'Partial': 'amber', 'Pending': 'gray', 'Overdue': 'red',
+                'Draft': 'gray', 'Sent': 'indigo', 'Viewed': 'amber', 'Accepted': 'green', 'Rejected': 'red', 'Expired': 'gray',
+                'New': 'gray', 'Contacted': 'indigo', 'Qualified': 'indigo', 'Quote Sent': 'amber', 'Negotiation': 'amber', 'Booked': 'green', 'Lost': 'red'
+            };
+            return `<span class="badge badge-${map[status] || 'gray'}"><span class="badge-dot"></span>${status}</span>`;
+        }
+        function aiInsightPanel(title, body, actions) {
+            return `<div class="ai-insight-panel">
+    <div class="ai-badge">${ic('sparkle', 'ai-sparkle')} AI Business Insight</div>
+    <p style="font-size:14.5px;line-height:1.65;max-width:680px;position:relative;">${body}</p>
+    <div class="flex gap-8" style="margin-top:16px;flex-wrap:wrap;position:relative;">
+      ${actions.map(a => `<button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18);" data-action="${a.action}" ${a.arg ? `data-arg="${a.arg}"` : ''}>${a.label}</button>`).join('')}
+    </div>
+  </div>`;
+        }
+        function pageHead(title, sub, right) {
+            return `<div class="page-head flex justify-between items-center wrap gap-16">
+    <div><h1 class="section-title">${title}</h1>${sub ? `<div class="sub">${sub}</div>` : ''}</div>
+    <div class="flex gap-8">${right || ''}</div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: DASHBOARD
+        ===================================================================== */
+        function pageDashboard() {
+            const upcoming = bookings.slice(0, 5);
+            return `
+  ${pageHead('Dashboard', 'Welcome back — here is how Evergreen Event Rentals is doing today.', `<button class="btn btn-secondary btn-sm" data-action="go" data-page="analytics">${ic('analytics', 'icon-sm')} View Analytics</button>`)}
+  <div class="kpi-grid stagger">
+    ${kpiCard('Revenue (MTD)', money(184620), '18.4%', true)}
+    ${kpiCard('Upcoming Events', '42')}
+    ${kpiCard('Outstanding Payments', money(23840))}
+    ${kpiCard('Inventory Utilization', '78%')}
+    ${kpiCard('Avg. Event Margin', '54.8%')}
+    ${kpiCard('Quote Conversion', '62%')}
+  </div>
+  ${aiInsightPanel('Insight', 'You have <b>7 events</b> this weekend. Two customers have outstanding balances totaling <b>$8,420</b>. Your white Chiavari chairs are at <b>91% utilization</b>. Consider increasing weekend pricing by 8–12%.',
+                [{ label: 'View Events', action: 'go', arg: 'calendar' }, { label: 'Review Payments', action: 'go', arg: 'payments' }, { label: 'Optimize Pricing', action: 'toast', arg: 'Pricing recommendation applied to weekend quotes.' }])}
+  <div class="dash-grid">
+    <div class="card card-pad">
+      <div class="flex justify-between items-center" style="margin-bottom:14px;">
+        <h3 style="font-size:15px;">Upcoming Bookings</h3>
+        <button class="btn btn-ghost btn-sm" data-action="go" data-page="bookings">View all ${ic('chevronR', 'icon-sm')}</button>
+      </div>
+      <table class="table">
+        <thead><tr><th>Customer</th><th>Event</th><th>Date</th><th>Revenue</th><th>Status</th></tr></thead>
+        <tbody>
+          ${upcoming.map(b => `<tr class="clickable" data-action="open-booking" data-arg="${b.id}">
+            <td><div class="flex items-center gap-8"><div class="avatar" style="width:26px;height:26px;font-size:10.5px;">${initials(b.custName)}</div>${b.custName}</div></td>
+            <td class="muted">${b.eventType}</td><td class="muted">${b.date}</td>
+            <td class="mono">${money(b.revenue)}</td><td>${statusBadge(b.opStatus)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="card card-pad">
+      <h3 style="font-size:15px;margin-bottom:14px;">This Week</h3>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="flex justify-between items-center"><span class="muted" style="font-size:13px;">Events scheduled</span><span class="bold">7</span></div>
+        <div class="flex justify-between items-center"><span class="muted" style="font-size:13px;">New leads</span><span class="bold">5</span></div>
+        <div class="flex justify-between items-center"><span class="muted" style="font-size:13px;">Quotes sent</span><span class="bold">9</span></div>
+        <div class="flex justify-between items-center"><span class="muted" style="font-size:13px;">Deliveries tomorrow</span><span class="bold">4</span></div>
+        <hr class="divider">
+        <div>
+          <div class="flex justify-between" style="font-size:12.5px;margin-bottom:6px;"><span class="muted">Chiavari Chairs</span><span class="bold">91%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:91%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between" style="font-size:12.5px;margin-bottom:6px;"><span class="muted">Round Tables</span><span class="bold">68%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:68%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between" style="font-size:12.5px;margin-bottom:6px;"><span class="muted">Frame Tents</span><span class="bold">82%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:82%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: AI COPILOT  (also houses Quote Assistant + Command Center)
+        ===================================================================== */
+        const SUGGESTED_PROMPTS = [
+            "Show me today's priorities", "Which customers haven't paid?", "What events are most profitable?",
+            "Do I have enough inventory for Saturday?", "Which products are underutilized?",
+            "Create a quote for a 250-person wedding", "Optimize tomorrow's deliveries"
+        ];
+
+        function toolChip(name) { return `<span class="tag-chip">${ic('bolt', 'icon-sm')} ${name}</span>`; }
+
+        const AI_RESPONSES = {
+            "Show me today's priorities": {
+                tools: ['searchInventory()', 'checkAvailability()', 'generateReport()'],
+                text: `Good morning. I found 5 priorities:<br><br>
+      1. ABC Weddings owes $4,200 and the event is tomorrow.<br>
+      2. You're short 30 white chairs for Saturday.<br>
+      3. Event #1048 still needs a signed contract.<br>
+      4. Truck #3 has a delivery conflict.<br>
+      5. The warehouse team needs a pickup list for today's events.<br><br>
+      I can help resolve these automatically.`,
+                actions: [['Send Payment Reminder', 'toast', 'Payment reminder sent to ABC Weddings.'], ['Find Available Chairs', 'toast', 'Found 40 chairs available from overflow warehouse — reserved 30.'], ['Send Contract', 'toast', 'Contract sent to customer for Event #1048.'], ['Resolve Delivery', 'toast', 'Truck #3 conflict resolved — rescheduled to 1:00 PM.'], ['Create Pick List', 'toast', 'Pick list generated for today\'s events.']]
+            },
+            "Which customers haven't paid?": {
+                tools: ['searchCustomer()', 'generateReport()'],
+                text: `I found <b>7 customers</b> with outstanding balances totaling <b>$23,840</b>:<br><br>
+      • ABC Weddings — $4,200 (2 days overdue)<br>
+      • Mike Thompson — $3,100 (due in 3 days)<br>
+      • Turtle Creek Events — $2,840 (due in 5 days)<br>
+      • 4 more customers — $13,700 combined`,
+                actions: [['Send All Reminders', 'toast', 'Payment reminders sent to 7 customers.'], ['View Payments', 'go', 'payments']]
+            },
+            "What events are most profitable?": {
+                tools: ['calculateProfit()', 'generateReport()'],
+                text: `Your top 3 most profitable events this quarter:<br><br>
+      1. <b>Johnson Wedding</b> — 57.8% margin ($7,225 profit)<br>
+      2. <b>Turtle Creek Corporate Gala</b> — 56.2% margin ($6,840 profit)<br>
+      3. <b>Highland Park Anniversary</b> — 55.1% margin ($4,120 profit)<br><br>
+      Weddings with clear-top tents consistently outperform average margin by 6–9%.`,
+                actions: [['View Analysis', 'go', 'analytics']]
+            },
+            "Do I have enough inventory for Saturday?": {
+                tools: ['checkAvailability()', 'searchInventory()'],
+                text: `Checking Saturday's 7 events against current inventory…<br><br>
+      ⚠️ You're short <b>30 White Chiavari Chairs</b> (680 reserved of 650 comfortably available).<br>
+      ✅ Round tables, linens and lighting are fully covered.<br>
+      ✅ Frame tents are at 82% — sufficient with 3 units in reserve.`,
+                actions: [['Find Available Chairs', 'toast', 'Sourced 40 chairs from overflow partner warehouse.'], ['View Inventory', 'go', 'inventory']]
+            },
+            "Which products are underutilized?": {
+                tools: ['searchInventory()', 'generateReport()'],
+                text: `3 products are running below 30% utilization this month:<br><br>
+      • Neon "Mr & Mrs" Sign — 18%<br>
+      • Portable Dance Floor 16x16 — 24%<br>
+      • Bar Cart — 27%<br><br>
+      Consider bundling these into wedding packages to increase attach rate.`,
+                actions: [['View Products', 'go', 'products']]
+            },
+            "Optimize tomorrow's deliveries": {
+                tools: ['optimizeDelivery()'],
+                text: `I found a route that reduces estimated driving time by <b>42 minutes</b> across 3 trucks by grouping deliveries geographically around Turtle Creek and Uptown.`,
+                actions: [['Apply Route', 'toast', 'Optimized route applied to Truck #1, #2 and #3.'], ['View Delivery', 'go', 'delivery']]
+            },
+            "Create a quote for a 250-person wedding": {
+                special: 'quote'
+            }
+        };
+
+        function pageCopilot() {
+            return `
+  ${pageHead('RentFlow AI Copilot', 'Ask anything about your rental business.')}
+  <div class="copilot-wrap">
+    <div class="chat-scroll" id="chat-scroll">
+      ${state.chatHistory.length === 0 ? `
+        <div class="card card-pad" style="margin-bottom:18px;background:var(--surface-alt);border-style:dashed;">
+          <div class="flex items-center gap-8" style="margin-bottom:10px;"><div class="chat-avatar" style="width:24px;height:24px;">${ic('sparkle', 'icon-sm')}</div><span class="bold" style="font-size:13px;">Try asking:</span></div>
+          <div class="suggested-prompts">
+            ${SUGGESTED_PROMPTS.map(p => `<button class="prompt-chip" data-action="ask-copilot" data-arg="${encodeURIComponent(p)}">${p}</button>`).join('')}
+          </div>
+        </div>` : ''}
+      ${state.chatHistory.map(renderChatRow).join('')}
+      ${state.copilotTyping ? `<div class="chat-row ai"><div class="chat-avatar">${ic('sparkle', 'icon-sm')}</div><div class="chat-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>` : ''}
+    </div>
+    <div class="chat-input-bar">
+      <input class="input" id="copilot-input" placeholder="Ask RentFlow anything…" onkeydown="if(event.key==='Enter'){submitCopilot();}">
+      <button class="btn btn-accent" data-action="submit-copilot">${ic('send', 'icon-sm')} Send</button>
+    </div>
+  </div>`;
+        }
+
+        function renderChatRow(row) {
+            if (row.role === 'user') {
+                return `<div class="chat-row user"><div class="chat-avatar">JM</div><div class="chat-bubble">${row.text}</div></div>`;
+            }
+            if (row.quoteCard) {
+                return `<div class="chat-row ai"><div class="chat-avatar">${ic('sparkle', 'icon-sm')}</div><div class="chat-bubble" style="max-width:520px;">
+      ${row.tools ? `<div class="tool-trace">${row.tools.map(toolChip).join('')}</div>` : ''}
+      ${quoteResultCard(row.quoteCard)}
+    </div></div>`;
+            }
+            return `<div class="chat-row ai"><div class="chat-avatar">${ic('sparkle', 'icon-sm')}</div><div class="chat-bubble">
+    ${row.tools ? `<div class="tool-trace">${row.tools.map(toolChip).join('')}</div>` : ''}
+    <div>${row.text}</div>
+    ${row.actions ? `<div class="chat-actions">${row.actions.map(a => `<button class="btn btn-secondary btn-sm" data-action="${a[1]}" data-arg="${a[2] || ''}">${a[0]}</button>`).join('')}</div>` : ''}
+  </div></div>`;
+        }
+
+        function quoteResultCard(q) {
+            return `<div style="font-size:12.5px;">
+    <div class="bold" style="font-size:13.5px;margin-bottom:10px;">AI Recommended Package — ${q.guests} Guests</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">
+      ${q.items.map(it => `<div class="flex justify-between"><span class="muted">${it.name}</span><span class="mono">${it.qty}×</span></div>`).join('')}
+    </div>
+    <hr class="divider" style="margin:10px 0;">
+    <div style="display:flex;flex-direction:column;gap:5px;font-family:'IBM Plex Mono';font-size:12px;">
+      <div class="flex justify-between"><span class="muted">Rental Items</span><span>${money(q.itemsCost)}</span></div>
+      <div class="flex justify-between"><span class="muted">Delivery</span><span>${money(q.delivery)}</span></div>
+      <div class="flex justify-between"><span class="muted">Setup</span><span>${money(q.setup)}</span></div>
+      <div class="flex justify-between"><span class="muted">Tax</span><span>${money(q.tax)}</span></div>
+      <hr class="divider" style="margin:4px 0;">
+      <div class="flex justify-between bold" style="font-size:14px;"><span>Total</span><span>${money(q.total)}</span></div>
+    </div>
+    <div class="flex gap-8" style="margin:12px 0;flex-wrap:wrap;">
+      <div class="badge badge-gray">Cost ${money(q.cost)}</div>
+      <div class="badge badge-green">Profit ${money(q.profit)}</div>
+      <div class="badge badge-indigo">Margin ${q.marginPct}%</div>
+    </div>
+    <p class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:12px;">"This price keeps your estimated margin above 50% while remaining competitive with similar bookings."</p>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-accent btn-sm" data-action="send-ai-quote">${ic('send', 'icon-sm')} Send Quote</button>
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Quote opened in editor.">Edit Quote</button>
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Draft saved.">Save Draft</button>
+    </div>
+  </div>`;
+        }
+
+        function buildAIQuote(guests, eventType, extra) {
+            guests = guests || 250;
+            const chairs = guests, tables = Math.ceil(guests / 10);
+            const chairPrice = 8.5, tablePrice = 18, linenPrice = 14, uplightQty = Math.max(6, Math.round(guests / 25));
+            const itemsCost = Math.round(chairs * chairPrice + tables * tablePrice + tables * linenPrice + uplightQty * 35);
+            const delivery = 650, setup = 500;
+            const subtotal = itemsCost + delivery + setup;
+            const tax = Math.round(subtotal * 0.0825);
+            const total = subtotal + tax;
+            const cost = Math.round(total * 0.451);
+            const profit = total - cost;
+            const marginPct = Math.round((profit / total) * 100 * 10) / 10;
+            return {
+                guests, eventType: eventType || 'Wedding',
+                items: [
+                    { name: `${chairs} Chiavari Chairs`, qty: chairs },
+                    { name: `${tables} Round Tables`, qty: tables },
+                    { name: `${tables} White Linens`, qty: tables },
+                    { name: `${uplightQty} Uplights`, qty: uplightQty }
+                ],
+                itemsCost, delivery, setup, tax, total, cost, profit, marginPct
+            };
+        }
+
+        function submitCopilot() {
+            const input = document.getElementById('copilot-input');
+            const val = input.value.trim();
+            if (!val) return;
+            askCopilot(val);
+        }
+        function askCopilot(promptText) {
+            state.chatHistory.push({ role: 'user', text: promptText });
+            render();
+            const scrollEl = document.getElementById('chat-scroll'); if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+            state.copilotTyping = true;
+            render();
+            setTimeout(() => {
+                state.copilotTyping = false;
+                const known = AI_RESPONSES[promptText];
+                if (known && known.special === 'quote') {
+                    const q = buildAIQuote(250, 'Wedding');
+                    state.generatedQuote = q;
+                    state.chatHistory.push({ role: 'ai', tools: ['searchCustomer()', 'checkAvailability()', 'calculateQuote()', 'calculateProfit()'], quoteCard: q });
+                } else if (known) {
+                    state.chatHistory.push({ role: 'ai', tools: known.tools, text: known.text, actions: known.actions });
+                } else {
+                    state.chatHistory.push({ role: 'ai', tools: ['searchCustomer()', 'searchInventory()', 'generateReport()'], text: `Here's what I found for "<i>${promptText}</i>": based on current bookings and inventory, everything looks on track. Would you like me to dig into a specific customer, product or date?` });
+                }
+                render();
+                const s = document.getElementById('chat-scroll'); if (s) s.scrollTop = s.scrollHeight;
+            }, 950);
+        }
+
+        /* =====================================================================
+           PAGE: AI QUOTE ASSISTANT (standalone form, reachable from Leads/Quotes)
+        ===================================================================== */
+        function pageQuoteAssistant() {
+            const q = state.generatedQuote;
+            return `
+  ${pageHead('Create Quote with AI', 'Describe the event — RentFlow builds a profitable package instantly.')}
+  <div class="dash-grid">
+    <div class="card card-pad">
+      <div class="field"><label class="field-label">Customer</label><input class="input" id="qa-customer" value="Sarah Johnson"></div>
+      <div class="field"><label class="field-label">Event Type</label>
+        <select class="input" id="qa-event">${EVENT_TYPES.map(e => `<option ${e === 'Wedding' ? 'selected' : ''}>${e}</option>`).join('')}</select>
+      </div>
+      <div class="flex gap-12"><div class="field" style="flex:1;"><label class="field-label">Event Date</label><input class="input" type="date" id="qa-date" value="2026-09-20"></div>
+      <div class="field" style="flex:1;"><label class="field-label">Guest Count</label><input class="input" type="number" id="qa-guests" value="250"></div></div>
+      <div class="field"><label class="field-label">Venue</label><input class="input" id="qa-venue" value="The Grand Dallas"></div>
+      <div class="field"><label class="field-label">Requirements</label><textarea class="input" id="qa-req">Tables, chairs, linens and lighting</textarea></div>
+      <button class="btn btn-accent" style="width:100%;" data-action="generate-quote">${ic('sparkle', 'icon-sm')} Generate Profitable Quote</button>
+    </div>
+    <div>
+      ${q ? `<div class="card card-pad">${quoteResultCard(q)}</div>` : `<div class="card card-pad empty-state"><div class="ei">${ic('sparkle', 'icon')}</div>Fill in event details and RentFlow AI will build a margin-protected quote here.</div>`}
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: LEADS (Kanban)
+        ===================================================================== */
+        function pageLeads() {
+            return `
+  ${pageHead('Leads', 'Track every inquiry from first contact to booked event.', `<button class="btn btn-accent btn-sm" data-action="go" data-page="quote-assistant">${ic('sparkle', 'icon-sm')} New AI Quote</button>`)}
+  <div class="kanban">
+    ${leadStages.map(stage => {
+                const items = leads.filter(l => l.stage === stage);
+                return `<div class="kanban-col">
+        <div class="kanban-col-head"><span>${stage}</span><span class="kanban-count">${items.length}</span></div>
+        ${items.map(l => `<div class="lead-card" data-action="open-lead" data-arg="${l.id}">
+          <div class="lname">${l.name}</div>
+          <div class="lmeta">${l.eventType} · ${l.guests} guests</div>
+          <div class="flex justify-between items-center" style="margin-top:8px;">
+            <div class="lamt">${money(l.amount)}</div><div class="muted" style="font-size:11px;">${l.date}</div>
+          </div>
+        </div>`).join('') || `<div class="muted" style="font-size:12px;padding:8px;">No leads</div>`}
+      </div>`;
+            }).join('')}
+  </div>`;
+        }
+
+        function leadDrawer(id) {
+            const l = leads.find(x => x.id === id); if (!l) return '';
+            return `
+  <div class="drawer-head">
+    <div><h3>${l.name}</h3><div class="sub muted" style="font-size:12.5px;margin-top:3px;">${l.eventType} · ${l.guests} guests · ${l.date}</div></div>
+    <button class="icon-btn" data-action="close-drawer">${ic('x', 'icon-sm')}</button>
+  </div>
+  <div class="drawer-body">
+    <div class="flex gap-8" style="margin-bottom:18px;">${statusBadge(l.stage)}<span class="badge badge-gray mono">${money(l.amount)}</span></div>
+    <div class="card card-pad" style="background:var(--info-bg);border-color:#DDD6FE;margin-bottom:18px;">
+      <div class="ai-badge" style="background:#fff;color:var(--indigo);">${ic('sparkle', 'ai-sparkle')} AI Next Best Action</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--navy);">Customer viewed the quote twice but hasn't responded. Send a follow-up today.</p>
+      <button class="btn btn-accent btn-sm" style="margin-top:10px;" data-action="ai-followup" data-arg="${l.id}">Send AI Follow-up</button>
+    </div>
+    <h4 style="font-size:13px;margin-bottom:10px;">Contact Details</h4>
+    <div style="font-size:13px;color:var(--navy-soft);line-height:2;margin-bottom:18px;">
+      ${l.email}<br>${l.phone}${l.company ? `<br>${l.company}` : ''}
+    </div>
+    <h4 style="font-size:13px;margin-bottom:10px;">Activity Timeline</h4>
+    <div class="timeline">
+      <div class="tl-item done"><div class="bold" style="font-size:13px;">Lead created</div><div class="muted" style="font-size:12px;">${l.lastActivity}</div></div>
+      <div class="tl-item done"><div class="bold" style="font-size:13px;">Quote sent</div><div class="muted" style="font-size:12px;">2 days ago</div></div>
+      <div class="tl-item current"><div class="bold" style="font-size:13px;">Awaiting response</div><div class="muted" style="font-size:12px;">Viewed twice</div></div>
+    </div>
+    <div class="flex gap-8" style="margin-top:16px;">
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Stage updated to Negotiation.">Move to Negotiation</button>
+      <button class="btn btn-primary btn-sm" data-action="convert-lead" data-arg="${l.id}">Mark Booked</button>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: CUSTOMERS
+        ===================================================================== */
+        function pageCustomers() {
+            return `
+  ${pageHead('Customers', `${customers.length} customers · ${money(customers.reduce((s, c) => s + c.ltv, 0))} lifetime revenue`)}
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Customer</th><th>Events</th><th>Lifetime Revenue</th><th>Outstanding</th><th>Last Event</th><th>Value</th></tr></thead>
+      <tbody>
+        ${customers.map(c => `<tr class="clickable" data-action="open-customer" data-arg="${c.id}">
+          <td><div class="flex items-center gap-8"><div class="avatar">${initials(c.name)}</div><div><div class="bold" style="font-size:13px;">${c.name}</div><div class="muted" style="font-size:11.5px;">${c.email}</div></div></div></td>
+          <td>${c.events} events</td>
+          <td class="mono">${money(c.ltv)}</td>
+          <td class="mono" style="color:${c.outstanding ? 'var(--danger)' : 'var(--muted)'}">${c.outstanding ? money(c.outstanding) : '—'}</td>
+          <td class="muted">${c.lastEvent}</td>
+          <td style="color:#F59E0B;">${'★'.repeat(c.rating)}${'☆'.repeat(5 - c.rating)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        function customerDrawer(id) {
+            const c = customers.find(x => x.id === id); if (!c) return '';
+            const custBookings = bookings.filter(b => b.custId === id);
+            const custQuotes = quotes.filter(q => q.custId === id);
+            return `
+  <div class="drawer-head">
+    <div class="flex items-center gap-12"><div class="avatar" style="width:44px;height:44px;font-size:15px;">${initials(c.name)}</div>
+    <div><h3>${c.name}</h3><div class="sub muted" style="font-size:12.5px;">${c.email}</div></div></div>
+    <button class="icon-btn" data-action="close-drawer">${ic('x', 'icon-sm')}</button>
+  </div>
+  <div class="drawer-body">
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;">
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Events</div><div class="bold" style="font-size:17px;">${c.events}</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Lifetime</div><div class="bold" style="font-size:17px;">${money(c.ltv)}</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Outstanding</div><div class="bold" style="font-size:17px;color:${c.outstanding ? 'var(--danger)' : 'inherit'}">${c.outstanding ? money(c.outstanding) : '$0'}</div></div>
+    </div>
+    <h4 style="font-size:13px;margin-bottom:8px;">Contact</h4>
+    <div style="font-size:13px;color:var(--navy-soft);line-height:1.9;margin-bottom:18px;">${c.phone}<br>${c.address}</div>
+    <h4 style="font-size:13px;margin-bottom:8px;">Recent Quotes</h4>
+    <div style="margin-bottom:18px;">${custQuotes.length ? custQuotes.slice(0, 3).map(q => `<div class="flex justify-between" style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${q.id} · ${q.event}</span><span class="mono">${money(q.amount)}</span></div>`).join('') : '<div class="muted" style="font-size:12.5px;">No quotes yet</div>'}</div>
+    <h4 style="font-size:13px;margin-bottom:8px;">Event History</h4>
+    <div>${custBookings.length ? custBookings.map(b => `<div class="flex justify-between" style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${b.venue}</span><span class="muted">${b.date}</span></div>`).join('') : '<div class="muted" style="font-size:12.5px;">No events yet</div>'}</div>
+    <div class="flex gap-8" style="margin-top:18px;">
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Message composer opened.">Contact Customer</button>
+      <button class="btn btn-primary btn-sm" data-action="go" data-arg2="quote-assistant" data-action2="go">New Quote</button>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: QUOTES
+        ===================================================================== */
+        function pageQuotes() {
+            return `
+  ${pageHead('Quotes', `${quotes.length} quotes`, `<button class="btn btn-accent btn-sm" data-action="go" data-page="quote-assistant">${ic('sparkle', 'icon-sm')} New AI Quote</button>`)}
+  <div class="filter-bar">
+    ${['All', ...quoteStatuses].map(s => `<button class="tab-btn ${state.quoteFilter === s || (!state.quoteFilter && s === 'All') ? 'active' : ''}" data-action="filter-quotes" data-arg="${s}">${s}</button>`).join('')}
+  </div>
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Quote #</th><th>Customer</th><th>Event</th><th>Date</th><th>Amount</th><th>Margin</th><th>Status</th></tr></thead>
+      <tbody>
+        ${quotes.filter(q => !state.quoteFilter || state.quoteFilter === 'All' || q.status === state.quoteFilter).map(q => `<tr class="clickable" data-action="open-quote" data-arg="${q.id}">
+          <td class="mono bold">${q.id}</td><td>${q.custName}</td><td class="muted">${q.event}</td><td class="muted">${q.date}</td>
+          <td class="mono">${money(q.amount)}</td><td class="mono" style="color:var(--success)">${q.margin}%</td><td>${statusBadge(q.status)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        function quoteModal(id) {
+            const q = quotes.find(x => x.id === id); if (!q) return '';
+            const cost = Math.round(q.amount * (1 - q.margin / 100));
+            return `
+  <div class="modal-head"><h3>Quote ${q.id}</h3><button class="icon-btn" data-action="close-modal">${ic('x', 'icon-sm')}</button></div>
+  <div class="modal-body">
+    <div class="flex justify-between items-start" style="margin-bottom:18px;">
+      <div><div class="bold" style="font-size:16px;">${q.custName}</div><div class="muted" style="font-size:13px;">${q.event} · ${q.date}</div></div>
+      ${statusBadge(q.status)}
+    </div>
+    <div class="card card-pad" style="background:var(--surface-alt);margin-bottom:16px;">
+      <div class="flex justify-between mono" style="font-size:13px;margin-bottom:6px;"><span class="muted">Subtotal</span><span>${money(Math.round(q.amount * 0.92))}</span></div>
+      <div class="flex justify-between mono" style="font-size:13px;margin-bottom:6px;"><span class="muted">Tax</span><span>${money(Math.round(q.amount * 0.08))}</span></div>
+      <hr class="divider" style="margin:8px 0;">
+      <div class="flex justify-between bold" style="font-size:16px;"><span>Total</span><span>${money(q.amount)}</span></div>
+    </div>
+    <div class="flex gap-8" style="margin-bottom:18px;">
+      <div class="badge badge-gray">Cost ${money(cost)}</div>
+      <div class="badge badge-green">Profit ${money(q.amount - cost)}</div>
+      <div class="badge badge-indigo">Margin ${q.margin}%</div>
+    </div>
+    <div class="flex gap-8 wrap">
+      <button class="btn btn-accent btn-sm" data-action="accept-quote" data-arg="${q.id}">Accept Quote</button>
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Quote resent to customer.">Resend</button>
+      <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Quote duplicated as draft.">Duplicate</button>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: BOOKINGS
+        ===================================================================== */
+        function pageBookings() {
+            return `
+  ${pageHead('Bookings', `${bookings.length} bookings`)}
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Booking #</th><th>Customer</th><th>Date</th><th>Venue</th><th>Revenue</th><th>Margin</th><th>Payment</th><th>Status</th></tr></thead>
+      <tbody>
+        ${bookings.map(b => `<tr class="clickable" data-action="open-booking" data-arg="${b.id}">
+          <td class="mono bold">${b.id}</td><td>${b.custName}</td><td class="muted">${b.date}</td><td class="muted">${b.venue}</td>
+          <td class="mono">${money(b.revenue)}</td><td class="mono" style="color:var(--success)">${b.margin}%</td>
+          <td>${statusBadge(b.paymentStatus)}</td><td>${statusBadge(b.opStatus)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        const BOOKING_FLOW = ['Quote', 'Contract Signed', 'Deposit Paid', 'Inventory Reserved', 'Warehouse Prepared', 'Delivery', 'Setup', 'Event', 'Pickup', 'Inspection', 'Completed'];
+        function bookingDrawer(id) {
+            const b = bookings.find(x => x.id === id); if (!b) return '';
+            const flowIdx = BOOKING_FLOW.indexOf(b.opStatus === 'Confirmed' ? 'Contract Signed' : b.opStatus === 'Preparing' ? 'Warehouse Prepared' : b.opStatus === 'Ready for Delivery' ? 'Delivery' : b.opStatus === 'Delivered' ? 'Setup' : b.opStatus === 'Setup Complete' ? 'Event' : b.opStatus === 'Picked Up' ? 'Pickup' : b.opStatus === 'Returned' ? 'Inspection' : 'Completed');
+            return `
+  <div class="drawer-head">
+    <div><h3>${b.id}</h3><div class="sub muted" style="font-size:12.5px;">${b.custName} · ${b.venue}</div></div>
+    <button class="icon-btn" data-action="close-drawer">${ic('x', 'icon-sm')}</button>
+  </div>
+  <div class="drawer-body">
+    <div class="flex gap-8" style="margin-bottom:18px;">${statusBadge(b.opStatus)}${statusBadge(b.paymentStatus)}</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Revenue</div><div class="bold" style="font-size:16px;">${money(b.revenue)}</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Margin</div><div class="bold" style="font-size:16px;color:var(--success)">${b.margin}%</div></div>
+    </div>
+    <h4 style="font-size:13px;margin-bottom:12px;">Operational Timeline</h4>
+    <div class="timeline" style="margin-bottom:18px;">
+      ${BOOKING_FLOW.map((step, i) => `<div class="tl-item ${i < flowIdx ? 'done' : i === flowIdx ? 'current' : ''}"><div style="font-size:13px;font-weight:${i <= flowIdx ? 600 : 400};">${step}</div></div>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--navy-soft);line-height:1.9;margin-bottom:18px;">
+      Delivery: ${b.deliveryTime} &nbsp;·&nbsp; Pickup: ${b.pickupTime}<br>Crew: ${b.crew}
+    </div>
+    <button class="btn btn-accent btn-sm" style="width:100%;" data-action="advance-booking" data-arg="${b.id}">Advance to Next Stage</button>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: CALENDAR
+        ===================================================================== */
+        function pageCalendar() {
+            const days = Array.from({ length: 35 }, (_, i) => i - 3);
+            const eventDays = new Set(bookings.map(b => parseInt(b.date.split(' ')[1]) || randInt(1, 28)));
+            return `
+  ${pageHead('Calendar', 'September 2026')}
+  <div class="tabs">${['Month', 'Week', 'Day'].map(v => `<button class="tab-btn ${state.calendarView === v ? 'active' : ''}" data-action="cal-view" data-arg="${v}">${v}</button>`).join('')}</div>
+  <div class="card card-pad">
+    <div class="grid" style="grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
+      ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div class="muted" style="font-size:11.5px;font-weight:700;text-align:center;">${d}</div>`).join('')}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(7,1fr);gap:6px;">
+      ${days.map(d => {
+                const inMonth = d >= 1 && d <= 30;
+                const has = inMonth && eventDays.has(d) && Math.random() > 0.4;
+                const evB = has ? bookings[d % bookings.length] : null;
+                return `<div style="min-height:78px;border:1px solid var(--border);border-radius:9px;padding:7px;background:${inMonth ? 'var(--surface)' : 'var(--surface-alt)'};${evB ? 'cursor:pointer;' : ''}" ${evB ? `data-action="open-booking" data-arg="${evB.id}"` : ''}>
+          <div style="font-size:11.5px;color:${inMonth ? 'var(--navy-soft)' : 'var(--muted)'};font-weight:600;">${inMonth ? d : ''}</div>
+          ${evB ? `<div style="margin-top:5px;background:var(--info-bg);color:var(--indigo);border-radius:6px;padding:3px 6px;font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${evB.eventType}</div>` : ''}
+        </div>`;
+            }).join('')}
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: INVENTORY
+        ===================================================================== */
+        function pageInventory() {
+            const totals = products.reduce((a, p) => ({ total: a.total + p.total, available: a.available + p.available, reserved: a.reserved + p.reserved, maintenance: a.maintenance + p.maintenance, damaged: a.damaged + p.damaged }), { total: 0, available: 0, reserved: 0, maintenance: 0, damaged: 0 });
+            return `
+  ${pageHead('Inventory', 'Real-time stock across every category.')}
+  <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);">
+    ${kpiCard('Total Items', totals.total.toLocaleString())}
+    ${kpiCard('Available', totals.available.toLocaleString())}
+    ${kpiCard('Reserved', totals.reserved.toLocaleString())}
+    ${kpiCard('Maintenance', totals.maintenance.toLocaleString())}
+    ${kpiCard('Damaged', totals.damaged.toLocaleString())}
+    ${kpiCard('Lost', '6')}
+  </div>
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Item</th><th>Total</th><th>Available</th><th>Reserved</th><th>Maintenance</th><th>Utilization</th></tr></thead>
+      <tbody>
+        ${products.map(p => `<tr class="clickable" data-action="open-product" data-arg="${p.id}">
+          <td><div class="flex items-center gap-8"><span style="font-size:17px;">${p.emoji}</span><div><div class="bold" style="font-size:13px;">${p.name}</div><div class="muted mono" style="font-size:11px;">${p.sku}</div></div></div></td>
+          <td class="mono">${p.total}</td><td class="mono">${p.available}</td><td class="mono">${p.reserved}</td><td class="mono">${p.maintenance}</td>
+          <td style="width:140px;"><div class="flex items-center gap-8"><div class="progress-track" style="flex:1;"><div class="progress-fill" style="width:${p.util}%"></div></div><span class="mono" style="font-size:11.5px;">${p.util}%</span></div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: PRODUCTS
+        ===================================================================== */
+        function pageProducts() {
+            const filtered = state.productFilter === 'All' ? products : products.filter(p => p.cat === state.productFilter);
+            return `
+  ${pageHead('Products', `${products.length} products in catalog`, `<button class="btn btn-primary btn-sm" data-action="toast" data-arg="New product form opened.">${ic('plus', 'icon-sm')} Add Product</button>`)}
+  <div class="filter-bar">
+    ${['All', ...CATEGORIES].map(c => `<button class="tab-btn ${state.productFilter === c ? 'active' : ''}" data-action="filter-products" data-arg="${c}">${c}</button>`).join('')}
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:16px;">
+    ${filtered.map(p => `<div class="card clickable" data-action="open-product" data-arg="${p.id}" style="overflow:hidden;">
+      <div style="height:100px;background:linear-gradient(135deg,#EEF0FF,#F3EEFF);display:flex;align-items:center;justify-content:center;font-size:32px;">${p.emoji}</div>
+      <div style="padding:13px;">
+        <div class="bold" style="font-size:13px;">${p.name}</div>
+        <div class="muted" style="font-size:11px;margin:4px 0 8px;">${p.cat} · ${p.available} available</div>
+        <div class="flex justify-between items-center">
+          <span class="mono bold" style="color:var(--indigo-dark);font-size:13px;">${moneyD(p.price)}/day</span>
+          <span class="badge badge-gray" style="font-size:10.5px;">${p.util}% util</span>
+        </div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+        }
+
+        function productDrawer(id) {
+            const p = products.find(x => x.id === id); if (!p) return '';
+            return `
+  <div class="drawer-head">
+    <div><h3>${p.name}</h3><div class="sub muted" style="font-size:12.5px;">${p.sku} · ${p.cat}</div></div>
+    <button class="icon-btn" data-action="close-drawer">${ic('x', 'icon-sm')}</button>
+  </div>
+  <div class="drawer-body">
+    <div style="height:130px;border-radius:12px;background:linear-gradient(135deg,#EEF0FF,#F3EEFF);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:16px;">${p.emoji}</div>
+    <p style="font-size:13px;color:var(--navy-soft);line-height:1.6;margin-bottom:18px;">${p.desc}</p>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Rental Price</div><div class="bold" style="font-size:15px;">${moneyD(p.price)}/day</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Replacement Cost</div><div class="bold" style="font-size:15px;">${money(p.repl)}</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Deposit</div><div class="bold" style="font-size:15px;">${money(p.deposit)}</div></div>
+      <div class="card card-pad" style="padding:12px;"><div class="muted" style="font-size:11px;">Total Qty</div><div class="bold" style="font-size:15px;">${p.total}</div></div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div class="flex justify-between" style="font-size:12.5px;margin-bottom:6px;"><span class="muted">Weekend Utilization</span><span class="bold">${p.util}%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${p.util}%"></div></div>
+    </div>
+    ${p.util > 80 ? `<div class="card card-pad" style="background:var(--info-bg);border-color:#DDD6FE;margin-bottom:16px;">
+      <div class="ai-badge" style="background:#fff;color:var(--indigo);">${ic('sparkle', 'ai-sparkle')} AI Recommendation</div>
+      <p style="font-size:12.5px;line-height:1.55;">This product has ${p.util}% weekend utilization. Consider purchasing ${Math.round(p.total * 0.15)} additional units before October.</p>
+      <button class="btn btn-accent btn-sm" style="margin-top:10px;" data-action="toast" data-arg="Purchase recommendation created for procurement review.">Create Purchase Recommendation</button>
+    </div>`: ''}
+    <button class="btn btn-secondary btn-sm" style="width:100%;" data-action="toast" data-arg="Product details updated.">${ic('edit', 'icon-sm')} Edit Product</button>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: WAREHOUSE
+        ===================================================================== */
+        function pageWarehouse() {
+            const tasks = bookings.slice(0, 6).map((b, i) => ({
+                id: b.id, name: b.eventType, when: i < 2 ? 'Today' : 'Tomorrow', prog: [80, 45, 100, 20, 60, 10][i],
+                items: [`${randInt(150, 260)} Chairs`, `${randInt(15, 26)} Tables`, `${randInt(15, 26)} Linens`, `${randInt(6, 12)} Uplights`]
+            }));
+            return `
+  ${pageHead('Warehouse', 'Pick, pack, load and inspect for upcoming events.')}
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px;">
+    ${tasks.map(t => `<div class="card card-pad">
+      <div class="flex justify-between items-start" style="margin-bottom:10px;">
+        <div><div class="bold" style="font-size:13.5px;">${t.name}</div><div class="muted" style="font-size:11.5px;">${t.id} · ${t.when}</div></div>
+        ${statusBadge(t.prog === 100 ? 'Completed' : t.prog > 60 ? 'Ready for Delivery' : 'Preparing')}
+      </div>
+      <div style="font-size:12px;color:var(--navy-soft);line-height:1.8;margin-bottom:10px;">${t.items.join('<br>')}</div>
+      <div class="flex justify-between" style="font-size:11.5px;margin-bottom:6px;"><span class="muted">Progress</span><span class="bold">${t.prog}%</span></div>
+      <div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${t.prog}%"></div></div>
+      <div class="flex gap-6 wrap">
+        <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="Pick started for ${t.id}.">Start Pick</button>
+        <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="${t.id} marked packed.">Mark Packed</button>
+        <button class="btn btn-secondary btn-sm" data-action="toast" data-arg="${t.id} marked loaded.">Mark Loaded</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: DELIVERY
+        ===================================================================== */
+        function pageDelivery() {
+            const trucks = [
+                { name: 'Truck #1', driver: 'James Carter', cap: 82, stops: [['08:00 AM', 'The Grand Dallas'], ['11:30 AM', 'Hilton Dallas Downtown'], ['3:00 PM', 'Oak Venue']] },
+                { name: 'Truck #2', driver: 'Maria Lopez', cap: 64, stops: [['09:00 AM', 'Sunset Gardens Dallas'], ['1:00 PM', 'Turtle Creek Estate']] },
+                { name: 'Truck #3', driver: 'DeShawn Wright', cap: 91, stops: [['07:30 AM', 'Prestonwood Country Club'], ['10:00 AM', 'Highland Park Social Hall'], ['2:30 PM', 'Dallas Arboretum'], ['5:00 PM', 'The Room on Main']] }
+            ];
+            return `
+  ${pageHead('Delivery', 'Today\'s routes across 3 trucks.', `<button class="btn btn-accent btn-sm" data-action="optimize-routes">${ic('bolt', 'icon-sm')} AI Optimize Routes</button>`)}
+  <div id="route-banner"></div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px;">
+    ${trucks.map(t => `<div class="route-card">
+      <div class="flex justify-between items-center" style="margin-bottom:10px;">
+        <div class="flex items-center gap-8">${ic('truck', 'icon-sm')}<span class="bold" style="font-size:13.5px;">${t.name}</span></div>
+        <span class="badge badge-gray">${t.cap}% cap</span>
+      </div>
+      <div class="muted" style="font-size:12px;margin-bottom:10px;">Driver: ${t.driver}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${t.stops.map(s => `<div class="flex items-center gap-8" style="font-size:12.5px;"><span class="mono muted" style="width:64px;flex-shrink:0;">${s[0]}</span>${ic('mapPin', 'icon-sm')}<span>${s[1]}</span></div>`).join('')}
+      </div>
+    </div>`).join('')}
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: PAYMENTS
+        ===================================================================== */
+        function pagePayments() {
+            const collected = payments.filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0);
+            const outstanding = payments.filter(p => p.status !== 'Paid').reduce((s, p) => s + p.amount, 0);
+            const overdue = payments.filter(p => p.status === 'Overdue').reduce((s, p) => s + p.amount, 0);
+            return `
+  ${pageHead('Payments', 'Collections, deposits and outstanding balances.')}
+  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
+    ${kpiCard('Collected (Month)', money(collected))}
+    ${kpiCard('Outstanding', money(outstanding))}
+    ${kpiCard('Overdue', money(overdue))}
+    ${kpiCard('Deposits Held', money(41200))}
+    ${kpiCard('Refunds', money(1120))}
+  </div>
+  ${aiInsightPanel('AI', '7 customers have balances due within 3 days. Send reminders?', [{ label: 'Send All Reminders', action: 'send-all-reminders' }])}
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Customer</th><th>Invoice</th><th>Amount</th><th>Due Date</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        ${payments.map((p, i) => `<tr>
+          <td>${p.custName}</td><td class="mono muted">${p.invoice}</td><td class="mono">${money(p.amount)}</td><td class="muted">${p.due}</td>
+          <td>${statusBadge(p.status)}</td>
+          <td>${p.status !== 'Paid' ? `<button class="btn btn-secondary btn-sm" data-action="remind-one" data-arg="${i}">Remind</button>` : ''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: ANALYTICS
+        ===================================================================== */
+        function pageAnalytics() {
+            const eventProfit = bookings.slice(0, 8).map(b => ({
+                name: b.custName, revenue: b.revenue, equip: Math.round(b.revenue * 0.19), labor: Math.round(b.revenue * 0.14), delivery: Math.round(b.revenue * 0.055), fees: Math.round(b.revenue * 0.03),
+                profit: b.revenue - Math.round(b.revenue * (0.19 + 0.14 + 0.055 + 0.03)), margin: b.margin
+            }));
+            const chartVals = [62, 71, 58, 80, 74, 88, 95, 83, 90, 76, 84, 92];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `
+  ${pageHead('Profitability Analytics', 'Revenue, margin and utilization at a glance.')}
+  <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr);">
+    ${kpiCard('Revenue (YTD)', money(1284000))}
+    ${kpiCard('Costs', money(571000))}
+    ${kpiCard('Gross Profit', money(713000))}
+    ${kpiCard('Margin', '55.5%')}
+    ${kpiCard('Revenue / Event', money(6120))}
+    ${kpiCard('Avg Order Value', money(5840))}
+  </div>
+  <div class="dash-grid" style="margin-bottom:20px;">
+    <div class="card card-pad">
+      <h3 style="font-size:14.5px;margin-bottom:16px;">Monthly Revenue Index</h3>
+      <div class="chart-bars">
+        ${chartVals.map((v, i) => `<div class="bar-col"><div class="bar" style="height:${v}%;"></div><div class="bar-label">${months[i]}</div></div>`).join('')}
+      </div>
+    </div>
+    ${aiInsightPanel('AI', 'Your average tent delivery cost is 14% higher than similar events. Grouping Friday deliveries by geographic zone could improve monthly margin by approximately $3,200.', [{ label: 'View Analysis', action: 'toast', arg: 'Delivery cost breakdown opened.' }, { label: 'Optimize Deliveries', action: 'go', arg: 'delivery' }]).replace('margin-bottom:22px;', '')}
+  </div>
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>Event</th><th>Revenue</th><th>Equipment</th><th>Labor</th><th>Delivery</th><th>Fees</th><th>Profit</th><th>Margin</th></tr></thead>
+      <tbody>
+        ${eventProfit.map(e => `<tr>
+          <td class="bold">${e.name}</td><td class="mono">${money(e.revenue)}</td><td class="mono muted">${money(e.equip)}</td><td class="mono muted">${money(e.labor)}</td>
+          <td class="mono muted">${money(e.delivery)}</td><td class="mono muted">${money(e.fees)}</td><td class="mono" style="color:var(--success)">${money(e.profit)}</td><td class="mono bold">${e.margin}%</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: STOREFRONT (admin preview link) / INTEGRATIONS / SETTINGS
+        ===================================================================== */
+        function pageStorefrontAdmin() {
+            return `
+  ${pageHead('Storefront', 'Your customer-facing rental shop.', `<button class="btn btn-primary btn-sm" data-action="go-storefront">${ic('storefront', 'icon-sm')} View Live Storefront</button>`)}
+  <div class="card card-pad" style="text-align:center;padding:60px 20px;">
+    <div style="font-size:40px;margin-bottom:14px;">🛍️</div>
+    <h3 style="margin-bottom:8px;">evergreenrentals.com</h3>
+    <p class="muted" style="max-width:420px;margin:0 auto 18px;">Customers browse products, check live availability by date, and check out online with an AI shopping assistant guiding them.</p>
+    <button class="btn btn-accent" data-action="go-storefront">Open Storefront ${ic('chevronR', 'icon-sm')}</button>
+  </div>`;
+        }
+
+        function pageIntegrations() {
+            const items = [
+                ['Stripe', 'Payments processing', 'connected'], ['QuickBooks', 'Accounting sync', 'connect'],
+                ['Google Calendar', 'Event scheduling', 'connected'], ['Twilio', 'SMS notifications', 'connect'],
+                ['Avalara', 'Automated tax', 'connect'], ['Zapier', '5,000+ app workflows', 'connect']
+            ];
+            return `
+  ${pageHead('Integrations', 'Connect the tools your business already runs on.')}
+  <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:14px;">
+    ${items.map(([name, desc, st]) => `<div class="integration-card">
+      <div class="avatar" style="border-radius:10px;background:var(--surface-alt);color:var(--navy);">${name[0]}</div>
+      <div style="flex:1;"><div class="bold" style="font-size:13.5px;">${name}</div><div class="muted" style="font-size:12px;">${desc}</div></div>
+      ${st === 'connected' ? `<span class="badge badge-green">${ic('check', 'icon-sm')}Connected</span>` : `<button class="btn btn-secondary btn-sm" data-action="toast" data-arg="${name} connected successfully.">Connect</button>`}
+    </div>`).join('')}
+  </div>`;
+        }
+
+        function pageSettings() {
+            const groups = ['Business', 'Users', 'Roles', 'Locations', 'Taxes', 'Payments', 'Notifications', 'AI Settings', 'Integrations', 'Billing'];
+            return `
+  ${pageHead('Settings', 'Configure your RentFlow AI workspace.')}
+  <div class="dash-grid">
+    <div class="card" style="padding:8px;">
+      ${groups.map((g, i) => `<div class="nav-item" style="color:var(--navy);${i === 0 ? 'background:var(--surface-alt);' : ''}" data-action="toast" data-arg="${g} settings opened.">${g}</div>`).join('')}
+    </div>
+    <div class="card card-pad">
+      <h3 style="font-size:15px;margin-bottom:18px;">Business Profile</h3>
+      <div class="field"><label class="field-label">Business Name</label><input class="input" value="Evergreen Event Rentals"></div>
+      <div class="field"><label class="field-label">Location</label><input class="input" value="Dallas, Texas"></div>
+      <div class="field"><label class="field-label">Business Type</label><input class="input" value="Event & Party Rental Company"></div>
+      <div class="checkbox-row justify-between"><span>AI Copilot suggestions</span><div class="switch on"></div></div>
+      <div class="checkbox-row justify-between"><span>Automatic payment reminders</span><div class="switch on"></div></div>
+      <div class="checkbox-row justify-between"><span>Weekend dynamic pricing</span><div class="switch"></div></div>
+      <button class="btn btn-primary" style="margin-top:14px;" data-action="toast" data-arg="Settings saved.">Save Changes</button>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           PAGE: AI PHONE AGENT
+        ===================================================================== */
+        const PHONE_SCRIPT = [
+            { who: 'ai', text: "Thanks for calling Evergreen Event Rentals. How can I help?" },
+            { who: 'cust', text: "I need chairs and tables for 250 people on September 20." },
+            { who: 'ai', text: "I found availability. Would you also like delivery and setup?" },
+            { who: 'cust', text: "Yes." },
+            { who: 'ai', text: "Your estimated rental is $6,480 including delivery and setup. Would you like me to send the quote by text?" },
+            { who: 'cust', text: "Yes, please send it." }
+        ];
+        function pagePhoneAgent() {
+            return `
+  ${pageHead('AI Phone Agent', 'A simulated inbound call, handled entirely by RentFlow AI.')}
+  <div class="dash-grid">
+    <div class="card card-pad">
+      <div class="flex items-center gap-12" style="margin-bottom:18px;">
+        <div class="avatar" style="width:44px;height:44px;">${ic('phone', 'icon-sm')}</div>
+        <div><div class="bold" style="font-size:14.5px;">Incoming Call</div><div class="muted" style="font-size:12.5px;">Sarah Johnson · Wedding Inquiry</div></div>
+        <div class="pulse-dot" style="margin-left:auto;"></div>
+      </div>
+      <div id="phone-transcript" style="display:flex;flex-direction:column;gap:10px;min-height:220px;">
+        ${PHONE_SCRIPT.slice(0, state.phoneStep).map(t => `<div class="chat-row ${t.who === 'ai' ? 'ai' : 'user'}" style="margin-bottom:0;"><div class="chat-avatar" style="width:26px;height:26px;">${t.who === 'ai' ? ic('sparkle', 'icon-sm') : 'SJ'}</div><div class="chat-bubble" style="font-size:13px;padding:10px 13px;">${t.text}</div></div>`).join('')}
+      </div>
+      ${state.phoneStep < PHONE_SCRIPT.length ? `<button class="btn btn-accent btn-sm" style="margin-top:14px;" data-action="phone-next">▶ Play Next Line</button>` : `
+      <div class="grid" style="grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px;">
+        <div class="badge badge-green" style="justify-content:center;padding:8px;">${ic('check', 'icon-sm')} Lead Created</div>
+        <div class="badge badge-green" style="justify-content:center;padding:8px;">${ic('check', 'icon-sm')} Inventory Checked</div>
+        <div class="badge badge-green" style="justify-content:center;padding:8px;">${ic('check', 'icon-sm')} Quote Generated</div>
+        <div class="badge badge-green" style="justify-content:center;padding:8px;">${ic('check', 'icon-sm')} SMS Sent</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px;" data-action="convert-phone-lead">Convert to Lead</button>`}
+    </div>
+    <div class="card card-pad">
+      <h3 style="font-size:14px;margin-bottom:12px;">Behind the scenes</h3>
+      <div class="tool-trace" style="margin-bottom:14px;">${['searchCustomer()', 'checkAvailability()', 'calculateQuote()', 'createQuote()', 'sendQuote()'].map(toolChip).join('')}</div>
+      <p class="muted" style="font-size:12.5px;line-height:1.6;">RentFlow's AI phone agent answers calls 24/7, checks live inventory before quoting, and never overpromises availability it can't deliver.</p>
+    </div>
+  </div>`;
+        }
+
+        /* =====================================================================
+           NOTIFICATIONS DROPDOWN & SEARCH — rendered as modal/drawer-like popovers
+        ===================================================================== */
+        function notifPanelHTML() {
+            return `
+  <div class="modal-head"><h3 style="font-size:15px;">Notifications</h3><button class="icon-btn" data-action="close-modal">${ic('x', 'icon-sm')}</button></div>
+  <div class="modal-body" style="padding:10px;">
+    ${notifications.map(n => `<div class="flex gap-12" style="padding:12px 10px;border-radius:10px;" >
+      <div class="avatar" style="width:34px;height:34px;background:${n.tone === 'red' ? 'var(--danger-bg)' : n.tone === 'amber' ? 'var(--warning-bg)' : n.tone === 'green' ? 'var(--success-bg)' : 'var(--info-bg)'};color:${n.tone === 'red' ? 'var(--danger)' : n.tone === 'amber' ? 'var(--warning)' : n.tone === 'green' ? 'var(--success)' : 'var(--indigo)'};">${ic(n.icon, 'icon-sm')}</div>
+      <div style="flex:1;"><div class="bold" style="font-size:13px;">${n.title}</div><div class="muted" style="font-size:12px;margin-top:2px;">${n.body}</div><div class="muted" style="font-size:11px;margin-top:4px;">${n.time}</div></div>
+    </div>`).join('')}
+  </div>`;
+        }
+
+        function searchPanelHTML(query) {
+            query = query || '';
+            let results = { Customers: [], Products: [], Quotes: [], Bookings: [] };
+            if (query.length > 0) {
+                const q = query.toLowerCase();
+                results.Customers = customers.filter(c => c.name.toLowerCase().includes(q)).slice(0, 3);
+                results.Products = products.filter(p => p.name.toLowerCase().includes(q)).slice(0, 3);
+                results.Quotes = quotes.filter(x => x.custName.toLowerCase().includes(q) || x.id.toLowerCase().includes(q)).slice(0, 3);
+                results.Bookings = bookings.filter(x => x.custName.toLowerCase().includes(q) || x.id.toLowerCase().includes(q)).slice(0, 3);
+            }
+            const hasAny = Object.values(results).some(a => a.length);
+            return `
+  <div class="search-input-row">
+    ${ic('search', 'icon-sm')}
+    <input id="global-search-input" placeholder="Search customers, products, quotes, bookings…" value="${query}" oninput="onGlobalSearch(this.value)" autofocus>
+    <button class="icon-btn" data-action="close-search">${ic('x', 'icon-sm')}</button>
+  </div>
+  <div style="max-height:400px;overflow-y:auto;">
+  ${query.length === 0 ? `<div class="empty-state" style="padding:30px;">${ic('search', 'icon')}<div style="margin-top:8px;">Start typing to search everything</div></div>` :
+                    !hasAny ? `<div class="empty-state" style="padding:30px;">No results for "${query}"</div>` :
+                        Object.entries(results).map(([label, items]) => items.length ? `
+      <div class="search-result-group">
+        <div class="search-result-label">${label}</div>
+        ${items.map(it => {
+                            const name = it.name || it.custName; const sub = it.id || it.email || '';
+                            const action = label === 'Customers' ? 'open-customer' : label === 'Products' ? 'open-product' : label === 'Quotes' ? 'open-quote' : 'open-booking';
+                            const arg = it.id;
+                            return `<div class="search-result-item" data-action="search-goto" data-arg="${action}|${arg}"><div class="avatar" style="width:28px;height:28px;font-size:10.5px;">${initials(name)}</div><div><div class="bold" style="font-size:13px;">${name}</div><div class="muted" style="font-size:11.5px;">${sub}</div></div></div>`;
+                        }).join('')}
+      </div>`: '').join('')
+                }
+  </div>`;
+        }
+        function onGlobalSearch(v) {
+            document.getElementById('search-content').innerHTML = searchPanelHTML(v);
+            const inp = document.getElementById('global-search-input');
+            inp.focus(); inp.setSelectionRange(v.length, v.length);
+        }
+
+        /* =====================================================================
+           PAGES MAP
+        ===================================================================== */
+        const PAGES = {
+            dashboard: pageDashboard,
+            copilot: pageCopilot,
+            'quote-assistant': pageQuoteAssistant,
+            leads: pageLeads,
+            customers: pageCustomers,
+            quotes: pageQuotes,
+            bookings: pageBookings,
+            calendar: pageCalendar,
+            inventory: pageInventory,
+            products: pageProducts,
+            warehouse: pageWarehouse,
+            delivery: pageDelivery,
+            payments: pagePayments,
+            analytics: pageAnalytics,
+            'storefront-admin': pageStorefrontAdmin,
+            integrations: pageIntegrations,
+            settings: pageSettings,
+            'phone-agent': pagePhoneAgent
+        };
+
+        /* =====================================================================
+           DRAWER / MODAL RENDER
+        ===================================================================== */
+        function renderDrawer() {
+            const ov = document.getElementById('drawer-overlay');
+            if (!state.drawer) { ov.classList.remove('active'); return; }
+            ov.classList.add('active');
+            let html = '';
+            if (state.drawer.type === 'lead') html = leadDrawer(state.drawer.id);
+            if (state.drawer.type === 'customer') html = customerDrawer(state.drawer.id);
+            if (state.drawer.type === 'booking') html = bookingDrawer(state.drawer.id);
+            if (state.drawer.type === 'product') html = productDrawer(state.drawer.id);
+            document.getElementById('drawer-content').innerHTML = html;
+        }
+        function closeDrawer() { state.drawer = null; const ov = document.getElementById('drawer-overlay'); if (ov) ov.classList.remove('active'); }
+
+        function renderModal() {
+            const ov = document.getElementById('modal-overlay');
+            if (!state.modal) { ov.classList.remove('active'); return; }
+            ov.classList.add('active');
+            let html = '';
+            if (state.modal.type === 'quote') html = quoteModal(state.modal.id);
+            if (state.modal.type === 'notifications') html = notifPanelHTML();
+            document.getElementById('modal-content').innerHTML = html;
+        }
+        function closeModal() { state.modal = null; const ov = document.getElementById('modal-overlay'); if (ov) ov.classList.remove('active'); }
+
+        function openSearch() { document.getElementById('search-overlay').classList.add('active'); document.getElementById('search-content').innerHTML = searchPanelHTML(''); }
+        function closeSearch() { document.getElementById('search-overlay').classList.remove('active'); }
+
+        /* =====================================================================
+           LANDING: animated workflow steps
+        ===================================================================== */
+        function initLandingWorkflow() {
+            const steps = [
+                'Customer Inquiry received', 'AI Sales Agent responds', 'Availability checked live', 'Profitable quote generated', 'Payment collected', 'Operations scheduled', 'Delivery optimized', 'Profit tracked'
+            ];
+            const wrap = document.getElementById('wf-steps');
+            wrap.innerHTML = steps.map((s, i) => `<div class="wf-step" style="animation-delay:${i * 0.09}s"><div class="n">${i + 1}</div>${s}</div>`).join('');
+        }
+
+        /* =====================================================================
+           DEMO MODE
+        ===================================================================== */
+        const DEMO_STEPS = [
+            { label: '1 / 7', text: 'AI creates a quote for a 250-person wedding.', run: () => { go('copilot'); setTimeout(() => askCopilot("Create a quote for a 250-person wedding"), 400); } },
+            { label: '2 / 7', text: 'Customer accepts the quote.', run: () => { toast('Sarah Johnson accepted the quote via Customer Portal.'); } },
+            { label: '3 / 7', text: 'Payment received — deposit paid.', run: () => { toast('Deposit of $2,592 received via Stripe.'); } },
+            { label: '4 / 7', text: 'Inventory is reserved automatically.', run: () => { go('inventory'); toast('250 chairs, 25 tables and 10 uplights reserved.'); } },
+            { label: '5 / 7', text: 'Warehouse prepares the order.', run: () => { go('warehouse'); toast('Pick list generated for warehouse team.'); } },
+            { label: '6 / 7', text: 'AI optimizes the delivery route.', run: () => { go('delivery'); optimizeRoutes(); } },
+            { label: '7 / 7', text: 'Event completed — profit recorded.', run: () => { go('analytics'); toast('Event marked completed — 54.9% margin recorded.'); } }
+        ];
+        function toggleDemo() {
+            state.demoMode = !state.demoMode;
+            if (state.demoMode) { state.demoStep = 0; showDemoStep(); } else { document.getElementById('demo-tour').classList.remove('active'); }
+        }
+        function showDemoStep() {
+            const el = document.getElementById('demo-tour');
+            const step = DEMO_STEPS[state.demoStep];
+            el.classList.add('active');
+            el.innerHTML = `<span class="step-badge">${step.label}</span><span style="font-size:13px;flex:1;">${step.text}</span>
+    <button class="btn btn-secondary btn-sm" data-action="demo-run">Run</button>
+    ${state.demoStep < DEMO_STEPS.length - 1 ? `<button class="btn btn-ghost btn-sm" style="color:#fff;" data-action="demo-next">Skip →</button>` : `<button class="btn btn-ghost btn-sm" style="color:#fff;" data-action="demo-end">Finish</button>`}`;
+        }
+        function demoRun() { DEMO_STEPS[state.demoStep].run(); demoNext(); }
+        function demoNext() {
+            if (state.demoStep < DEMO_STEPS.length - 1) { state.demoStep++; showDemoStep(); }
+            else { demoEnd(); }
+        }
+        function demoEnd() { state.demoMode = false; document.getElementById('demo-tour').classList.remove('active'); toast('Demo flow complete — that\'s the full RentFlow AI loop!'); }
+
+        /* =====================================================================
+           STOREFRONT
+        ===================================================================== */
+        function buildStorefront() {
+            const shown = products.slice(0, 12);
+            return `
+  <div class="sf-topbar">Free delivery & setup on orders over $500 in the Dallas metro</div>
+  <div class="sf-nav">
+    <div class="brand"><div class="brand-mark">E</div>Evergreen Event Rentals</div>
+    <div class="sf-nav-links">
+      ${['Tents', 'Tables', 'Chairs', 'Furniture', 'Linens', 'Lighting', 'Packages'].map(c => `<span data-action="sf-filter" data-arg="${c}">${c}</span>`).join('')}
+    </div>
+    <button class="btn btn-secondary btn-sm" data-action="go-app">Business Login</button>
+  </div>
+  <div class="sf-hero">
+    <h1>Make Your Event Unforgettable</h1>
+    <p>Premium event rentals delivered and set up across Dallas — tents, tables, chairs, linens and lighting for weddings, corporate events and celebrations of every size.</p>
+    <button class="btn btn-accent" style="margin-top:22px;padding:13px 24px;" data-action="sf-scroll-products">Browse Rentals ${ic('chevronR', 'icon-sm')}</button>
+  </div>
+  <div class="sf-cat-strip">
+    ${CATEGORIES.map(c => `<div class="sf-cat-pill">${c}</div>`).join('')}
+  </div>
+  <div id="sf-products" class="sf-grid">
+    ${shown.map(p => `<div class="sf-product">
+      <div class="sf-product-img">${p.emoji}</div>
+      <div class="sf-product-body">
+        <h4>${p.name}</h4>
+        <div class="price">${moneyD(p.price)}/day</div>
+        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px;" data-action="add-to-cart" data-arg="${p.id}">Add to Cart</button>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div style="max-width:900px;margin:0 auto 80px;padding:0 44px;">
+    <div class="card card-pad" style="text-align:center;background:var(--navy);color:#fff;border:none;">
+      <h3 style="color:#fff;font-size:20px;margin-bottom:8px;">Not sure what you need?</h3>
+      <p class="muted" style="color:#B9BCD1;margin-bottom:16px;">Chat with our AI planner in the corner — tell it your guest count and it'll build your package.</p>
+    </div>
+  </div>
+  <div class="cart-fab" data-action="open-checkout">${ic('cart', 'icon-sm')} <span id="cart-count">${CART.reduce((s, i) => s + i.qty, 0)}</span> items · <span id="cart-total">${money(cartSubtotal())}</span></div>
+  <div class="sf-chat-bubble" data-action="toggle-sf-chat">${ic('sparkle', 'icon-sm')}</div>
+  <div class="sf-chat-panel ${state.sfChatOpen ? 'active' : ''}" id="sf-chat-panel">
+    <div class="sf-chat-head flex items-center gap-8"><span>${ic('sparkle', 'icon-sm')}</span> AI Event Planner</div>
+    <div class="sf-chat-body" id="sf-chat-body">
+      ${state.sfChatHistory.length === 0 ? `<div class="muted" style="font-size:12.5px;line-height:1.6;">Hi! Tell me your guest count and event type and I'll put together a package. Try: "I have 250 guests, what do I need?"</div>` : ''}
+      ${state.sfChatHistory.map(m => `<div class="chat-row ${m.role === 'user' ? 'user' : 'ai'}" style="margin-bottom:10px;"><div class="chat-avatar" style="width:22px;height:22px;">${m.role === 'user' ? 'You' : ic('sparkle', 'icon-sm')}</div><div class="chat-bubble" style="font-size:12.5px;padding:9px 11px;">${m.html}</div></div>`).join('')}
+    </div>
+    <div class="sf-chat-inputrow">
+      <input class="input" id="sf-chat-input" placeholder="I have 250 guests…" onkeydown="if(event.key==='Enter'){sfChatSend();}">
+      <button class="btn btn-accent btn-sm" data-action="sf-chat-send">${ic('send', 'icon-sm')}</button>
+    </div>
+  </div>`;
+        }
+        function cartSubtotal() {
+            return CART.reduce((s, item) => { const p = products.find(x => x.id === item.productId); return s + (p ? p.price * item.qty : 0); }, 0);
+        }
+        function renderStorefront() { document.getElementById('storefront-root').innerHTML = buildStorefront(); }
+
+        function sfChatSend() {
+            const inp = document.getElementById('sf-chat-input');
+            const val = inp.value.trim(); if (!val) return;
+            state.sfChatHistory.push({ role: 'user', html: val });
+            renderStorefront();
+            setTimeout(() => {
+                const guestMatch = val.match(/(\\d{2,4})/);
+                const guests = guestMatch ? parseInt(guestMatch[1]) : 150;
+                const tables = Math.ceil(guests / 10);
+                state.sfChatHistory.push({ role: 'ai', html: `For ${guests} guests, I recommend <b>${guests} Chiavari chairs</b> and <b>${tables} round tables</b>. Based on your event date, all items are currently available.<br><br><button class="btn btn-accent btn-sm" data-action="sf-add-package" data-arg="${guests}|${tables}" style="margin-top:6px;">Add Recommended Package</button>` });
+                renderStorefront();
+                const body = document.getElementById('sf-chat-body'); if (body) body.scrollTop = body.scrollHeight;
+            }, 850);
+        }
+
+        /* =====================================================================
+           GLOBAL CLICK DELEGATION
+        ===================================================================== */
+        document.addEventListener('click', function (e) {
+            const t = e.target.closest('[data-action]');
+            if (!t) return;
+            const action = t.getAttribute('data-action');
+            const arg = t.getAttribute('data-arg');
+
+            switch (action) {
+                case 'start-demo': showApp(); toast('Welcome to Evergreen Event Rentals\' workspace.'); break;
+                case 'watch-ai-demo': showApp(); go('phone-agent'); break;
+                case 'go-storefront': document.getElementById('landing').style.display = 'none'; document.getElementById('app-shell').classList.remove('active'); document.getElementById('storefront').style.display = 'block'; state.screen = 'storefront'; renderStorefront(); break;
+                case 'go-app': document.getElementById('storefront').style.display = 'none'; showApp(); break;
+                case 'go': go(t.getAttribute('data-page') || arg); break;
+                case 'open-copilot': go('copilot'); break;
+                case 'open-notifs': state.modal = { type: 'notifications' }; renderModal(); break;
+                case 'close-modal': closeModal(); break;
+                case 'close-drawer': closeDrawer(); break;
+                case 'open-search': openSearch(); break;
+                case 'close-search': closeSearch(); break;
+                case 'search-goto': {
+                    const [act, id] = arg.split('|'); closeSearch();
+                    if (act === 'open-customer') { go('customers'); state.drawer = { type: 'customer', id }; }
+                    if (act === 'open-product') { go('products'); state.drawer = { type: 'product', id }; }
+                    if (act === 'open-quote') { go('quotes'); state.modal = { type: 'quote', id }; }
+                    if (act === 'open-booking') { go('bookings'); state.drawer = { type: 'booking', id }; }
+                    renderDrawer(); renderModal(); break;
+                }
+                case 'toast': toast(arg); break;
+                case 'toggle-demo': toggleDemo(); break;
+                case 'demo-run': demoRun(); break;
+                case 'demo-next': demoNext(); break;
+                case 'demo-end': demoEnd(); break;
+
+                case 'ask-copilot': askCopilot(decodeURIComponent(arg)); break;
+                case 'submit-copilot': submitCopilot(); break;
+                case 'send-ai-quote': toast('Quote sent to Sarah Johnson via email + SMS.'); break;
+                case 'generate-quote': {
+                    const guests = parseInt(document.getElementById('qa-guests').value) || 250;
+                    const eventType = document.getElementById('qa-event').value;
+                    state.generatedQuote = buildAIQuote(guests, eventType);
+                    render(); toast('Quote generated.'); break;
+                }
+
+                case 'open-lead': state.drawer = { type: 'lead', id: arg }; renderDrawer(); break;
+                case 'ai-followup': toast('AI follow-up sent to lead.'); closeDrawer(); break;
+                case 'convert-lead': { const l = leads.find(x => x.id === arg); if (l) l.stage = 'Booked'; closeDrawer(); go('leads'); toast('Lead marked as Booked — booking created.'); break; }
+
+                case 'open-customer': state.drawer = { type: 'customer', id: arg }; renderDrawer(); break;
+
+                case 'open-quote': state.modal = { type: 'quote', id: arg }; renderModal(); break;
+                case 'accept-quote': { const q = quotes.find(x => x.id === arg); if (q) q.status = 'Accepted'; closeModal(); go('quotes'); toast('Quote accepted — booking created automatically.'); break; }
+                case 'filter-quotes': state.quoteFilter = arg; go('quotes'); break;
+
+                case 'open-booking': state.drawer = { type: 'booking', id: arg }; renderDrawer(); break;
+                case 'advance-booking': { const b = bookings.find(x => x.id === arg); if (b) { const i = bookingStatuses.indexOf(b.opStatus); b.opStatus = bookingStatuses[Math.min(i + 1, bookingStatuses.length - 1)]; } renderDrawer(); render(); toast('Booking advanced to next stage.'); break; }
+
+                case 'cal-view': state.calendarView = arg; go('calendar'); break;
+
+                case 'open-product': state.drawer = { type: 'product', id: arg }; renderDrawer(); break;
+                case 'filter-products': state.productFilter = arg; go('products'); break;
+
+                case 'optimize-routes': optimizeRoutes(); break;
+
+                case 'send-all-reminders': payments.forEach(p => { if (p.status !== 'Paid') p.status = 'Pending'; }); toast('Payment reminders sent to all outstanding customers.'); break;
+                case 'remind-one': toast('Reminder sent to ' + payments[parseInt(arg)].custName + '.'); break;
+
+                case 'phone-next': state.phoneStep++; render(); break;
+                case 'convert-phone-lead': toast('Sarah Johnson added as a new lead — Quote Sent.'); break;
+
+                case 'add-to-cart': { const existing = CART.find(c => c.productId === arg); if (existing) existing.qty++; else CART.push({ productId: arg, qty: 1 }); renderStorefront(); toast('Added to cart.'); break; }
+                case 'toggle-sf-chat': state.sfChatOpen = !state.sfChatOpen; renderStorefront(); break;
+                case 'sf-chat-send': sfChatSend(); break;
+                case 'sf-add-package': {
+                    const [g, tb] = arg.split('|').map(Number);
+                    const chair = products.find(p => p.name === 'White Chiavari Chair'); const table = products.find(p => p.name === '60" Round Table');
+                    if (chair) CART.push({ productId: chair.id, qty: g }); if (table) CART.push({ productId: table.id, qty: tb });
+                    renderStorefront(); toast('Package added to cart.'); break;
+                }
+                case 'open-checkout': state.modal = { type: 'checkout' }; document.getElementById('modal-overlay').classList.add('active'); document.getElementById('modal-content').innerHTML = checkoutModalHTML(); break;
+                case 'sf-filter': case 'sf-scroll-products': { const el = document.getElementById('sf-products'); if (el) el.scrollIntoView({ behavior: 'smooth' }); break; }
+                case 'checkout-confirm': { CART.length = 0; closeModal(); renderStorefront(); toast('Order confirmed! Confirmation sent — welcome to your Customer Portal.'); break; }
+                case 'view-portal': { document.getElementById('storefront').style.display = 'none'; showApp(); go('bookings'); break; }
+            }
+        });
+
+        function optimizeRoutes() {
+            const banner = document.getElementById('route-banner');
+            toast('Optimizing delivery routes…', 'info');
+            setTimeout(() => {
+                if (banner) banner.innerHTML = `<div class="card card-pad" style="background:var(--success-bg);border-color:#A7F3D0;margin-bottom:16px;"><div class="flex items-center gap-8 bold" style="color:var(--success);font-size:13.5px;">${ic('check', 'icon-sm')} I found a route that reduces estimated driving time by 42 minutes.</div></div>`;
+                toast('Routes optimized — 42 minutes saved.');
+            }, 700);
+        }
+
+        function checkoutModalHTML() {
+            const items = CART.map(c => ({ ...c, p: products.find(p => p.id === c.productId) })).filter(x => x.p);
+            const subtotal = items.reduce((s, i) => s + i.p.price * i.qty, 0);
+            const delivery = subtotal > 0 ? 150 : 0, setup = subtotal > 0 ? 120 : 0, tax = Math.round((subtotal + delivery + setup) * 0.0825);
+            const total = subtotal + delivery + setup + tax;
+            const deposit = Math.round(total * 0.4);
+            if (items.length === 0) {
+                return `<div class="modal-head"><h3>Your Cart</h3><button class="icon-btn" data-action="close-modal">${ic('x', 'icon-sm')}</button></div>
+    <div class="modal-body"><div class="empty-state">${ic('cart', 'icon')}<div style="margin-top:10px;">Your cart is empty — browse rentals to get started.</div></div></div>`;
+            }
+            return `
+  <div class="modal-head"><h3>Checkout</h3><button class="icon-btn" data-action="close-modal">${ic('x', 'icon-sm')}</button></div>
+  <div class="modal-body">
+    <div class="field"><label class="field-label">Event Date</label><input class="input" type="date" value="2026-09-20"></div>
+    <div class="field"><label class="field-label">Delivery Location</label><input class="input" value="The Grand Dallas, TX"></div>
+    <div style="margin:16px 0;">
+      ${items.map(i => `<div class="flex justify-between" style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${i.p.name} × ${i.qty}</span><span class="mono">${money(i.p.price * i.qty)}</span></div>`).join('')}
+    </div>
+    <div style="font-family:'IBM Plex Mono';font-size:12.5px;display:flex;flex-direction:column;gap:6px;">
+      <div class="flex justify-between"><span class="muted">Subtotal</span><span>${money(subtotal)}</span></div>
+      <div class="flex justify-between"><span class="muted">Delivery & Setup</span><span>${money(delivery + setup)}</span></div>
+      <div class="flex justify-between"><span class="muted">Tax</span><span>${money(tax)}</span></div>
+      <hr class="divider" style="margin:4px 0;">
+      <div class="flex justify-between bold" style="font-size:15px;"><span>Total</span><span>${money(total)}</span></div>
+      <div class="flex justify-between muted"><span>Deposit due today (40%)</span><span>${money(deposit)}</span></div>
+    </div>
+    <button class="btn btn-accent" style="width:100%;margin-top:18px;" data-action="checkout-confirm">Pay Deposit & Confirm</button>
+  </div>`;
+        }
+
+        /* =====================================================================
+           INIT
+        ===================================================================== */
+        document.body.insertAdjacentHTML('beforeend', '<div id="storefront" style="display:none;"><div id="storefront-root"></div></div>');
+        initLandingWorkflow();
+    </script>
+</body>
+
+</html>
