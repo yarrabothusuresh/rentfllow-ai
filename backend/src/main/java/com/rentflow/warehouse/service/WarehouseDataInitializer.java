@@ -15,7 +15,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.core.annotation.Order;
+
 @Component
+@Order(5)
 public class WarehouseDataInitializer implements CommandLineRunner {
 
     private final WarehouseLocationRepository locationRepository;

@@ -55,6 +55,13 @@ import { InventoryReservationsListComponent } from './pages/inventory/inventory-
 import { InventoryProductAvailabilityComponent } from './pages/inventory/inventory-product-availability.component';
 import { InventoryConflictsComponent } from './pages/inventory/inventory-conflicts.component';
 
+import { DeliveryDashboardComponent } from './pages/delivery/delivery-dashboard.component';
+import { DeliveryListComponent } from './pages/delivery/delivery-list.component';
+import { DeliveryDetailComponent } from './pages/delivery/delivery-detail.component';
+import { DeliveryCalendarComponent } from './pages/delivery/delivery-calendar.component';
+import { DeliveryRoutesComponent } from './pages/delivery/delivery-routes.component';
+import { DriverListComponent } from './pages/delivery/driver-list.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'portal/login', component: PortalLoginComponent },
@@ -153,7 +160,14 @@ export const routes: Routes = [
       { path: 'warehouse/orders/:id', component: WarehouseOrderDetailComponent },
       { path: 'warehouse/pick', component: WarehousePickListComponent },
       { path: 'warehouse/packing', component: WarehousePackingComponent },
-      { path: 'warehouse/shortages', component: WarehouseShortagesComponent }
+      { path: 'warehouse/shortages', component: WarehouseShortagesComponent },
+      { path: 'delivery', component: DeliveryDashboardComponent },
+      { path: 'delivery/dashboard', component: DeliveryDashboardComponent },
+      { path: 'delivery/list', component: DeliveryListComponent },
+      { path: 'delivery/calendar', component: DeliveryCalendarComponent },
+      { path: 'delivery/routes', component: DeliveryRoutesComponent },
+      { path: 'delivery/drivers', component: DriverListComponent },
+      { path: 'delivery/:id', component: DeliveryDetailComponent }
     ]
   },
   { path: '**', redirectTo: '' }
