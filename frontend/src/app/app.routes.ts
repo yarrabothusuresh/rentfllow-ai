@@ -62,6 +62,12 @@ import { DeliveryCalendarComponent } from './pages/delivery/delivery-calendar.co
 import { DeliveryRoutesComponent } from './pages/delivery/delivery-routes.component';
 import { DriverListComponent } from './pages/delivery/driver-list.component';
 
+import { ReturnsDashboardComponent } from './pages/returns/returns-dashboard.component';
+import { ReturnsListComponent } from './pages/returns/returns-list.component';
+import { ReturnDetailComponent } from './pages/returns/return-detail.component';
+import { ReturnsInspectionComponent } from './pages/returns/returns-inspection.component';
+import { DamageDashboardComponent } from './pages/returns/damage-dashboard.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'portal/login', component: PortalLoginComponent },
@@ -121,6 +127,12 @@ export const routes: Routes = [
   { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
   { path: 'inventory/conflicts', component: InventoryConflictsComponent },
   { path: 'inventory/products/:id/availability', component: InventoryProductAvailabilityComponent },
+  { path: 'inventory/damage', component: DamageDashboardComponent },
+  { path: 'returns', component: ReturnsListComponent },
+  { path: 'returns/dashboard', component: ReturnsDashboardComponent },
+  { path: 'returns/inspection', component: ReturnsInspectionComponent },
+  { path: 'returns/damage', component: DamageDashboardComponent },
+  { path: 'returns/:id', component: ReturnDetailComponent },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -145,6 +157,12 @@ export const routes: Routes = [
       { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
       { path: 'inventory/conflicts', component: InventoryConflictsComponent },
       { path: 'inventory/products/:id/availability', component: InventoryProductAvailabilityComponent },
+      { path: 'inventory/damage', component: DamageDashboardComponent },
+      { path: 'returns', component: ReturnsListComponent },
+      { path: 'returns/dashboard', component: ReturnsDashboardComponent },
+      { path: 'returns/inspection', component: ReturnsInspectionComponent },
+      { path: 'returns/damage', component: DamageDashboardComponent },
+      { path: 'returns/:id', component: ReturnDetailComponent },
       { path: 'quotes', component: QuotesListComponent },
       { path: 'quotes/new', component: QuoteBuilderComponent },
       { path: 'quotes/:id', component: QuoteDetailComponent },

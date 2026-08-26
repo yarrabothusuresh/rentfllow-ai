@@ -545,17 +545,45 @@ public class DeliveryService {
         return "123 Main Street, New York, NY 10001";
     }
 
-    private boolean timeWindowsOverlap(Delivery d1, Delivery d2) {
-        if (d1.getScheduledStartTime() == null || d1.getScheduledEndTime() == null ||
-            d2.getScheduledStartTime() == null || d2.getScheduledEndTime() == null) {
-            return true; // Default fallback overlap check if times unspecified
+    public boolean timeWindowsOverlap(String start1Str, String end1Str, String start2Str, String end2Str) {
+        if (start1Str == null || end1Str == null || start2Str == null || end2Str == null) {
+            return true;
         }
-        LocalTime start1 = LocalTime.parse(d1.getScheduledStartTime());
-        LocalTime end1 = LocalTime.parse(d1.getScheduledEndTime());
-        LocalTime start2 = LocalTime.parse(d2.getScheduledStartTime());
-        LocalTime end2 = LocalTime.parse(d2.getScheduledEndTime());
-
+        LocalTime start1 = LocalTime.parse(start1Str);
+        LocalTime end1 = LocalTime.parse(end1Str);
+        LocalTime start2 = LocalTime.parse(start2Str);
+        LocalTime end2 = LocalTime.parse(end2Str);
         return start1.isBefore(end2) && end1.isAfter(start2);
+    }
+
+    private boolean timeWindowsOverlap(Delivery d1, Delivery d2) {
+        return timeWindowsOverlap(d1.getScheduledStartTime(), d1.getScheduledEndTime(), d2.getScheduledStartTime(), d2.getScheduledEndTime());
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasDeliveryDriverConflict(String tenantId, UUID driverId, LocalDate date, String startTime, String endTime, UUID excludeDeliveryId) {
+        List<DeliveryStatus> inactiveStatuses = List.of(DeliveryStatus.CANCELLED, DeliveryStatus.FAILED, DeliveryStatus.DELIVERED);
+        List<Delivery> deliveries = deliveryRepository.findByTenantIdAndDriverIdAndScheduledDateAndStatusNotIn(tenantId, driverId, date, inactiveStatuses);
+        for (Delivery d : deliveries) {
+            if (excludeDeliveryId != null && excludeDeliveryId.equals(d.getId())) continue;
+            if (timeWindowsOverlap(startTime, endTime, d.getScheduledStartTime(), d.getScheduledEndTime())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasDeliveryVehicleConflict(String tenantId, UUID vehicleId, LocalDate date, String startTime, String endTime, UUID excludeDeliveryId) {
+        List<DeliveryStatus> inactiveStatuses = List.of(DeliveryStatus.CANCELLED, DeliveryStatus.FAILED, DeliveryStatus.DELIVERED);
+        List<Delivery> deliveries = deliveryRepository.findByTenantIdAndVehicleIdAndScheduledDateAndStatusNotIn(tenantId, vehicleId, date, inactiveStatuses);
+        for (Delivery d : deliveries) {
+            if (excludeDeliveryId != null && excludeDeliveryId.equals(d.getId())) continue;
+            if (timeWindowsOverlap(startTime, endTime, d.getScheduledStartTime(), d.getScheduledEndTime())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void releaseDriverAndVehicle(String tenantId, Delivery delivery) {

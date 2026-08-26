@@ -11,6 +11,11 @@ public enum BookingStatus {
     PAID,
     READY_FOR_FULFILLMENT,
     IN_PROGRESS,
+    DELIVERED,
+    READY_FOR_PICKUP,
+    PICKED_UP,
+    INSPECTING,
+    RETURNED,
     COMPLETED,
     CANCELLED,
     NO_SHOW
