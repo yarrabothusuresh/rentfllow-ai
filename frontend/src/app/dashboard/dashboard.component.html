@@ -25,6 +25,8 @@
       <a routerLink="/warehouse/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse Operations</a>
       <a routerLink="/dashboard/delivery/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery & Dispatch</a>
       <a routerLink="/dashboard/returns/dashboard" routerLinkActive="active" class="nav-item">Returns & Pickups</a>
+      <a routerLink="/dashboard/damage-claims/dashboard" routerLinkActive="active" class="nav-item">Claims & Loss Control</a>
+      <a routerLink="/dashboard/maintenance/dashboard" routerLinkActive="active" class="nav-item">Maintenance Center</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFinanceAdmin()">Finance & Admin</div>
       <a routerLink="/invoices" routerLinkActive="active" class="nav-item">Invoices</a>

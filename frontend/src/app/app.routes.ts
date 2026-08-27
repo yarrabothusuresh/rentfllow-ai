@@ -68,6 +68,14 @@ import { ReturnDetailComponent } from './pages/returns/return-detail.component';
 import { ReturnsInspectionComponent } from './pages/returns/returns-inspection.component';
 import { DamageDashboardComponent } from './pages/returns/damage-dashboard.component';
 
+import { DamageClaimsDashboardComponent } from './pages/claims/damage-claims-dashboard.component';
+import { DamageClaimsListComponent } from './pages/claims/damage-claims-list.component';
+import { DamageClaimDetailComponent } from './pages/claims/damage-claim-detail.component';
+import { RepairsDashboardComponent } from './pages/maintenance/repairs-dashboard.component';
+import { RepairDetailComponent } from './pages/maintenance/repair-detail.component';
+import { ReplacementsListComponent } from './pages/replacements/replacements-list.component';
+import { PortalDamageClaimsComponent } from './pages/claims/portal-damage-claims.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'portal/login', component: PortalLoginComponent },
@@ -85,6 +93,7 @@ export const routes: Routes = [
       { path: 'bookings/:id', component: PortalBookingDetailComponent },
       { path: 'invoices', component: PortalInvoicesListComponent },
       { path: 'invoices/:id', component: PortalInvoiceDetailComponent },
+      { path: 'damage-claims', component: PortalDamageClaimsComponent },
       { path: 'profile', component: PortalProfileComponent },
       { path: 'requests', component: PortalRequestsComponent },
       { path: 'notifications', component: NotificationsListComponent }
@@ -163,6 +172,13 @@ export const routes: Routes = [
       { path: 'returns/inspection', component: ReturnsInspectionComponent },
       { path: 'returns/damage', component: DamageDashboardComponent },
       { path: 'returns/:id', component: ReturnDetailComponent },
+      { path: 'damage-claims', component: DamageClaimsListComponent },
+      { path: 'damage-claims/dashboard', component: DamageClaimsDashboardComponent },
+      { path: 'damage-claims/:id', component: DamageClaimDetailComponent },
+      { path: 'maintenance', component: RepairsDashboardComponent },
+      { path: 'maintenance/dashboard', component: RepairsDashboardComponent },
+      { path: 'maintenance/:id', component: RepairDetailComponent },
+      { path: 'replacements', component: ReplacementsListComponent },
       { path: 'quotes', component: QuotesListComponent },
       { path: 'quotes/new', component: QuoteBuilderComponent },
       { path: 'quotes/:id', component: QuoteDetailComponent },
