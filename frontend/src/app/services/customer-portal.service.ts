@@ -12,6 +12,43 @@ import {
   CustomerRequest
 } from '../models/customer-portal.models';
 
+export interface CustomerAddress {
+  id?: string;
+  customerId?: string;
+  addressType: 'HOME' | 'OFFICE' | 'VENUE' | 'OTHER';
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country?: string;
+  isDefault?: boolean;
+  deliveryInstructions?: string;
+  contactPerson?: string;
+  phone?: string;
+}
+
+export interface CustomerMessageItem {
+  id: string;
+  senderType: string;
+  senderId?: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface CustomerConversation {
+  id: string;
+  customerId: string;
+  bookingId?: string;
+  bookingNumber?: string;
+  quoteId?: string;
+  subject: string;
+  status: 'OPEN' | 'WAITING_FOR_CUSTOMER' | 'WAITING_FOR_STAFF' | 'CLOSED';
+  createdAt: string;
+  updatedAt: string;
+  messages: CustomerMessageItem[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -54,6 +91,15 @@ export class CustomerPortalService {
         .set('X-User-Role', 'CUSTOMER');
     }
     return headers;
+  }
+
+  register(data: any): Observable<CustomerAuthResponse> {
+    return this.http.post<CustomerAuthResponse>(`${this.apiUrl}/auth/register`, data).pipe(
+      tap(res => {
+        localStorage.setItem('rentflow_customer_session', JSON.stringify(res));
+        this.currentCustomerSubject.next(res);
+      })
+    );
   }
 
   login(credentials: { email: string; password: string }): Observable<CustomerAuthResponse> {
@@ -102,8 +148,16 @@ export class CustomerPortalService {
     return this.http.get<CustomerPortalQuote>(`${this.apiUrl}/quotes/${id}`, { headers: this.getHeaders() });
   }
 
+  approveQuote(id: string): Observable<CustomerPortalQuote> {
+    return this.http.post<CustomerPortalQuote>(`${this.apiUrl}/quotes/${id}/approve`, {}, { headers: this.getHeaders() });
+  }
+
   acceptQuote(id: string): Observable<CustomerPortalQuote> {
-    return this.http.post<CustomerPortalQuote>(`${this.apiUrl}/quotes/${id}/accept`, {}, { headers: this.getHeaders() });
+    return this.approveQuote(id);
+  }
+
+  declineQuote(id: string, reason: string): Observable<CustomerPortalQuote> {
+    return this.http.post<CustomerPortalQuote>(`${this.apiUrl}/quotes/${id}/decline`, { reason }, { headers: this.getHeaders() });
   }
 
   requestQuoteChanges(id: string, message: string): Observable<CustomerPortalQuote> {
@@ -126,8 +180,52 @@ export class CustomerPortalService {
     return this.http.get<CustomerPortalInvoice>(`${this.apiUrl}/invoices/${id}`, { headers: this.getHeaders() });
   }
 
+  getPayments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/payments`, { headers: this.getHeaders() });
+  }
+
   getInvoicePayments(id: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/invoices/${id}/payments`, { headers: this.getHeaders() });
+  }
+
+  getClaims(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/claims`, { headers: this.getHeaders() });
+  }
+
+  getClaimDetail(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/claims/${id}`, { headers: this.getHeaders() });
+  }
+
+  approveClaim(id: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/claims/${id}/approve`, {}, { headers: this.getHeaders() });
+  }
+
+  disputeClaim(id: string, reason: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/claims/${id}/dispute`, { reason }, { headers: this.getHeaders() });
+  }
+
+  getMessages(): Observable<CustomerConversation[]> {
+    return this.http.get<CustomerConversation[]>(`${this.apiUrl}/messages`, { headers: this.getHeaders() });
+  }
+
+  sendMessage(messageReq: { conversationId?: string; bookingId?: string; quoteId?: string; subject?: string; message: string }): Observable<CustomerConversation> {
+    return this.http.post<CustomerConversation>(`${this.apiUrl}/messages`, messageReq, { headers: this.getHeaders() });
+  }
+
+  getAddresses(): Observable<CustomerAddress[]> {
+    return this.http.get<CustomerAddress[]>(`${this.apiUrl}/addresses`, { headers: this.getHeaders() });
+  }
+
+  createAddress(address: CustomerAddress): Observable<CustomerAddress> {
+    return this.http.post<CustomerAddress>(`${this.apiUrl}/addresses`, address, { headers: this.getHeaders() });
+  }
+
+  updateAddress(id: string, address: Partial<CustomerAddress>): Observable<CustomerAddress> {
+    return this.http.patch<CustomerAddress>(`${this.apiUrl}/addresses/${id}`, address, { headers: this.getHeaders() });
+  }
+
+  deleteAddress(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/addresses/${id}`, { headers: this.getHeaders() });
   }
 
   getRequests(): Observable<CustomerRequest[]> {

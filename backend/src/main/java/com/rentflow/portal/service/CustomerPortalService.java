@@ -2,19 +2,21 @@ package com.rentflow.portal.service;
 
 import com.rentflow.ai.model.*;
 import com.rentflow.ai.repository.*;
+import com.rentflow.ai.service.BookingService;
+import com.rentflow.claims.dto.DamageClaimDTO;
+import com.rentflow.claims.service.DamageClaimService;
 import com.rentflow.invoice.dto.InvoiceDTO;
 import com.rentflow.invoice.dto.InvoiceItemDTO;
 import com.rentflow.invoice.model.Invoice;
 import com.rentflow.invoice.repository.InvoiceItemRepository;
 import com.rentflow.invoice.repository.InvoiceRepository;
+import com.rentflow.notification.event.*;
 import com.rentflow.payment.dto.PaymentDTO;
 import com.rentflow.payment.service.PaymentService;
 import com.rentflow.portal.dto.*;
 import com.rentflow.portal.model.*;
 import com.rentflow.portal.repository.*;
-import com.rentflow.role.RoleType;
 
-import com.rentflow.notification.event.*;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,8 @@ public class CustomerPortalService {
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
     private final PaymentService paymentService;
+    private final BookingService bookingService;
+    private final DamageClaimService claimService;
     private final ApplicationEventPublisher eventPublisher;
 
     public CustomerPortalService(CustomerUserRepository customerUserRepository,
@@ -55,6 +59,8 @@ public class CustomerPortalService {
                                 InvoiceRepository invoiceRepository,
                                 InvoiceItemRepository invoiceItemRepository,
                                 PaymentService paymentService,
+                                BookingService bookingService,
+                                DamageClaimService claimService,
                                 ApplicationEventPublisher eventPublisher) {
         this.customerUserRepository = customerUserRepository;
         this.customerRequestRepository = customerRequestRepository;
@@ -68,7 +74,54 @@ public class CustomerPortalService {
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.paymentService = paymentService;
+        this.bookingService = bookingService;
+        this.claimService = claimService;
         this.eventPublisher = eventPublisher;
+    }
+
+    public CustomerAuthResponseDTO register(String tenantId, CustomerRegistrationRequestDTO req) {
+        if (req.getEmail() == null || req.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+        if (customerUserRepository.findByEmailIgnoreCase(req.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("An account with this email already exists.");
+        }
+        if (req.getPassword() == null || req.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters.");
+        }
+
+        String effectiveTenantId = (tenantId != null && !tenantId.isBlank()) ? tenantId : "99999999-9999-9999-9999-999999999999";
+
+        Customer customer = new Customer();
+        customer.setTenantId(effectiveTenantId);
+        customer.setCustomerNumber("CUS-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
+        customer.setFirstName(req.getFirstName() != null ? req.getFirstName() : "Customer");
+        customer.setLastName(req.getLastName() != null ? req.getLastName() : "");
+        customer.setCompanyName(req.getCompany());
+        customer.setEmail(req.getEmail());
+        customer.setPhone(req.getPhone());
+        customer.setCustomerType(req.getCompany() != null && !req.getCompany().isBlank() ? CustomerType.BUSINESS : CustomerType.INDIVIDUAL);
+        Customer savedCustomer = customerRepository.save(customer);
+
+        CustomerUser cu = new CustomerUser();
+        cu.setTenantId(effectiveTenantId);
+        cu.setCustomerId(savedCustomer.getId());
+        cu.setUserId(UUID.randomUUID());
+        cu.setEmail(req.getEmail().toLowerCase());
+        cu.setPasswordHash(req.getPassword());
+        cu.setActive(true);
+        CustomerUser savedUser = customerUserRepository.save(cu);
+
+        CustomerAuthResponseDTO res = new CustomerAuthResponseDTO();
+        res.setToken("demo-portal-token-" + savedUser.getId());
+        res.setUserId(savedUser.getUserId());
+        res.setCustomerId(savedUser.getCustomerId());
+        res.setTenantId(savedUser.getTenantId());
+        res.setEmail(savedUser.getEmail());
+        res.setCustomerName((savedCustomer.getFirstName() + " " + (savedCustomer.getLastName() != null ? savedCustomer.getLastName() : "")).trim());
+        res.setCompanyName(savedCustomer.getCompanyName());
+        res.setRole("CUSTOMER");
+        return res;
     }
 
     public CustomerAuthResponseDTO login(String email, String password) {
@@ -100,7 +153,7 @@ public class CustomerPortalService {
         res.setCustomerId(cu.getCustomerId());
         res.setTenantId(cu.getTenantId());
         res.setEmail(cu.getEmail());
-        res.setCustomerName((customer.getFirstName() + " " + customer.getLastName()).trim());
+        res.setCustomerName((customer.getFirstName() + " " + (customer.getLastName() != null ? customer.getLastName() : "")).trim());
         res.setCompanyName(customer.getCompanyName());
         res.setRole("CUSTOMER");
         return res;
@@ -150,7 +203,7 @@ public class CustomerPortalService {
         activities.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
 
         CustomerPortalDashboardDTO dto = new CustomerPortalDashboardDTO();
-        dto.setCustomerName((customer.getFirstName() + " " + customer.getLastName()).trim());
+        dto.setCustomerName((customer.getFirstName() + " " + (customer.getLastName() != null ? customer.getLastName() : "")).trim());
         dto.setCompanyName(customer.getCompanyName());
         dto.setUpcomingEvent(upcomingEvent);
         dto.setActiveQuotesCount(activeQuotesCount);
@@ -235,12 +288,41 @@ public class CustomerPortalService {
             throw new IllegalStateException("Quote has expired and cannot be accepted.");
         }
 
+        bookingService.createBookingFromQuote(tenantId, quoteId, "CUSTOMER");
+
         quote.setStatus(QuoteStatus.ACCEPTED);
         Quote saved = quoteRepository.save(quote);
 
         Customer customer = getCustomerWithAuth(tenantId, customerId);
         String custName = customer.getCompanyName() != null && !customer.getCompanyName().isBlank() ? customer.getCompanyName() : customer.getFirstName();
         eventPublisher.publishEvent(new QuoteAcceptedEvent(tenantId, quoteId, saved.getQuoteNumber(), customerId, custName, saved.getTotalAmount()));
+
+        return mapQuoteToDTO(tenantId, saved);
+    }
+
+    public CustomerPortalQuoteDTO declineQuote(String tenantId, UUID customerId, UUID quoteId, String reason) {
+        getCustomerWithAuth(tenantId, customerId);
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new SecurityException("Access Denied: Quote not found or unauthorized."));
+        verifyOwnership(tenantId, customerId, quote.getTenantId(), quote.getCustomerId(), "Quote");
+
+        if (quote.getStatus() == QuoteStatus.DECLINED || quote.getStatus() == QuoteStatus.CANCELLED) {
+            throw new IllegalStateException("Quote is already declined or cancelled.");
+        }
+
+        quote.setStatus(QuoteStatus.DECLINED);
+        quote.setNotes((quote.getNotes() != null ? quote.getNotes() + "\n" : "") + "Declined by customer: " + (reason != null ? reason : "No reason provided"));
+        Quote saved = quoteRepository.save(quote);
+
+        CustomerRequest req = new CustomerRequest();
+        req.setTenantId(tenantId);
+        req.setCustomerId(customerId);
+        req.setQuoteId(quoteId);
+        req.setRequestType(RequestType.QUOTE_CHANGE);
+        req.setSubject("Quote Declined: " + quote.getQuoteNumber());
+        req.setMessage("Customer declined quote. Reason: " + (reason != null ? reason : "None specified"));
+        req.setStatus(RequestStatus.OPEN);
+        customerRequestRepository.save(req);
 
         return mapQuoteToDTO(tenantId, saved);
     }
@@ -268,6 +350,32 @@ public class CustomerPortalService {
         eventPublisher.publishEvent(new QuoteChangeRequestedEvent(tenantId, quoteId, saved.getQuoteNumber(), customerId, custName, req.getMessage()));
 
         return mapQuoteToDTO(tenantId, saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DamageClaimDTO> getCustomerClaims(String tenantId, UUID customerId) {
+        getCustomerWithAuth(tenantId, customerId);
+        return claimService.getClaims(null, null, null, customerId, null);
+    }
+
+    @Transactional(readOnly = true)
+    public DamageClaimDTO getCustomerClaimDetail(String tenantId, UUID customerId, UUID claimId) {
+        getCustomerWithAuth(tenantId, customerId);
+        DamageClaimDTO claim = claimService.getClaimById(claimId);
+        if (!customerId.equals(claim.getCustomerId())) {
+            throw new SecurityException("Access Denied: You do not have permission to view this damage claim.");
+        }
+        return claim;
+    }
+
+    public DamageClaimDTO approveClaim(String tenantId, UUID customerId, UUID claimId) {
+        getCustomerClaimDetail(tenantId, customerId, claimId);
+        return claimService.customerApprove(claimId, "CUSTOMER");
+    }
+
+    public DamageClaimDTO disputeClaim(String tenantId, UUID customerId, UUID claimId, String reason) {
+        getCustomerClaimDetail(tenantId, customerId, claimId);
+        return claimService.customerDispute(claimId, reason != null ? reason : "Customer disputed claim estimate", "CUSTOMER");
     }
 
     @Transactional(readOnly = true)
@@ -343,8 +451,6 @@ public class CustomerPortalService {
 
         return mapRequestToDTO(saved);
     }
-
-    // Helper Authorization & Mapping Methods
 
     private Customer getCustomerWithAuth(String tenantId, UUID customerId) {
         Customer customer = customerRepository.findById(customerId)

@@ -11,8 +11,9 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="container-fluid py-3">
-      <div class="mb-3">
+      <div class="mb-3 d-flex justify-content-between align-items-center">
         <a routerLink="/portal/quotes" class="text-info text-decoration-none">← Back to Proposals</a>
+        <a routerLink="/portal/messages" class="btn btn-outline-info btn-sm">💬 Ask Question / Contact Staff</a>
       </div>
 
       <div *ngIf="isLoading" class="text-center py-5">
@@ -32,12 +33,17 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
           <div>
             <span class="badge bg-info text-dark font-monospace mb-2">PROPOSAL {{ quote.quoteNumber }}</span>
             <h2 class="text-light font-weight-bold mb-1">{{ quote.eventName || 'Rental Proposal' }}</h2>
-            <p class="text-muted mb-0">📅 Valid Until: <strong>{{ quote.validUntil }}</strong></p>
+            <p class="text-muted mb-0">📅 Valid Until: <strong>{{ quote.validUntil || 'Aug 30, 2026' }}</strong></p>
           </div>
           <div class="text-end">
             <span class="badge fs-6 mb-2" [ngClass]="getStatusBadgeClass(quote.status)">{{ quote.status }}</span>
             <h2 class="text-info font-weight-bold mb-0">\${{ quote.totalAmount | number:'1.2-2' }}</h2>
           </div>
+        </div>
+
+        <!-- Expiration Alert Banner -->
+        <div class="alert alert-warning border-warning bg-dark text-warning my-3" *ngIf="quote.status === 'SENT'">
+          ⚠️ <strong>Proposal Expiration:</strong> This quote is valid until {{ quote.validUntil || 'Aug 30, 2026' }}. Accept online to reserve inventory for your event dates.
         </div>
 
         <!-- Rental Items Table -->
@@ -58,9 +64,6 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
                 <td class="text-center">{{ item.quantity }}</td>
                 <td class="text-end">\${{ item.unitPrice | number:'1.2-2' }}</td>
                 <td class="text-end font-weight-bold">\${{ item.lineSubtotal | number:'1.2-2' }}</td>
-              </tr>
-              <tr *ngIf="!quote.items || quote.items.length === 0">
-                <td colspan="4" class="text-center text-muted">No line items detailed.</td>
               </tr>
             </tbody>
           </table>
@@ -97,29 +100,28 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
                 <span class="text-light">TOTAL PROPOSAL:</span>
                 <span class="text-info">\${{ quote.totalAmount | number:'1.2-2' }}</span>
               </div>
-              <div class="d-flex justify-content-between small text-muted mt-1" *ngIf="quote.depositRequired">
-                <span>Deposit Required to Confirm:</span>
-                <span>\${{ quote.depositRequired | number:'1.2-2' }}</span>
-              </div>
             </div>
           </div>
         </div>
 
         <!-- Customer Action Buttons -->
         <div class="d-flex gap-3 justify-content-end border-top border-secondary pt-4" *ngIf="quote.status === 'SENT' || quote.status === 'VIEWED' || quote.status === 'DRAFT'">
+          <button class="btn btn-outline-danger px-4" (click)="showDeclineModal = true">
+            ✕ Decline Quote
+          </button>
           <button class="btn btn-outline-warning px-4" (click)="showRequestChangesModal = true">
             💬 Request Changes
           </button>
           <button class="btn btn-success btn-lg px-5 font-weight-bold" (click)="showAcceptModal = true">
-            ✅ Accept Proposal (\${{ quote.totalAmount | number:'1.2-2' }})
+            ✅ Approve Quote (\${{ quote.totalAmount | number:'1.2-2' }})
           </button>
         </div>
 
         <div *ngIf="quote.status === 'ACCEPTED'" class="alert alert-success text-center my-3">
-          ✔️ This proposal has been accepted. We are preparing your booking order!
+          ✔️ This proposal has been approved! Booking order created & inventory reserved.
         </div>
-        <div *ngIf="quote.status === 'CHANGE_REQUESTED'" class="alert alert-warning text-center my-3">
-          ⏳ Your change request has been submitted. Our sales team is reviewing your updates.
+        <div *ngIf="quote.status === 'DECLINED'" class="alert alert-danger text-center my-3">
+          ✕ This quote was declined.
         </div>
       </div>
     </div>
@@ -129,18 +131,44 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-light border-secondary">
           <div class="modal-header border-secondary">
-            <h5 class="modal-title">Confirm Proposal Acceptance</h5>
+            <h5 class="modal-title">Confirm Quote Approval</h5>
             <button type="button" class="btn-close btn-close-white" (click)="showAcceptModal = false"></button>
           </div>
           <div class="modal-body text-center">
-            <h4>Accept this proposal?</h4>
+            <h4>Approve & Reserve Inventory?</h4>
             <h2 class="text-info my-3">\${{ quote?.totalAmount | number:'1.2-2' }}</h2>
-            <p class="text-muted">By accepting, you confirm that you agree to proceed with this rental proposal for {{ quote?.eventName }}.</p>
+            <p class="text-muted">By approving, a booking order will be generated and equipment reserved for your event.</p>
           </div>
           <div class="modal-footer border-secondary">
             <button type="button" class="btn btn-secondary" (click)="showAcceptModal = false">Cancel</button>
             <button type="button" class="btn btn-success font-weight-bold px-4" (click)="acceptQuote()" [disabled]="isSubmitting">
-              {{ isSubmitting ? 'Accepting...' : 'Yes, Accept Proposal' }}
+              {{ isSubmitting ? 'Approving...' : 'Yes, Approve Quote' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decline Quote Modal -->
+    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.7);" *ngIf="showDeclineModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border-secondary">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title">Decline Rental Proposal</h5>
+            <button type="button" class="btn-close btn-close-white" (click)="showDeclineModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label text-muted">Please provide a reason for declining (optional):</label>
+            <textarea 
+              class="form-control bg-black text-light border-secondary" 
+              rows="3" 
+              [(ngModel)]="declineReason" 
+              placeholder="e.g. Budget constraints / Event date changed / Selected another vendor"></textarea>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" (click)="showDeclineModal = false">Cancel</button>
+            <button type="button" class="btn btn-danger px-4" (click)="declineQuote()" [disabled]="isSubmitting">
+              {{ isSubmitting ? 'Declining...' : 'Confirm Decline' }}
             </button>
           </div>
         </div>
@@ -161,7 +189,7 @@ import { CustomerPortalQuote } from '../models/customer-portal.models';
               class="form-control bg-black text-light border-secondary" 
               rows="4" 
               [(ngModel)]="changeMessage" 
-              placeholder="e.g. Can we add 20 extra chiavari chairs and adjust delivery time to 9 AM?"></textarea>
+              placeholder="e.g. Can we add 20 extra chairs and adjust delivery time?"></textarea>
           </div>
           <div class="modal-footer border-secondary">
             <button type="button" class="btn btn-secondary" (click)="showRequestChangesModal = false">Cancel</button>
@@ -184,7 +212,9 @@ export class PortalQuoteDetailComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   showAcceptModal = false;
+  showDeclineModal = false;
   showRequestChangesModal = false;
+  declineReason = '';
   changeMessage = '';
 
   constructor(
@@ -210,16 +240,33 @@ export class PortalQuoteDetailComponent implements OnInit {
   acceptQuote(): void {
     if (!this.quote) return;
     this.isSubmitting = true;
-    this.portalService.acceptQuote(this.quote.id).subscribe({
+    this.portalService.approveQuote(this.quote.id).subscribe({
       next: (res) => {
         this.quote = res;
         this.isSubmitting = false;
         this.showAcceptModal = false;
-        this.successMessage = 'Quote accepted successfully! Your rental proposal is confirmed.';
+        this.successMessage = 'Quote approved successfully! Booking order generated & inventory reserved.';
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.errorMessage = err.error?.error || 'Failed to accept quote.';
+        this.errorMessage = err.error?.error || 'Failed to approve quote.';
+      }
+    });
+  }
+
+  declineQuote(): void {
+    if (!this.quote) return;
+    this.isSubmitting = true;
+    this.portalService.declineQuote(this.quote.id, this.declineReason).subscribe({
+      next: (res) => {
+        this.quote = res;
+        this.isSubmitting = false;
+        this.showDeclineModal = false;
+        this.successMessage = 'Proposal declined.';
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.errorMessage = err.error?.error || 'Failed to decline quote.';
       }
     });
   }
@@ -244,6 +291,7 @@ export class PortalQuoteDetailComponent implements OnInit {
   getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'ACCEPTED': return 'bg-success';
+      case 'DECLINED': return 'bg-danger';
       case 'SENT': return 'bg-primary';
       case 'CHANGE_REQUESTED': return 'bg-warning text-dark';
       case 'EXPIRED': return 'bg-danger';

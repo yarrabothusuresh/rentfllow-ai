@@ -10,8 +10,9 @@ import { CustomerPortalBooking } from '../models/customer-portal.models';
   imports: [CommonModule, RouterModule],
   template: `
     <div class="container-fluid py-3">
-      <div class="mb-3">
+      <div class="mb-3 d-flex justify-content-between align-items-center">
         <a routerLink="/portal/bookings" class="text-info text-decoration-none">← Back to Bookings</a>
+        <a routerLink="/portal/messages" class="btn btn-outline-info btn-sm">💬 Contact Rental Company</a>
       </div>
 
       <div *ngIf="isLoading" class="text-center py-5">
@@ -29,6 +30,41 @@ import { CustomerPortalBooking } from '../models/customer-portal.models';
           <div class="text-end">
             <span class="badge bg-success fs-6 mb-2">{{ booking.status }}</span>
             <h2 class="text-info font-weight-bold mb-0">\${{ booking.totalAmount | number:'1.2-2' }}</h2>
+          </div>
+        </div>
+
+        <!-- Rental Lifecycle Timeline Widget (Step 29) -->
+        <div class="card-glass p-4 bg-dark mb-4">
+          <h5 class="text-light mb-3">Rental Lifecycle Status</h5>
+          <div class="lifecycle-timeline">
+            <div class="step completed">
+              <div class="dot">✓</div>
+              <span>Confirmed</span>
+            </div>
+            <div class="step completed">
+              <div class="dot">✓</div>
+              <span>Preparing</span>
+            </div>
+            <div class="step active">
+              <div class="dot">🚚</div>
+              <span>Delivered</span>
+            </div>
+            <div class="step">
+              <div class="dot">⛺</div>
+              <span>Out on Rent</span>
+            </div>
+            <div class="step">
+              <div class="dot">🚛</div>
+              <span>Pickup</span>
+            </div>
+            <div class="step">
+              <div class="dot">🔍</div>
+              <span>Inspection</span>
+            </div>
+            <div class="step">
+              <div class="dot">🏁</div>
+              <span>Completed</span>
+            </div>
           </div>
         </div>
 
@@ -70,9 +106,6 @@ import { CustomerPortalBooking } from '../models/customer-portal.models';
                 <td class="text-end">\${{ item.unitPrice | number:'1.2-2' }}</td>
                 <td class="text-end font-weight-bold">\${{ item.lineSubtotal | number:'1.2-2' }}</td>
               </tr>
-              <tr *ngIf="!booking.items || booking.items.length === 0">
-                <td colspan="4" class="text-center text-muted">No line items detailed.</td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -108,6 +141,37 @@ import { CustomerPortalBooking } from '../models/customer-portal.models';
   `,
   styles: [`
     .card-glass { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+    .lifecycle-timeline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      padding: 1rem 0;
+    }
+    .lifecycle-timeline .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 1;
+      font-size: 0.8rem;
+      color: #6e7681;
+    }
+    .lifecycle-timeline .step.completed { color: #3fb950; }
+    .lifecycle-timeline .step.active { color: #58a6ff; font-weight: bold; }
+    .lifecycle-timeline .dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #21262d;
+      border: 2px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .lifecycle-timeline .step.completed .dot { background: #1f6feb; border-color: #3fb950; color: white; }
+    .lifecycle-timeline .step.active .dot { background: #38bdf8; border-color: #38bdf8; color: #0f172a; }
   `]
 })
 export class PortalBookingDetailComponent implements OnInit {

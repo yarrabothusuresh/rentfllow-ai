@@ -29,6 +29,7 @@ import { InvoiceDetailComponent } from './pages/invoices/invoice-detail.componen
 
 import { PortalLayoutComponent } from './portal/portal-layout.component';
 import { PortalLoginComponent } from './portal/portal-login.component';
+import { PortalRegisterComponent } from './portal/portal-register.component';
 import { PortalDashboardComponent } from './portal/portal-dashboard.component';
 import { PortalEventsListComponent } from './portal/portal-events-list.component';
 import { PortalEventDetailComponent } from './portal/portal-event-detail.component';
@@ -40,6 +41,19 @@ import { PortalInvoicesListComponent } from './portal/portal-invoices-list.compo
 import { PortalInvoiceDetailComponent } from './portal/portal-invoice-detail.component';
 import { PortalProfileComponent } from './portal/portal-profile.component';
 import { PortalRequestsComponent } from './portal/portal-requests.component';
+import { PortalMessagesComponent } from './portal/portal-messages.component';
+import { PortalAddressesComponent } from './portal/portal-addresses.component';
+
+import { PublicCatalogComponent } from './rentals/public-catalog.component';
+import { PublicProductDetailComponent } from './rentals/public-product-detail.component';
+import { RentalCartComponent } from './rentals/rental-cart.component';
+import { QuoteRequestComponent } from './rentals/quote-request.component';
+import { CheckoutComponent } from './rentals/checkout.component';
+import { CheckoutSuccessComponent } from './rentals/checkout-success.component';
+import { QuoteRequestSuccessComponent } from './rentals/quote-request-success.component';
+
+import { CustomerRequestsDashboardComponent } from './customers/customer-requests-dashboard.component';
+import { Customer360Component } from './customers/customer-360.component';
 
 import { NotificationsListComponent } from './pages/notifications/notifications-list/notifications-list.component';
 import { WarehouseDashboardComponent } from './pages/warehouse/warehouse-dashboard.component';
@@ -78,7 +92,18 @@ import { PortalDamageClaimsComponent } from './pages/claims/portal-damage-claims
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
+  { path: 'rentals', component: PublicCatalogComponent },
+  { path: 'rentals/cart', component: RentalCartComponent },
+  { path: 'rentals/request-quote', component: QuoteRequestComponent },
+  { path: 'rentals/checkout', component: CheckoutComponent },
+  { path: 'rentals/:productId', component: PublicProductDetailComponent },
+  { path: 'checkout/success', component: CheckoutSuccessComponent },
+  { path: 'quote-request/success', component: QuoteRequestSuccessComponent },
+  { path: 'store/:tenantSlug', component: PublicCatalogComponent },
+  { path: 'customer-requests', component: CustomerRequestsDashboardComponent },
+
   { path: 'portal/login', component: PortalLoginComponent },
+  { path: 'portal/register', component: PortalRegisterComponent },
   {
     path: 'portal',
     component: PortalLayoutComponent,
@@ -94,6 +119,8 @@ export const routes: Routes = [
       { path: 'invoices', component: PortalInvoicesListComponent },
       { path: 'invoices/:id', component: PortalInvoiceDetailComponent },
       { path: 'damage-claims', component: PortalDamageClaimsComponent },
+      { path: 'messages', component: PortalMessagesComponent },
+      { path: 'addresses', component: PortalAddressesComponent },
       { path: 'profile', component: PortalProfileComponent },
       { path: 'requests', component: PortalRequestsComponent },
       { path: 'notifications', component: NotificationsListComponent }
@@ -107,6 +134,7 @@ export const routes: Routes = [
   { path: 'leads/:id', component: LeadDetailComponent },
   { path: 'customers', component: CustomersListComponent },
   { path: 'customers/:id', component: CustomerDetailComponent },
+  { path: 'customers/:id/360', component: Customer360Component },
   { path: 'events', component: EventsListComponent },
   { path: 'events/:id', component: EventDetailComponent },
   { path: 'products', component: ProductListComponent },
@@ -206,4 +234,3 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: '' }
 ];
-

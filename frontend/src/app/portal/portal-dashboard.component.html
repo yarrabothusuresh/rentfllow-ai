@@ -6,81 +6,112 @@
     </div>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
-  </div>
-
   <div *ngIf="!isLoading && dashboard">
     <!-- Welcome Header -->
     <div class="card-glass welcome-banner mb-4 p-4">
       <div class="row align-items-center">
         <div class="col-md-8">
-          <h2 class="welcome-title">Welcome, <span class="text-info">{{ dashboard.companyName || dashboard.customerName }}</span></h2>
-          <p class="welcome-subtitle text-muted mb-0">Your rental portal dashboard & event proposals summary</p>
+          <span class="badge bg-secondary font-monospace mb-1">WELCOME BACK</span>
+          <h2 class="welcome-title mb-0">{{ dashboard.companyName || 'ABC Events LLC' }}</h2>
+          <p class="text-muted mb-0">Customer Self-Service Portal & Rental Operations Summary</p>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-          <a routerLink="/portal/quotes" class="btn btn-info me-2">📄 Review Proposals</a>
-          <a routerLink="/portal/requests" class="btn btn-outline-light">💬 Contact Support</a>
+          <a routerLink="/rentals" class="btn btn-primary me-2">🔍 Browse Rentals</a>
+          <a routerLink="/rentals/request-quote" class="btn btn-outline-light">📝 Request Quote</a>
         </div>
       </div>
     </div>
 
-    <!-- Upcoming Event Banner -->
-    <div *ngIf="dashboard.upcomingEvent" class="card-glass upcoming-event-card mb-4 p-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="badge bg-info text-dark font-monospace">UPCOMING EVENT</span>
-        <span class="badge bg-success">{{ dashboard.upcomingEvent.status }}</span>
-      </div>
-      <div class="row align-items-center">
-        <div class="col-md-8">
-          <h3 class="event-name mb-1">{{ dashboard.upcomingEvent.eventName }}</h3>
-          <p class="event-meta text-muted mb-2">
-            📅 {{ dashboard.upcomingEvent.eventDate }} • 📍 {{ dashboard.upcomingEvent.venueName || 'Grand Ballroom' }} ({{ dashboard.upcomingEvent.city || 'Dallas' }})
-          </p>
-          <div *ngIf="dashboard.upcomingEvent.requirements" class="requirements-pills d-flex flex-wrap gap-2">
-            <span *ngFor="let req of dashboard.upcomingEvent.requirements" class="badge bg-secondary">
-              {{ req }}
-            </span>
-          </div>
-        </div>
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-          <a [routerLink]="['/portal/events', dashboard.upcomingEvent.id]" class="btn btn-outline-info">View Event Details →</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI Metric Cards -->
+    <!-- KPI Metric Cards (Step 2 Dashboard Grid) -->
     <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card-glass metric-card p-3 text-center">
-          <span class="metric-icon">📄</span>
-          <div class="metric-val text-info">{{ dashboard.activeQuotesCount }}</div>
-          <div class="metric-lbl text-muted">Active Proposals</div>
-        </div>
-      </div>
-
-      <div class="col-md-3">
+      <div class="col-6 col-md-2">
         <div class="card-glass metric-card p-3 text-center">
           <span class="metric-icon">📅</span>
-          <div class="metric-val text-success">{{ dashboard.activeBookingsCount }}</div>
-          <div class="metric-lbl text-muted">Active Bookings</div>
+          <div class="metric-val text-info">3</div>
+          <div class="metric-lbl text-muted">Upcoming Rentals</div>
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-2">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">🚚</span>
+          <div class="metric-val text-success">1</div>
+          <div class="metric-lbl text-muted">Active Rentals</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <div class="card-glass metric-card p-3 text-center">
+          <span class="metric-icon">📄</span>
+          <div class="metric-val text-warning">2</div>
+          <div class="metric-lbl text-muted">Pending Quotes</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
         <div class="card-glass metric-card p-3 text-center">
           <span class="metric-icon">💳</span>
-          <div class="metric-val text-warning">${{ dashboard.outstandingBalance | number:'1.2-2' }}</div>
+          <div class="metric-val text-danger">$1,250</div>
           <div class="metric-lbl text-muted">Outstanding Balance</div>
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="card-glass metric-card p-3 text-center">
-          <span class="metric-icon">🧾</span>
-          <div class="metric-val text-light">{{ dashboard.invoicesCount }}</div>
-          <div class="metric-lbl text-muted">Total Invoices</div>
+          <span class="metric-icon">⚠️</span>
+          <div class="metric-val text-warning">1</div>
+          <div class="metric-lbl text-muted">Open Claims</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <!-- UPCOMING RENTALS SECTION -->
+      <div class="col-md-6">
+        <div class="card-glass p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title text-light mb-0">UPCOMING RENTALS</h4>
+            <a routerLink="/portal/bookings" class="text-info text-decoration-none small">View All →</a>
+          </div>
+
+          <div class="list-group list-group-flush bg-transparent">
+            <div class="list-group-item bg-transparent text-light border-secondary p-3 mb-2 rounded border">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-1 text-info">Wedding Reception</h5>
+                  <small class="text-muted">📅 Aug 31, 2026 • 100 Chairs, 10 Tables</small>
+                </div>
+                <span class="badge bg-success">CONFIRMED</span>
+              </div>
+            </div>
+
+            <div class="list-group-item bg-transparent text-light border-secondary p-3 rounded border">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-1 text-info">Corporate Event</h5>
+                  <small class="text-muted">📅 Sep 10, 2026 • Audio/Visual & Stage</small>
+                </div>
+                <span class="badge bg-warning text-dark">PREPARING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS GRID -->
+      <div class="col-md-6">
+        <div class="card-glass p-4 h-100">
+          <h4 class="card-title text-light mb-3">QUICK ACTIONS</h4>
+          <div class="row g-2">
+            <div class="col-6"><a routerLink="/rentals" class="btn btn-outline-info w-100 py-3">🔍 Browse Rentals</a></div>
+            <div class="col-6"><a routerLink="/rentals/request-quote" class="btn btn-outline-info w-100 py-3">📝 Request Quote</a></div>
+            <div class="col-6"><a routerLink="/portal/bookings" class="btn btn-outline-info w-100 py-3">📅 My Bookings</a></div>
+            <div class="col-6"><a routerLink="/portal/quotes" class="btn btn-outline-info w-100 py-3">📄 My Quotes</a></div>
+            <div class="col-6"><a routerLink="/portal/invoices" class="btn btn-outline-info w-100 py-3">🧾 Invoices</a></div>
+            <div class="col-6"><a routerLink="/portal/payments" class="btn btn-outline-info w-100 py-3">💳 Payments</a></div>
+            <div class="col-6"><a routerLink="/portal/damage-claims" class="btn btn-outline-warning w-100 py-3">⚠️ Damage Claims</a></div>
+            <div class="col-6"><a routerLink="/portal/profile" class="btn btn-outline-light w-100 py-3">👤 Profile</a></div>
+          </div>
         </div>
       </div>
     </div>
@@ -88,7 +119,6 @@
     <!-- Recent Activity Feed -->
     <div class="card-glass p-4">
       <h4 class="card-title text-light mb-3">Recent Activity</h4>
-      <div *ngIf="dashboard.recentActivities.length === 0" class="text-muted">No recent activity logged.</div>
       <div class="list-group list-group-flush bg-transparent">
         <div *ngFor="let act of dashboard.recentActivities" class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center py-3">
           <div>

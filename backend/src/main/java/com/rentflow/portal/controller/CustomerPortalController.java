@@ -1,9 +1,12 @@
 package com.rentflow.portal.controller;
 
 import com.rentflow.ai.service.CrmDataInitializer;
+import com.rentflow.claims.dto.DamageClaimDTO;
 import com.rentflow.invoice.dto.InvoiceDTO;
 import com.rentflow.payment.dto.PaymentDTO;
 import com.rentflow.portal.dto.*;
+import com.rentflow.portal.service.CustomerAddressService;
+import com.rentflow.portal.service.CustomerMessagingService;
 import com.rentflow.portal.service.CustomerPortalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +21,15 @@ import java.util.UUID;
 public class CustomerPortalController {
 
     private final CustomerPortalService portalService;
+    private final CustomerAddressService addressService;
+    private final CustomerMessagingService messagingService;
 
-    public CustomerPortalController(CustomerPortalService portalService) {
+    public CustomerPortalController(CustomerPortalService portalService,
+                                    CustomerAddressService addressService,
+                                    CustomerMessagingService messagingService) {
         this.portalService = portalService;
+        this.addressService = addressService;
+        this.messagingService = messagingService;
     }
 
     private String resolveTenantId(String tenantHeader) {
@@ -36,6 +45,19 @@ public class CustomerPortalController {
             }
         }
         return CrmDataInitializer.EMILY_CUSTOMER_ID;
+    }
+
+    @PostMapping("/auth/register")
+    public ResponseEntity<?> register(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestBody CustomerRegistrationRequestDTO request) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            CustomerAuthResponseDTO response = portalService.register(tenantId, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/auth/login")
@@ -122,8 +144,8 @@ public class CustomerPortalController {
         }
     }
 
-    @PostMapping("/quotes/{id}/accept")
-    public ResponseEntity<?> acceptQuote(
+    @PostMapping("/quotes/{id}/approve")
+    public ResponseEntity<?> approveQuote(
             @PathVariable UUID id,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
@@ -135,6 +157,30 @@ public class CustomerPortalController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/quotes/{id}/accept")
+    public ResponseEntity<?> acceptQuote(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        return approveQuote(id, tenantHeader, customerHeader);
+    }
+
+    @PostMapping("/quotes/{id}/decline")
+    public ResponseEntity<?> declineQuote(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestBody(required = false) QuoteDeclineRequestDTO req) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            UUID customerId = resolveCustomerId(customerHeader);
+            String reason = req != null ? req.getReason() : "Customer declined quote.";
+            return ResponseEntity.ok(portalService.declineQuote(tenantId, customerId, id, reason));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -200,15 +246,138 @@ public class CustomerPortalController {
         }
     }
 
-    @GetMapping("/invoices/{id}/payments")
-    public ResponseEntity<?> getInvoicePayments(
+    @GetMapping("/payments")
+    public ResponseEntity<?> getPayments(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        List<CustomerPortalInvoiceDTO> invoices = portalService.getCustomerInvoices(tenantId, customerId);
+        List<PaymentDTO> payments = new java.util.ArrayList<>();
+        for (CustomerPortalInvoiceDTO inv : invoices) {
+            if (inv.getId() != null) {
+                payments.addAll(portalService.getInvoicePayments(tenantId, customerId, inv.getId()));
+            }
+        }
+        return ResponseEntity.ok(payments);
+    }
+
+    @GetMapping("/claims")
+    public ResponseEntity<List<DamageClaimDTO>> getClaims(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        return ResponseEntity.ok(portalService.getCustomerClaims(tenantId, customerId));
+    }
+
+    @GetMapping("/claims/{id}")
+    public ResponseEntity<?> getClaimDetail(
             @PathVariable UUID id,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
         try {
             String tenantId = resolveTenantId(tenantHeader);
             UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getInvoicePayments(tenantId, customerId, id));
+            return ResponseEntity.ok(portalService.getCustomerClaimDetail(tenantId, customerId, id));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/claims/{id}/approve")
+    public ResponseEntity<?> approveClaim(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            UUID customerId = resolveCustomerId(customerHeader);
+            return ResponseEntity.ok(portalService.approveClaim(tenantId, customerId, id));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/claims/{id}/dispute")
+    public ResponseEntity<?> disputeClaim(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestBody Map<String, String> body) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            UUID customerId = resolveCustomerId(customerHeader);
+            String reason = body != null ? body.get("reason") : "Customer disputed claim";
+            return ResponseEntity.ok(portalService.disputeClaim(tenantId, customerId, id, reason));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/messages")
+    public ResponseEntity<List<CustomerConversationDTO>> getConversations(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        return ResponseEntity.ok(messagingService.getCustomerConversations(tenantId, customerId));
+    }
+
+    @PostMapping("/messages")
+    public ResponseEntity<CustomerConversationDTO> sendMessage(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestBody CreateMessageRequestDTO dto) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        return ResponseEntity.status(HttpStatus.CREATED).body(messagingService.createOrReplyMessage(tenantId, customerId, dto, "CUSTOMER"));
+    }
+
+    @GetMapping("/addresses")
+    public ResponseEntity<List<CustomerAddressDTO>> getAddresses(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        return ResponseEntity.ok(addressService.getCustomerAddresses(tenantId, customerId));
+    }
+
+    @PostMapping("/addresses")
+    public ResponseEntity<CustomerAddressDTO> createAddress(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestBody CustomerAddressDTO dto) {
+        String tenantId = resolveTenantId(tenantHeader);
+        UUID customerId = resolveCustomerId(customerHeader);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(tenantId, customerId, dto));
+    }
+
+    @PatchMapping("/addresses/{id}")
+    public ResponseEntity<?> updateAddress(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestBody CustomerAddressDTO dto) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            UUID customerId = resolveCustomerId(customerHeader);
+            return ResponseEntity.ok(addressService.updateAddress(tenantId, customerId, id, dto));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/addresses/{id}")
+    public ResponseEntity<?> deleteAddress(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            UUID customerId = resolveCustomerId(customerHeader);
+            addressService.deleteAddress(tenantId, customerId, id);
+            return ResponseEntity.noContent().build();
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         }

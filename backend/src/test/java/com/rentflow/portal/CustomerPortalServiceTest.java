@@ -43,7 +43,13 @@ public class CustomerPortalServiceTest {
     private CustomerRepository customerRepository;
 
     @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private QuoteRepository quoteRepository;
+
+    @Autowired
+    private QuoteItemRepository quoteItemRepository;
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -183,6 +189,25 @@ public class CustomerPortalServiceTest {
         q.setSubtotal(new BigDecimal("1000.00"));
         q.setTotalAmount(new BigDecimal("1082.50"));
         q = quoteRepository.save(q);
+
+        Product prod = new Product();
+        prod.setId(UUID.randomUUID());
+        prod.setTenantId(tenantId);
+        prod.setSku("CHAIR-TEST");
+        prod.setName("Test Product Chairs");
+        prod.setQuantityOwned(50);
+        prod.setRentalPrice(new BigDecimal("100.00"));
+        prod = productRepository.save(prod);
+
+        QuoteItem item = new QuoteItem();
+        item.setQuoteId(q.getId());
+        item.setProductId(prod.getId());
+        item.setDescription("Test Product Chairs");
+        item.setQuantity(10);
+        item.setUnitPrice(new BigDecimal("100.00"));
+        item.setLineSubtotal(new BigDecimal("1000.00"));
+        item.setRentalDays(2);
+        quoteItemRepository.save(item);
 
         CustomerPortalQuoteDTO accepted = portalService.acceptQuote(tenantId, emilyCustomerId, q.getId(), "CUSTOMER");
         assertEquals("ACCEPTED", accepted.getStatus());
