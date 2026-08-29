@@ -57,6 +57,9 @@ public class Product {
     @Column(nullable = false)
     private int quantityLost = 0;
 
+    @Column(nullable = false)
+    private int defaultTurnaroundMinutes = 0;
+
     private String imageUrl;
 
     private LocalDateTime createdAt;
@@ -135,6 +138,9 @@ public class Product {
 
     public int getQuantityLost() { return quantityLost; }
     public void setQuantityLost(int quantityLost) { this.quantityLost = quantityLost; }
+
+    public int getDefaultTurnaroundMinutes() { return defaultTurnaroundMinutes; }
+    public void setDefaultTurnaroundMinutes(int defaultTurnaroundMinutes) { this.defaultTurnaroundMinutes = defaultTurnaroundMinutes; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

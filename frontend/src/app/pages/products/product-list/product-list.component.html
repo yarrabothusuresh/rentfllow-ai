@@ -1,203 +1,405 @@
-<div class="space-y-6">
-  <!-- Header Banner -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 p-6 rounded-2xl border border-indigo-500/20 shadow-xl backdrop-blur-md">
-    <div>
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-          <svg class="w-6 h-6" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m-8-10l-8-4m8 4v10M4 7v10l8 4" />
+<div class="max-w-7xl mx-auto space-y-6 text-slate-100">
+  
+  <!-- HERO HEADER & KPI METRICS DASHBOARD -->
+  <div class="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/70 to-slate-900 rounded-3xl border border-indigo-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-xl">
+    <!-- Ambient Background Glow -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-3 rounded-2xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-inner">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m-8-10l-8-4m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+              Product Catalog & Fleet Intelligence
+            </h1>
+            <p class="text-slate-400 text-sm mt-0.5">Authoritative item repository, daily rental rates, turnaround buffers & stock health</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+        <a routerLink="/calendar/inventory" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center gap-2 shadow-sm">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-white tracking-tight">Product Catalog & Inventory</h1>
-          <p class="text-sm text-slate-400">Manage rental items, rates, health metrics, and date-based availability</p>
-        </div>
+          Availability Matrix
+        </a>
+
+        <a routerLink="/inventory" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 transition-all flex items-center gap-2 shadow-sm">
+          📊 Inventory Hub
+        </a>
+
+        <a *ngIf="roleState.hasPermission('PRODUCT_CREATE')" routerLink="/products/new" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+          </svg>
+          Add New Product
+        </a>
       </div>
     </div>
 
-    <div class="flex items-center gap-3" *ngIf="roleState.hasPermission('PRODUCT_CREATE')">
-      <a routerLink="/inventory" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-2">
-        <svg class="w-4 h-4 text-emerald-400" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        Inventory Dashboard
-      </a>
-      <a routerLink="/products/new" class="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition flex items-center gap-2">
-        <svg class="w-4 h-4" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Add Product
-      </a>
+    <!-- QUICK KPI STAT CARDS BAR -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/80">
+      <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total SKUs</div>
+        <div class="text-2xl font-bold text-white mt-1">{{ totalProductCount }}</div>
+        <div class="text-[11px] text-indigo-400 mt-0.5">Active Catalog Items</div>
+      </div>
+
+      <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Fleet Units</div>
+        <div class="text-2xl font-bold text-white mt-1">{{ totalUnitsOwned | number }}</div>
+        <div class="text-[11px] text-emerald-400 mt-0.5">{{ totalUnitsAvailable | number }} Available Now</div>
+      </div>
+
+      <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Fleet Asset Value</div>
+        <div class="text-2xl font-bold text-white mt-1">${{ totalFleetValue | number:'1.0-0' }}</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Replacement Capital</div>
+      </div>
+
+      <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800/80">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Maint / Repair Units</div>
+        <div class="text-2xl font-bold" [class.text-rose-400]="totalUnitsInIssue > 0" [class.text-slate-400]="totalUnitsInIssue === 0">
+          {{ totalUnitsInIssue }}
+        </div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Needs Attention</div>
+      </div>
     </div>
   </div>
 
-  <!-- Filter & Search Control Bar -->
-  <div class="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-800 shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between">
-    <!-- Search Bar -->
-    <div class="relative flex-1 w-full">
-      <svg class="w-5 h-5 absolute left-3.5 top-3 text-slate-400" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <!-- CONTROL & FILTER BAR -->
+  <div class="bg-slate-900/90 backdrop-blur-xl p-4 rounded-2xl border border-slate-800/90 shadow-xl flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+    <!-- Search Field -->
+    <div class="relative flex-1 min-w-[280px]">
+      <svg class="w-5 h-5 absolute left-3.5 top-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
       <input
         type="text"
         [(ngModel)]="searchQuery"
         (keyup.enter)="onSearch()"
-        placeholder="Search product by name or SKU..."
-        class="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+        placeholder="Search products by name, SKU, or keyword..."
+        class="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-xs focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
       />
+      <button *ngIf="searchQuery" (click)="clearSearch()" class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300">
+        ✕
+      </button>
     </div>
 
-    <!-- Category Selector -->
-    <div class="w-full md:w-56">
+    <!-- Category Dropdown -->
+    <div class="w-full sm:w-56">
       <select
         [(ngModel)]="selectedCategory"
-        class="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition"
+        class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-indigo-500 transition cursor-pointer"
       >
-        <option value="">All Categories</option>
+        <option value="">All Categories ({{ categories.length }})</option>
         <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
       </select>
     </div>
 
-    <!-- Status Selector -->
-    <div class="w-full md:w-48">
+    <!-- Status Dropdown -->
+    <div class="w-full sm:w-48">
       <select
         [(ngModel)]="selectedStatus"
-        class="w-full px-3.5 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500 transition"
+        class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-indigo-500 transition cursor-pointer"
       >
         <option value="ALL">All Statuses</option>
-        <option value="ACTIVE">Active</option>
-        <option value="INACTIVE">Inactive</option>
+        <option value="ACTIVE">Active Only</option>
+        <option value="INACTIVE">Inactive Only</option>
         <option value="DRAFT">Draft</option>
         <option value="DISCONTINUED">Discontinued</option>
       </select>
     </div>
+
+    <!-- View Mode Switcher -->
+    <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 self-end lg:self-auto shrink-0">
+      <button
+        (click)="viewMode = 'GRID'"
+        [class.bg-indigo-600]="viewMode === 'GRID'"
+        [class.text-white]="viewMode === 'GRID'"
+        [class.text-slate-400]="viewMode !== 'GRID'"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        Grid
+      </button>
+
+      <button
+        (click)="viewMode = 'TABLE'"
+        [class.bg-indigo-600]="viewMode === 'TABLE'"
+        [class.text-white]="viewMode === 'TABLE'"
+        [class.text-slate-400]="viewMode !== 'TABLE'"
+        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        Table
+      </button>
+    </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="flex flex-col items-center justify-center py-16 text-slate-400">
-    <div class="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-3"></div>
-    <p class="text-sm">Loading product catalog & inventory levels...</p>
+  <!-- CATEGORY QUICK FILTER PILLS -->
+  <div *ngIf="categories.length > 0" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+    <span class="text-xs font-semibold text-slate-500 mr-1 shrink-0">Quick Filter:</span>
+    <button
+      (click)="selectCategory('')"
+      [class.bg-indigo-600]="!selectedCategory"
+      [class.text-white]="!selectedCategory"
+      [class.bg-slate-900]="selectedCategory"
+      [class.text-slate-400]="selectedCategory"
+      class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-800 hover:border-slate-700 transition shrink-0"
+    >
+      All Items ({{ products.length }})
+    </button>
+    <button
+      *ngFor="let cat of categories"
+      (click)="selectCategory(cat.id)"
+      [class.bg-indigo-600]="selectedCategory === cat.id"
+      [class.text-white]="selectedCategory === cat.id"
+      [class.bg-slate-900]="selectedCategory !== cat.id"
+      [class.text-slate-400]="selectedCategory !== cat.id"
+      class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-800 hover:border-slate-700 transition shrink-0"
+    >
+      {{ cat.name }}
+    </button>
   </div>
 
-  <!-- Empty Catalog -->
-  <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
-    <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m-8-10l-8-4m8 4v10M4 7v10l8 4" />
-    </svg>
-    <h3 class="text-lg font-semibold text-slate-300">No products found</h3>
-    <p class="text-sm text-slate-500 max-w-md mx-auto mt-1">No rental items match your search query or filter criteria.</p>
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="flex flex-col items-center justify-center py-20 bg-slate-900/60 rounded-3xl border border-slate-800">
+    <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-slate-400 text-sm mt-3 font-medium">Querying authoritative product catalog & inventory state...</p>
   </div>
 
-  <!-- Product Grid Cards -->
-  <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-20 bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-xl">
+    <div class="w-16 h-16 bg-slate-800/60 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500 text-2xl">
+      📦
+    </div>
+    <h3 class="text-lg font-bold text-slate-200">No products found</h3>
+    <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1">No items match your active search terms or category filter criteria.</p>
+    <button (click)="clearSearch(); selectedCategory=''" class="mt-4 px-4 py-2 bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-semibold hover:bg-indigo-600/30 transition">
+      Reset All Filters
+    </button>
+  </div>
+
+  <!-- GRID VIEW DISPLAY -->
+  <div *ngIf="!loading && viewMode === 'GRID' && filteredProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <div
       *ngFor="let p of filteredProducts"
-      class="bg-slate-900/90 rounded-2xl border border-slate-800/80 overflow-hidden shadow-lg hover:border-indigo-500/40 transition group flex flex-col justify-between"
+      class="group relative bg-slate-900/90 rounded-2xl border border-slate-800/90 hover:border-indigo-500/40 overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col justify-between"
     >
-      <div>
-        <!-- Image Header -->
-        <div class="relative h-44 bg-slate-950 overflow-hidden">
+      <div class="p-5 space-y-4">
+        <!-- HEADER WITH 50px BY 50px THUMBNAIL -->
+        <div class="flex items-start gap-3.5">
           <img
             [src]="getProductImage(p)"
             [alt]="p.name"
-            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            class="product-thumb-50 bg-slate-950 border border-slate-800 shrink-0 shadow-md"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
-
-          <!-- SKU Pill -->
-          <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-700 text-xs font-mono font-medium text-slate-300">
-            {{ p.sku }}
-          </div>
-
-          <!-- Health Badge -->
-          <div class="absolute top-3 right-3 px-2.5 py-1 rounded-lg backdrop-blur-md text-xs font-semibold border" [ngClass]="getHealthBadgeClass(p.health)">
-            {{ p.health || 'GOOD' }}
-          </div>
-
-          <!-- Status Indicator -->
-          <div class="absolute bottom-3 left-3">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              {{ p.status }}
-            </span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-400 truncate">
+                {{ p.categoryName || 'General Equipment' }}
+              </span>
+              <span [ngClass]="getStatusBadgeClass(p.status)" class="px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0">
+                {{ p.status }}
+              </span>
+            </div>
+            <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition truncate mt-0.5">
+              {{ p.name }}
+            </h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="px-2 py-0.5 rounded-md bg-slate-950 border border-slate-800 font-mono text-[11px] font-bold text-slate-300">
+                {{ p.sku }}
+              </span>
+              <span [ngClass]="getHealthBadgeClass(p.health)" class="px-2 py-0.5 rounded-md text-[10px] font-bold border uppercase">
+                {{ p.health || 'GOOD' }}
+              </span>
+            </div>
           </div>
         </div>
 
-        <!-- Product Details -->
-        <div class="p-5 space-y-4">
+        <p class="text-xs text-slate-400 line-clamp-2">
+          {{ p.description || 'Standard rental item in operational inventory.' }}
+        </p>
+
+        <!-- FINANCIAL RATE SUMMARY BOX -->
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800/80">
           <div>
-            <div class="text-xs font-medium text-indigo-400 mb-1">{{ p.categoryName || 'General Category' }}</div>
-            <h3 class="text-lg font-bold text-white group-hover:text-indigo-300 transition line-clamp-1">{{ p.name }}</h3>
-            <p class="text-xs text-slate-400 line-clamp-2 mt-1">{{ p.description || 'No description provided.' }}</p>
-          </div>
-
-          <!-- Pricing & Financial Summary -->
-          <div class="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
-            <div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Rental Rate</div>
-              <div class="text-base font-bold text-emerald-400">${{ p.rentalPrice | number:'1.2-2' }} <span class="text-xs text-slate-500 font-normal">/ day</span></div>
-            </div>
-            <div>
-              <div class="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Replacement</div>
-              <div class="text-base font-bold text-slate-300">
-                <span *ngIf="p.replacementCost != null">${{ p.replacementCost | number:'1.2-2' }}</span>
-                <span *ngIf="p.replacementCost == null" class="text-xs text-slate-500 italic">Protected</span>
-              </div>
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Rental Rate</div>
+            <div class="text-base font-extrabold text-emerald-400 mt-0.5">
+              ${{ p.rentalPrice | number:'1.2-2' }}
+              <span class="text-[10px] text-slate-500 font-normal">/ day</span>
             </div>
           </div>
 
-          <!-- Inventory Breakdown Metrics -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-400">Total Owned: <strong class="text-white">{{ p.quantityOwned }}</strong></span>
-              <span class="text-slate-400">Available: <strong class="text-emerald-400">{{ p.availableQuantity }}</strong></span>
+          <div>
+            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Replacement</div>
+            <div class="text-base font-extrabold text-slate-300 mt-0.5">
+              <span *ngIf="p.replacementCost">${{ p.replacementCost | number:'1.2-2' }}</span>
+              <span *ngIf="!p.replacementCost" class="text-xs text-slate-500 italic">Protected</span>
             </div>
+          </div>
+        </div>
 
-            <!-- Visual Availability Bar -->
-            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden flex">
-              <div
-                class="bg-emerald-500 h-full"
-                [style.width.%]="(p.availableQuantity / (p.quantityOwned || 1)) * 100"
-                title="Available"
-              ></div>
-              <div
-                class="bg-amber-500 h-full"
-                [style.width.%]="(p.quantityInMaintenance / (p.quantityOwned || 1)) * 100"
-                title="Maintenance"
-              ></div>
-              <div
-                class="bg-rose-500 h-full"
-                [style.width.%]="(p.quantityDamaged / (p.quantityOwned || 1)) * 100"
-                title="Damaged"
-              ></div>
-            </div>
+        <!-- LIVE AVAILABILITY BREAKDOWN BAR -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs font-semibold">
+            <span class="text-slate-400">Total Owned: <strong class="text-white">{{ p.quantityOwned }}</strong></span>
+            <span class="text-emerald-400">Available: <strong>{{ p.availableQuantity }}</strong> ({{ getAvailabilityPercentage(p) }}%)</span>
+          </div>
 
-            <div class="flex justify-between items-center text-[11px] text-slate-500 pt-1">
-              <span>Maint: {{ p.quantityInMaintenance }}</span>
-              <span>Damaged: {{ p.quantityDamaged }}</span>
-              <span>Lost: {{ p.quantityLost }}</span>
-            </div>
+          <!-- Multi-segment stock bar -->
+          <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden flex border border-slate-800">
+            <div
+              class="bg-emerald-500 h-full transition-all duration-500"
+              [style.width.%]="getAvailabilityPercentage(p)"
+              title="Available"
+            ></div>
+            <div
+              class="bg-amber-500 h-full transition-all duration-500"
+              [style.width.%]="(p.quantityInMaintenance / (p.quantityOwned || 1)) * 100"
+              title="Maintenance"
+            ></div>
+            <div
+              class="bg-rose-500 h-full transition-all duration-500"
+              [style.width.%]="(p.quantityDamaged / (p.quantityOwned || 1)) * 100"
+              title="Damaged"
+            ></div>
+          </div>
+
+          <div class="flex justify-between items-center text-[10px] font-medium text-slate-500 pt-0.5">
+            <span>Maint: {{ p.quantityInMaintenance }}</span>
+            <span>Damaged: {{ p.quantityDamaged }}</span>
+            <span>Lost: {{ p.quantityLost }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Card Action Footer -->
-      <div class="p-4 bg-slate-950/40 border-t border-slate-800/80 flex items-center justify-between gap-2">
-        <a [routerLink]="['/products', p.id]" class="flex-1 py-2 text-center text-xs font-semibold text-slate-200 bg-slate-800/80 hover:bg-slate-700 rounded-xl transition border border-slate-700/60">
-          View & Availability
+      <!-- CARD FOOTER ACTIONS -->
+      <div class="p-3.5 bg-slate-950/70 border-t border-slate-800/80 flex items-center justify-between gap-2">
+        <a [routerLink]="['/products', p.id]" class="flex-1 py-2 text-center text-xs font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-xl transition border border-slate-700/80">
+          View Details & Calendar
         </a>
 
-        <a *ngIf="roleState.hasPermission('PRODUCT_UPDATE')" [routerLink]="['/products', p.id, 'edit']" class="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition border border-transparent hover:border-indigo-500/20" title="Edit Product">
-          <svg class="w-4 h-4" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <a *ngIf="roleState.hasPermission('PRODUCT_UPDATE')" [routerLink]="['/products', p.id, 'edit']" class="p-2 text-slate-400 hover:text-indigo-300 hover:bg-indigo-500/15 rounded-xl transition border border-slate-800 hover:border-indigo-500/30" title="Edit Product">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
         </a>
 
-        <button *ngIf="roleState.hasPermission('PRODUCT_DELETE')" (click)="deleteProduct(p)" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition border border-transparent hover:border-rose-500/20" title="Delete Product">
-          <svg class="w-4 h-4" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button *ngIf="roleState.hasPermission('PRODUCT_DELETE')" (click)="deleteProduct(p)" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 rounded-xl transition border border-slate-800 hover:border-rose-500/30" title="Delete Product">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- TABLE VIEW DISPLAY -->
+  <div *ngIf="!loading && viewMode === 'TABLE' && filteredProducts.length > 0" class="bg-slate-900/90 rounded-2xl border border-slate-800/90 overflow-hidden shadow-xl backdrop-blur-xl">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead>
+          <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+            <th class="py-3.5 px-4 min-w-[240px]">Product / SKU</th>
+            <th class="py-3.5 px-3">Category</th>
+            <th class="py-3.5 px-3 text-center">Status</th>
+            <th class="py-3.5 px-3 text-center">Owned</th>
+            <th class="py-3.5 px-3 text-center">Available</th>
+            <th class="py-3.5 px-3 text-center">Maint / Damaged</th>
+            <th class="py-3.5 px-3 text-right">Daily Rate</th>
+            <th class="py-3.5 px-3 text-right">Replacement</th>
+            <th class="py-3.5 px-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60">
+          <tr *ngFor="let p of filteredProducts" class="hover:bg-slate-900 transition-colors">
+            <!-- Product Info -->
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3.5">
+                <img [src]="getProductImage(p)" [alt]="p.name" class="product-thumb-50 bg-slate-950 border border-slate-800 shrink-0 shadow-sm" />
+                <div>
+                  <a [routerLink]="['/products', p.id]" class="font-bold text-slate-100 hover:text-indigo-400 transition text-sm">
+                    {{ p.name }}
+                  </a>
+                  <div class="text-[11px] font-mono text-slate-400">{{ p.sku }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Category -->
+            <td class="py-3 px-3 font-medium text-slate-300">
+              {{ p.categoryName || 'General' }}
+            </td>
+
+            <!-- Status Dropdown -->
+            <td class="py-3 px-3 text-center">
+              <select
+                [ngModel]="p.status"
+                (ngModelChange)="updateStatus(p, $event)"
+                [ngClass]="getStatusBadgeClass(p.status)"
+                class="px-2 py-1 rounded-lg text-[11px] font-bold border bg-slate-950 cursor-pointer focus:outline-none"
+              >
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+                <option value="DRAFT">DRAFT</option>
+                <option value="DISCONTINUED">DISCONTINUED</option>
+              </select>
+            </td>
+
+            <!-- Quantities -->
+            <td class="py-3 px-3 text-center font-extrabold text-slate-200">
+              {{ p.quantityOwned }}
+            </td>
+
+            <td class="py-3 px-3 text-center font-extrabold text-emerald-400">
+              {{ p.availableQuantity }}
+            </td>
+
+            <td class="py-3 px-3 text-center text-slate-400 font-medium">
+              <span [class.text-amber-400]="p.quantityInMaintenance > 0">{{ p.quantityInMaintenance }}</span> /
+              <span [class.text-rose-400]="p.quantityDamaged > 0">{{ p.quantityDamaged }}</span>
+            </td>
+
+            <!-- Pricing -->
+            <td class="py-3 px-3 text-right font-extrabold text-emerald-400 text-sm">
+              ${{ p.rentalPrice | number:'1.2-2' }}
+            </td>
+
+            <td class="py-3 px-3 text-right font-bold text-slate-300">
+              ${{ p.replacementCost | number:'1.2-2' }}
+            </td>
+
+            <!-- Actions -->
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <a [routerLink]="['/products', p.id]" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700">
+                  View
+                </a>
+                <a *ngIf="roleState.hasPermission('PRODUCT_UPDATE')" [routerLink]="['/products', p.id, 'edit']" class="p-1.5 text-slate-400 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-lg">
+                  ✏️
+                </a>
+                <button *ngIf="roleState.hasPermission('PRODUCT_DELETE')" (click)="deleteProduct(p)" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

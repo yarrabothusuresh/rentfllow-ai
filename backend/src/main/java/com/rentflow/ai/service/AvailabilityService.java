@@ -1,10 +1,8 @@
 package com.rentflow.ai.service;
 
-import com.rentflow.ai.dto.AvailabilityResultDTO;
-import com.rentflow.ai.dto.InventoryReservationDTO;
+import com.rentflow.ai.dto.*;
 import com.rentflow.ai.model.InventoryReservation;
 import com.rentflow.ai.model.Product;
-
 import com.rentflow.ai.repository.EventRepository;
 import com.rentflow.ai.repository.InventoryReservationRepository;
 import com.rentflow.ai.repository.ProductRepository;
@@ -13,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,13 +36,28 @@ public class AvailabilityService {
 
     public AvailabilityResultDTO checkAvailability(String tenantId, UUID productId, int requestedQuantity,
                                                    LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return checkAvailabilityExcludingBooking(tenantId, productId, requestedQuantity, startDateTime, endDateTime, null);
+    }
 
+    public AvailabilityResultDTO checkAvailabilityExcludingBooking(String tenantId, UUID productId, int requestedQuantity,
+                                                                   LocalDateTime startDateTime, LocalDateTime endDateTime,
+                                                                   UUID excludeBookingId) {
         Product product = productRepository.findByTenantIdAndId(tenantId, productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + productId));
 
-        // Find overlapping reservations
-        List<InventoryReservation> overlapping = reservationRepository.findOverlappingReservations(
-                tenantId, productId, startDateTime, endDateTime);
+        int turnaroundMinutes = product.getDefaultTurnaroundMinutes() > 0 ? product.getDefaultTurnaroundMinutes() : 0;
+        // Expand search interval by turnaround minutes
+        LocalDateTime queryStart = startDateTime.minusMinutes(turnaroundMinutes);
+        LocalDateTime queryEnd = endDateTime.plusMinutes(turnaroundMinutes);
+
+        List<InventoryReservation> overlapping;
+        if (excludeBookingId != null) {
+            overlapping = reservationRepository.findOverlappingReservationsExcludingBooking(
+                    tenantId, productId, queryStart, queryEnd, excludeBookingId);
+        } else {
+            overlapping = reservationRepository.findOverlappingReservations(
+                    tenantId, productId, queryStart, queryEnd);
+        }
 
         int quantityReserved = overlapping.stream()
                 .mapToInt(InventoryReservation::getQuantity)
@@ -82,9 +97,9 @@ public class AvailabilityService {
         return result;
     }
 
-    public com.rentflow.ai.dto.BulkAvailabilityResultDTO checkBulkAvailability(String tenantId, com.rentflow.ai.dto.BulkAvailabilityRequestDTO request) {
+    public BulkAvailabilityResultDTO checkBulkAvailability(String tenantId, BulkAvailabilityRequestDTO request) {
         if (request == null || request.getItems() == null) {
-            com.rentflow.ai.dto.BulkAvailabilityResultDTO empty = new com.rentflow.ai.dto.BulkAvailabilityResultDTO();
+            BulkAvailabilityResultDTO empty = new BulkAvailabilityResultDTO();
             empty.setAvailable(true);
             empty.setItems(List.of());
             return empty;
@@ -94,11 +109,11 @@ public class AvailabilityService {
         LocalDateTime end = request.getEndDateTime() != null ? request.getEndDateTime() : start.plusDays(1);
 
         boolean overallAvailable = true;
-        List<com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult> itemResults = new java.util.ArrayList<>();
+        List<BulkAvailabilityResultDTO.ItemResult> itemResults = new ArrayList<>();
 
-        for (com.rentflow.ai.dto.BulkAvailabilityRequestDTO.ItemRequest item : request.getItems()) {
+        for (BulkAvailabilityRequestDTO.ItemRequest item : request.getItems()) {
             AvailabilityResultDTO single = checkAvailability(tenantId, item.getProductId(), item.getQuantity(), start, end);
-            com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult res = new com.rentflow.ai.dto.BulkAvailabilityResultDTO.ItemResult();
+            BulkAvailabilityResultDTO.ItemResult res = new BulkAvailabilityResultDTO.ItemResult();
             res.setProductId(single.getProductId());
             res.setProductName(single.getProductName());
             res.setSku(single.getSku());
@@ -113,7 +128,7 @@ public class AvailabilityService {
             }
         }
 
-        com.rentflow.ai.dto.BulkAvailabilityResultDTO bulkResult = new com.rentflow.ai.dto.BulkAvailabilityResultDTO();
+        BulkAvailabilityResultDTO bulkResult = new BulkAvailabilityResultDTO();
         bulkResult.setAvailable(overallAvailable);
         bulkResult.setItems(itemResults);
         return bulkResult;
@@ -121,7 +136,7 @@ public class AvailabilityService {
 
     public List<AvailabilityResultDTO> getProductAvailabilityTimeline(String tenantId, UUID productId, int days) {
         LocalDateTime now = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        List<AvailabilityResultDTO> timeline = new java.util.ArrayList<>();
+        List<AvailabilityResultDTO> timeline = new ArrayList<>();
 
         for (int i = 0; i < Math.max(1, days); i++) {
             LocalDateTime dayStart = now.plusDays(i).withHour(8);
@@ -130,6 +145,98 @@ public class AvailabilityService {
             timeline.add(dayResult);
         }
         return timeline;
+    }
+
+    public AvailabilityMatrixDTO getAvailabilityMatrix(String tenantId) {
+        return getAvailabilityMatrix(tenantId, null, null);
+    }
+
+    public AvailabilityMatrixDTO getAvailabilityMatrix(String tenantId, LocalDateTime start, LocalDateTime end) {
+        if (start == null) start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        if (end == null) end = start.plusDays(7);
+
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDate current = start.toLocalDate();
+        LocalDate lastDate = end.toLocalDate();
+        while (!current.isAfter(lastDate)) {
+            dates.add(current);
+            current = current.plusDays(1);
+        }
+
+        List<Product> products = productRepository.findByTenantId(tenantId);
+        List<AvailabilityMatrixDTO.ProductMatrixRow> rows = new ArrayList<>();
+
+        for (Product product : products) {
+            AvailabilityMatrixDTO.ProductMatrixRow row = new AvailabilityMatrixDTO.ProductMatrixRow();
+            row.setProductId(product.getId());
+            row.setProductName(product.getName());
+            row.setSku(product.getSku());
+            row.setTotalOwned(product.getQuantityOwned());
+
+            List<Integer> availByDate = new ArrayList<>();
+            for (LocalDate date : dates) {
+                LocalDateTime dayStart = date.atTime(8, 0);
+                LocalDateTime dayEnd = date.atTime(22, 0);
+                AvailabilityResultDTO res = checkAvailability(tenantId, product.getId(), 1, dayStart, dayEnd);
+                availByDate.add(res.getAvailableQuantity());
+            }
+            row.setAvailableByDate(availByDate);
+            rows.add(row);
+        }
+
+        AvailabilityMatrixDTO matrix = new AvailabilityMatrixDTO();
+        matrix.setDates(dates);
+        matrix.setProducts(rows);
+        return matrix;
+    }
+
+    public AlternativeSuggestionsDTO getAlternativeSuggestions(String tenantId, UUID productId, int requestedQuantity,
+                                                               LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        Product product = productRepository.findByTenantIdAndId(tenantId, productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with ID: " + productId));
+
+        AlternativeSuggestionsDTO dto = new AlternativeSuggestionsDTO();
+        dto.setProductId(product.getId());
+        dto.setProductName(product.getName());
+        dto.setRequestedQuantity(requestedQuantity);
+
+        // 1. Find alternative dates (shifts of +1 to +7 days)
+        long durationHours = java.time.Duration.between(startDateTime, endDateTime).toHours();
+        if (durationHours <= 0) durationHours = 24;
+
+        List<AlternativeSuggestionsDTO.DateOption> dateOptions = new ArrayList<>();
+        for (int dayShift = 1; dayShift <= 14; dayShift++) {
+            LocalDateTime altStart = startDateTime.plusDays(dayShift);
+            LocalDateTime altEnd = altStart.plusHours(durationHours);
+            AvailabilityResultDTO check = checkAvailability(tenantId, productId, requestedQuantity, altStart, altEnd);
+            if (check.isAvailable()) {
+                dateOptions.add(new AlternativeSuggestionsDTO.DateOption(altStart, altEnd, check.getAvailableQuantity()));
+                if (dateOptions.size() >= 3) break;
+            }
+        }
+        dto.setAlternativeDates(dateOptions);
+
+        // 2. Find alternative products in same category or overall
+        List<Product> candidates;
+        if (product.getCategoryId() != null) {
+            candidates = productRepository.findByTenantIdAndCategoryId(tenantId, product.getCategoryId());
+        } else {
+            candidates = productRepository.findByTenantId(tenantId);
+        }
+
+        List<AlternativeSuggestionsDTO.ProductOption> productOptions = new ArrayList<>();
+        for (Product cand : candidates) {
+            if (cand.getId().equals(productId)) continue;
+            AvailabilityResultDTO check = checkAvailability(tenantId, cand.getId(), requestedQuantity, startDateTime, endDateTime);
+            if (check.isAvailable()) {
+                productOptions.add(new AlternativeSuggestionsDTO.ProductOption(
+                        cand.getId(), cand.getName(), cand.getSku(), check.getAvailableQuantity()));
+                if (productOptions.size() >= 3) break;
+            }
+        }
+        dto.setAlternativeProducts(productOptions);
+
+        return dto;
     }
 
     public InventoryReservationDTO mapReservationToDTO(InventoryReservation r) {

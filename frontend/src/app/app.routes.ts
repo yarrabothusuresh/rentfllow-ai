@@ -90,6 +90,15 @@ import { RepairDetailComponent } from './pages/maintenance/repair-detail.compone
 import { ReplacementsListComponent } from './pages/replacements/replacements-list.component';
 import { PortalDamageClaimsComponent } from './pages/claims/portal-damage-claims.component';
 
+// Day 21 Rental Calendar & Advanced Availability Components
+import { RentalCalendarComponent } from './pages/calendar/rental-calendar.component';
+import { CalendarDashboardComponent } from './pages/calendar/calendar-dashboard.component';
+import { DriverCalendarComponent } from './pages/calendar/driver-calendar.component';
+import { VehicleCalendarComponent } from './pages/calendar/vehicle-calendar.component';
+import { WarehouseCalendarComponent } from './pages/calendar/warehouse-calendar.component';
+import { InventoryCalendarComponent } from './pages/calendar/inventory-calendar.component';
+import { ConflictDashboardComponent } from './pages/calendar/conflict-dashboard.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'rentals', component: PublicCatalogComponent },
@@ -128,48 +137,50 @@ export const routes: Routes = [
   },
   { path: 'ideal-customer', component: IdealCustomerComponent },
   { path: 'user-roles', component: UserRolesComponent },
-  { path: 'workflow-demo', component: WorkflowDemoComponent },
-  { path: 'ai-copilot', component: AiCopilotComponent },
-  { path: 'leads', component: LeadsListComponent },
-  { path: 'leads/:id', component: LeadDetailComponent },
-  { path: 'customers', component: CustomersListComponent },
-  { path: 'customers/:id', component: CustomerDetailComponent },
-  { path: 'customers/:id/360', component: Customer360Component },
-  { path: 'events', component: EventsListComponent },
-  { path: 'events/:id', component: EventDetailComponent },
-  { path: 'products', component: ProductListComponent },
-  { path: 'products/new', component: ProductFormComponent },
-  { path: 'products/:id', component: ProductDetailComponent },
-  { path: 'products/:id/edit', component: ProductFormComponent },
-  { path: 'inventory', component: InventoryOverviewComponent },
-  { path: 'quotes', component: QuotesListComponent },
-  { path: 'quotes/new', component: QuoteBuilderComponent },
-  { path: 'quotes/:id', component: QuoteDetailComponent },
-  { path: 'quotes/:id/edit', component: QuoteBuilderComponent },
-  { path: 'quotes/:id/preview', component: QuotePreviewComponent },
-  { path: 'bookings', component: BookingsListComponent },
-  { path: 'bookings/:id', component: BookingDetailComponent },
-  { path: 'invoices', component: InvoicesListComponent },
-  { path: 'invoices/:id', component: InvoiceDetailComponent },
-  { path: 'notifications', component: NotificationsListComponent },
-  { path: 'warehouse/dashboard', component: WarehouseDashboardComponent },
-  { path: 'warehouse/orders', component: WarehouseOrdersListComponent },
-  { path: 'warehouse/orders/:id', component: WarehouseOrderDetailComponent },
-  { path: 'warehouse/pick', component: WarehousePickListComponent },
-  { path: 'warehouse/packing', component: WarehousePackingComponent },
-  { path: 'warehouse/shortages', component: WarehouseShortagesComponent },
-  { path: 'inventory/dashboard', component: InventoryDashboardComponent },
-  { path: 'inventory/availability', component: InventoryAvailabilityCalendarComponent },
-  { path: 'inventory/reservations', component: InventoryReservationsListComponent },
-  { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
-  { path: 'inventory/conflicts', component: InventoryConflictsComponent },
-  { path: 'inventory/products/:id/availability', component: InventoryProductAvailabilityComponent },
-  { path: 'inventory/damage', component: DamageDashboardComponent },
-  { path: 'returns', component: ReturnsListComponent },
-  { path: 'returns/dashboard', component: ReturnsDashboardComponent },
-  { path: 'returns/inspection', component: ReturnsInspectionComponent },
-  { path: 'returns/damage', component: DamageDashboardComponent },
-  { path: 'returns/:id', component: ReturnDetailComponent },
+
+  // Redirect top-level legacy/direct admin paths to /dashboard/... to ensure Sidebar Left Menu is ALWAYS present
+  { path: 'workflow-demo', redirectTo: 'dashboard/workflow', pathMatch: 'full' },
+  { path: 'ai-copilot', redirectTo: 'dashboard/ai-copilot', pathMatch: 'full' },
+  { path: 'leads', redirectTo: 'dashboard/leads', pathMatch: 'full' },
+  { path: 'customers', redirectTo: 'dashboard/customers', pathMatch: 'full' },
+  { path: 'events', redirectTo: 'dashboard/events', pathMatch: 'full' },
+  { path: 'products', redirectTo: 'dashboard/products', pathMatch: 'full' },
+  { path: 'products/new', redirectTo: 'dashboard/products/new', pathMatch: 'full' },
+  { path: 'inventory', redirectTo: 'dashboard/inventory', pathMatch: 'full' },
+  { path: 'quotes', redirectTo: 'dashboard/quotes', pathMatch: 'full' },
+  { path: 'quotes/new', redirectTo: 'dashboard/quotes/new', pathMatch: 'full' },
+  { path: 'bookings', redirectTo: 'dashboard/bookings', pathMatch: 'full' },
+  { path: 'invoices', redirectTo: 'dashboard/invoices', pathMatch: 'full' },
+  { path: 'notifications', redirectTo: 'dashboard/notifications', pathMatch: 'full' },
+
+  // Warehouse sub-routes redirects
+  { path: 'warehouse', redirectTo: 'dashboard/warehouse/dashboard', pathMatch: 'full' },
+  { path: 'warehouse/dashboard', redirectTo: 'dashboard/warehouse/dashboard', pathMatch: 'full' },
+  { path: 'warehouse/orders', redirectTo: 'dashboard/warehouse/orders', pathMatch: 'full' },
+  { path: 'warehouse/pick', redirectTo: 'dashboard/warehouse/pick', pathMatch: 'full' },
+  { path: 'warehouse/packing', redirectTo: 'dashboard/warehouse/packing', pathMatch: 'full' },
+  { path: 'warehouse/shortages', redirectTo: 'dashboard/warehouse/shortages', pathMatch: 'full' },
+
+  // Delivery sub-routes redirects
+  { path: 'delivery', redirectTo: 'dashboard/delivery/dashboard', pathMatch: 'full' },
+  { path: 'delivery/dashboard', redirectTo: 'dashboard/delivery/dashboard', pathMatch: 'full' },
+  { path: 'delivery/list', redirectTo: 'dashboard/delivery/list', pathMatch: 'full' },
+  { path: 'delivery/calendar', redirectTo: 'dashboard/delivery/calendar', pathMatch: 'full' },
+
+  // Returns sub-routes redirects
+  { path: 'returns', redirectTo: 'dashboard/returns', pathMatch: 'full' },
+  { path: 'returns/dashboard', redirectTo: 'dashboard/returns/dashboard', pathMatch: 'full' },
+  { path: 'returns/inspection', redirectTo: 'dashboard/returns/inspection', pathMatch: 'full' },
+
+  // Calendar sub-routes redirects
+  { path: 'calendar', redirectTo: 'dashboard/calendar', pathMatch: 'full' },
+  { path: 'calendar/dashboard', redirectTo: 'dashboard/calendar/dashboard', pathMatch: 'full' },
+  { path: 'calendar/drivers', redirectTo: 'dashboard/calendar/drivers', pathMatch: 'full' },
+  { path: 'calendar/vehicles', redirectTo: 'dashboard/calendar/vehicles', pathMatch: 'full' },
+  { path: 'calendar/warehouse', redirectTo: 'dashboard/calendar/warehouse', pathMatch: 'full' },
+  { path: 'calendar/inventory', redirectTo: 'dashboard/calendar/inventory', pathMatch: 'full' },
+  { path: 'calendar/conflicts', redirectTo: 'dashboard/calendar/conflicts', pathMatch: 'full' },
+
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -181,6 +192,7 @@ export const routes: Routes = [
       { path: 'leads/:id', component: LeadDetailComponent },
       { path: 'customers', component: CustomersListComponent },
       { path: 'customers/:id', component: CustomerDetailComponent },
+      { path: 'customers/:id/360', component: Customer360Component },
       { path: 'events', component: EventsListComponent },
       { path: 'events/:id', component: EventDetailComponent },
       { path: 'products', component: ProductListComponent },
@@ -229,7 +241,16 @@ export const routes: Routes = [
       { path: 'delivery/calendar', component: DeliveryCalendarComponent },
       { path: 'delivery/routes', component: DeliveryRoutesComponent },
       { path: 'delivery/drivers', component: DriverListComponent },
-      { path: 'delivery/:id', component: DeliveryDetailComponent }
+      { path: 'delivery/:id', component: DeliveryDetailComponent },
+
+      // Calendar inside Dashboard sub-routes
+      { path: 'calendar', component: RentalCalendarComponent },
+      { path: 'calendar/dashboard', component: CalendarDashboardComponent },
+      { path: 'calendar/drivers', component: DriverCalendarComponent },
+      { path: 'calendar/vehicles', component: VehicleCalendarComponent },
+      { path: 'calendar/warehouse', component: WarehouseCalendarComponent },
+      { path: 'calendar/inventory', component: InventoryCalendarComponent },
+      { path: 'calendar/conflicts', component: ConflictDashboardComponent }
     ]
   },
   { path: '**', redirectTo: '' }

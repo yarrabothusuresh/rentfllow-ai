@@ -18,6 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findByTenantIdAndId(String tenantId, UUID id);
     Optional<Product> findByTenantIdAndSkuIgnoreCase(String tenantId, String sku);
     List<Product> findByTenantIdAndStatus(String tenantId, ProductStatus status);
+    List<Product> findByTenantIdAndCategoryId(String tenantId, UUID categoryId);
 
     @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId AND " +
            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

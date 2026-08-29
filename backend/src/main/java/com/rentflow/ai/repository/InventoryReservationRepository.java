@@ -33,4 +33,18 @@ public interface InventoryReservationRepository extends JpaRepository<InventoryR
             @Param("productId") UUID productId,
             @Param("requestedStart") LocalDateTime requestedStart,
             @Param("requestedEnd") LocalDateTime requestedEnd);
+
+    @Query("SELECT r FROM InventoryReservation r WHERE r.tenantId = :tenantId AND r.productId = :productId AND " +
+           "(r.status = com.rentflow.ai.model.ReservationStatus.RESERVED OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.CONFIRMED OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.PENDING OR " +
+           " r.status = com.rentflow.ai.model.ReservationStatus.HOLD) AND " +
+           "(r.bookingId IS NULL OR r.bookingId <> :excludeBookingId) AND " +
+           "r.startDateTime < :requestedEnd AND r.endDateTime > :requestedStart")
+    List<InventoryReservation> findOverlappingReservationsExcludingBooking(
+            @Param("tenantId") String tenantId,
+            @Param("productId") UUID productId,
+            @Param("requestedStart") LocalDateTime requestedStart,
+            @Param("requestedEnd") LocalDateTime requestedEnd,
+            @Param("excludeBookingId") UUID excludeBookingId);
 }

@@ -7,30 +7,30 @@
     
     <nav class="sidebar-nav">
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" *ngIf="hasPermission('DASHBOARD_VIEW')">Dashboard</a>
-      <a routerLink="/workflow-demo" routerLinkActive="active" class="nav-item">Rental Workflow</a>
+      <a routerLink="/dashboard/workflow" routerLinkActive="active" class="nav-item">Rental Workflow</a>
       <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('AI_COPILOT_USE')">AI Copilot</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>
       <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>
       <a routerLink="/dashboard/customers" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('CUSTOMER_VIEW')">Customers</a>
       <a routerLink="/dashboard/events" routerLinkActive="active" class="nav-item">Events</a>
-      <a routerLink="/quotes" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('QUOTE_VIEW')">Quotes</a>
-      <a routerLink="/bookings" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
-      <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('BOOKING_VIEW')">Calendar</a>
+      <a routerLink="/dashboard/quotes" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('QUOTE_VIEW')">Quotes</a>
+      <a routerLink="/dashboard/bookings" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('BOOKING_VIEW')">Bookings</a>
+      <a routerLink="/dashboard/calendar" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('BOOKING_VIEW')">Rental Calendar</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFulfillment()">Fulfillment</div>
       <a routerLink="/dashboard/inventory/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Inventory Control</a>
       <a routerLink="/dashboard/inventory/availability" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Availability Calendar</a>
-      <a routerLink="/products" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
-      <a routerLink="/warehouse/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse Operations</a>
+      <a routerLink="/dashboard/products" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
+      <a routerLink="/dashboard/warehouse/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse Operations</a>
       <a routerLink="/dashboard/delivery/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery & Dispatch</a>
       <a routerLink="/dashboard/returns/dashboard" routerLinkActive="active" class="nav-item">Returns & Pickups</a>
       <a routerLink="/dashboard/damage-claims/dashboard" routerLinkActive="active" class="nav-item">Claims & Loss Control</a>
       <a routerLink="/dashboard/maintenance/dashboard" routerLinkActive="active" class="nav-item">Maintenance Center</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInFinanceAdmin()">Finance & Admin</div>
-      <a routerLink="/invoices" routerLinkActive="active" class="nav-item">Invoices</a>
-      <a routerLink="/notifications" routerLinkActive="active" class="nav-item">Notifications</a>
+      <a routerLink="/dashboard/invoices" routerLinkActive="active" class="nav-item">Invoices</a>
+      <a routerLink="/dashboard/notifications" routerLinkActive="active" class="nav-item">Notifications</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('PAYMENT_VIEW')">Payments</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('ANALYTICS_VIEW')">Analytics</a>
       <a class="nav-item disabled" (click)="showFutureToast()" *ngIf="hasPermission('STOREFRONT_VIEW')">Storefront</a>
@@ -150,4 +150,3 @@
     </div>
   </div>
 </div>
-

@@ -19,10 +19,11 @@ export class ProductListComponent implements OnInit {
   loading = true;
   error = '';
 
-  // Filters & Search
+  // Filters & Controls
   searchQuery = '';
   selectedCategory = '';
   selectedStatus: string = 'ALL';
+  viewMode: 'GRID' | 'TABLE' = 'GRID';
 
   constructor(
     public catalogService: CatalogService,
@@ -69,12 +70,45 @@ export class ProductListComponent implements OnInit {
     });
   }
 
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.loadData();
+  }
+
+  selectCategory(catId: string): void {
+    this.selectedCategory = this.selectedCategory === catId ? '' : catId;
+  }
+
   get filteredProducts(): Product[] {
     return this.products.filter((p) => {
       const matchesCat = !this.selectedCategory || p.categoryId === this.selectedCategory;
       const matchesStatus = this.selectedStatus === 'ALL' || p.status === this.selectedStatus;
       return matchesCat && matchesStatus;
     });
+  }
+
+  // Analytics KPI Computations
+  get totalProductCount(): number {
+    return this.products.length;
+  }
+
+  get totalUnitsOwned(): number {
+    return this.products.reduce((acc, p) => acc + (p.quantityOwned || 0), 0);
+  }
+
+  get totalUnitsAvailable(): number {
+    return this.products.reduce((acc, p) => acc + (p.availableQuantity || 0), 0);
+  }
+
+  get totalUnitsInIssue(): number {
+    return this.products.reduce((acc, p) => acc + (p.quantityInMaintenance || 0) + (p.quantityDamaged || 0) + (p.quantityLost || 0), 0);
+  }
+
+  get totalFleetValue(): number {
+    return this.products.reduce((acc, p) => {
+      const cost = p.replacementCost || p.rentalPrice || 0;
+      return acc + (cost * (p.quantityOwned || 0));
+    }, 0);
   }
 
   updateStatus(product: Product, newStatus: ProductStatus): void {
@@ -100,14 +134,35 @@ export class ProductListComponent implements OnInit {
   getHealthBadgeClass(health?: string): string {
     switch (health) {
       case 'GOOD':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
       case 'WARNING':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
       case 'CRITICAL':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
       default:
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
     }
+  }
+
+  getStatusBadgeClass(status?: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+      case 'INACTIVE':
+        return 'bg-slate-800 text-slate-400 border-slate-700';
+      case 'DRAFT':
+        return 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+      case 'DISCONTINUED':
+        return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+      default:
+        return 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30';
+    }
+  }
+
+  getAvailabilityPercentage(p: Product): number {
+    if (!p.quantityOwned || p.quantityOwned === 0) return 0;
+    const pct = Math.round((p.availableQuantity / p.quantityOwned) * 100);
+    return Math.min(100, Math.max(0, pct));
   }
 
   getProductImage(p: Product): string {
@@ -115,16 +170,16 @@ export class ProductListComponent implements OnInit {
       return p.imageUrl;
     }
     const sku = (p.sku || '').toUpperCase();
-    if (sku.includes('CHI')) return 'https://images.unsplash.com/photo-1503602642458-232111445657?w=500&q=80';
-    if (sku.includes('WFC')) return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80';
-    if (sku.includes('TBL-060')) return 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=500&q=80';
-    if (sku.includes('TBL-CKT')) return 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=500&q=80';
-    if (sku.includes('LIN')) return 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80';
-    if (sku.includes('LGT')) return 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80';
-    if (sku.includes('CHR')) return 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=500&q=80';
-    if (sku.includes('TNT')) return 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=500&q=80';
-    if (sku.includes('DNC')) return 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=500&q=80';
-    if (sku.includes('STG')) return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80';
-    return 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=500&q=80';
+    if (sku.includes('CHI')) return 'https://images.unsplash.com/photo-1503602642458-232111445657?w=600&q=80';
+    if (sku.includes('WFC')) return 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80';
+    if (sku.includes('TBL-060')) return 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600&q=80';
+    if (sku.includes('TBL-CKT')) return 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=600&q=80';
+    if (sku.includes('LIN')) return 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80';
+    if (sku.includes('LGT')) return 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80';
+    if (sku.includes('CHR')) return 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&q=80';
+    if (sku.includes('TNT')) return 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=600&q=80';
+    if (sku.includes('DNC')) return 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=600&q=80';
+    if (sku.includes('STG')) return 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80';
+    return 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80';
   }
 }

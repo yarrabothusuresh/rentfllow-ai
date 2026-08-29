@@ -35,6 +35,7 @@ export interface Product {
   availableQuantity: number;
   quantityReserved?: number;
   health?: 'GOOD' | 'WARNING' | 'CRITICAL';
+  defaultTurnaroundMinutes?: number;
   imageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
