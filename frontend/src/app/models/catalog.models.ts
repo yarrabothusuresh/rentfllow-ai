@@ -25,6 +25,7 @@ export interface Product {
   categoryId?: string;
   categoryName?: string;
   productType: ProductType;
+  trackingType?: 'QUANTITY' | 'SERIALIZED';
   status: ProductStatus;
   rentalPrice: number;
   replacementCost?: number | null;

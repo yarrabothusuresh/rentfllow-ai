@@ -99,6 +99,19 @@ import { WarehouseCalendarComponent } from './pages/calendar/warehouse-calendar.
 import { InventoryCalendarComponent } from './pages/calendar/inventory-calendar.component';
 import { ConflictDashboardComponent } from './pages/calendar/conflict-dashboard.component';
 
+// Day 22 Inventory 2.0 Components
+import { InventoryDashboard2Component } from './pages/inventory/inventory-dashboard-2.component';
+import { ProductInventoryComponent } from './pages/inventory/product-inventory.component';
+import { SerializedAssetListComponent } from './pages/inventory/serialized-asset-list.component';
+import { AssetDetailComponent } from './pages/inventory/asset-detail.component';
+import { StockReceiveComponent } from './pages/inventory/stock-receive.component';
+import { StockAdjustComponent } from './pages/inventory/stock-adjust.component';
+import { StockTransfersComponent } from './pages/inventory/stock-transfers.component';
+import { ScanScreenComponent } from './pages/inventory/scan-screen.component';
+import { CycleCountComponent } from './pages/inventory/cycle-count.component';
+import { InventoryHistoryComponent } from './pages/inventory/inventory-history.component';
+import { WarehouseCheckoutComponent } from './pages/warehouse/warehouse-checkout.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'rentals', component: PublicCatalogComponent },
@@ -199,8 +212,18 @@ export const routes: Routes = [
       { path: 'products/new', component: ProductFormComponent },
       { path: 'products/:id', component: ProductDetailComponent },
       { path: 'products/:id/edit', component: ProductFormComponent },
-      { path: 'inventory', component: InventoryDashboardComponent },
-      { path: 'inventory/dashboard', component: InventoryDashboardComponent },
+      { path: 'inventory', component: InventoryDashboard2Component },
+      { path: 'inventory/dashboard', component: InventoryDashboard2Component },
+      { path: 'inventory/v2-dashboard', component: InventoryDashboard2Component },
+      { path: 'inventory/product-tracking', component: ProductInventoryComponent },
+      { path: 'inventory/products/:productId/assets', component: SerializedAssetListComponent },
+      { path: 'inventory/assets/:assetId', component: AssetDetailComponent },
+      { path: 'inventory/receive', component: StockReceiveComponent },
+      { path: 'inventory/adjust', component: StockAdjustComponent },
+      { path: 'inventory/transfers', component: StockTransfersComponent },
+      { path: 'inventory/scan', component: ScanScreenComponent },
+      { path: 'inventory/count', component: CycleCountComponent },
+      { path: 'inventory/history', component: InventoryHistoryComponent },
       { path: 'inventory/availability', component: InventoryAvailabilityCalendarComponent },
       { path: 'inventory/reservations', component: InventoryReservationsListComponent },
       { path: 'inventory/reservations/:id', component: InventoryReservationsListComponent },
@@ -235,6 +258,7 @@ export const routes: Routes = [
       { path: 'warehouse/pick', component: WarehousePickListComponent },
       { path: 'warehouse/packing', component: WarehousePackingComponent },
       { path: 'warehouse/shortages', component: WarehouseShortagesComponent },
+      { path: 'warehouse/checkout', component: WarehouseCheckoutComponent },
       { path: 'delivery', component: DeliveryDashboardComponent },
       { path: 'delivery/dashboard', component: DeliveryDashboardComponent },
       { path: 'delivery/list', component: DeliveryListComponent },

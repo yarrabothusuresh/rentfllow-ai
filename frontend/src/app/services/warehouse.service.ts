@@ -173,6 +173,10 @@ export class WarehouseService {
       .pipe(catchError(() => of(this.getMockLocations())));
   }
 
+  getWarehouses(): Observable<WarehouseLocation[]> {
+    return this.getLocations();
+  }
+
   // Fallback Mock Data for UI robustness
   private getMockOrders(): WarehouseOrder[] {
     return [

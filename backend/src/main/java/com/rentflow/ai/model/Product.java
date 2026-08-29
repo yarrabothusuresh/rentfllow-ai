@@ -39,6 +39,10 @@ public class Product {
     @Column(nullable = false)
     private ProductStatus status = ProductStatus.ACTIVE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private com.rentflow.inventory.model.ProductTrackingType trackingType = com.rentflow.inventory.model.ProductTrackingType.QUANTITY;
+
     @Column(precision = 10, scale = 2)
     private BigDecimal rentalPrice = BigDecimal.ZERO;
 
@@ -141,6 +145,9 @@ public class Product {
 
     public int getDefaultTurnaroundMinutes() { return defaultTurnaroundMinutes; }
     public void setDefaultTurnaroundMinutes(int defaultTurnaroundMinutes) { this.defaultTurnaroundMinutes = defaultTurnaroundMinutes; }
+
+    public com.rentflow.inventory.model.ProductTrackingType getTrackingType() { return trackingType; }
+    public void setTrackingType(com.rentflow.inventory.model.ProductTrackingType trackingType) { this.trackingType = trackingType; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }

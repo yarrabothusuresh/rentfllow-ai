@@ -24,4 +24,8 @@ public class SecurityUtils {
     public static String getCurrentUser() {
         return "Operations Manager";
     }
+
+    public static String getCurrentUsername() {
+        return getCurrentUser();
+    }
 }
