@@ -124,7 +124,6 @@ import { StockTransfersComponent } from './pages/inventory/stock-transfers.compo
 import { ScanScreenComponent } from './pages/inventory/scan-screen.component';
 import { CycleCountComponent } from './pages/inventory/cycle-count.component';
 import { InventoryHistoryComponent } from './pages/inventory/inventory-history.component';
-import { WarehouseCheckoutComponent } from './pages/warehouse/warehouse-checkout.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },

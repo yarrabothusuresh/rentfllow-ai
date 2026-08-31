@@ -138,43 +138,47 @@ public class WarehouseDataInitializer implements CommandLineRunner {
         }
 
         // 3. Seed Demo Customer: ABC Events LLC
-        UUID customerId = UUID.fromString("c3333333-3333-3333-3333-333333333333");
-        if (customerRepository.findById(customerId).isEmpty()) {
-            Customer c = new Customer();
-            c.setId(customerId);
-            c.setTenantId(tenantId);
-            c.setCustomerNumber("CUS-000123");
-            c.setFirstName("ABC Events");
-            c.setLastName("LLC");
-            c.setCompanyName("ABC Events LLC");
-            c.setEmail("contact@abcevents-demo.com");
-            c.setPhone("+1 555-019-9988");
-            c.setCustomerType(CustomerType.CORPORATE);
-            c.setStatus(CustomerStatus.ACTIVE);
-            customerRepository.save(c);
-        }
+        Customer c = customerRepository.findByTenantIdAndCustomerNumberIgnoreCase(tenantId, "CUS-000456")
+                .orElseGet(() -> {
+                    List<Customer> list = customerRepository.findByTenantId(tenantId);
+                    if (!list.isEmpty()) {
+                        return list.get(0);
+                    }
+                    Customer newCust = new Customer();
+                    newCust.setTenantId(tenantId);
+                    newCust.setCustomerNumber("CUS-000456");
+                    newCust.setFirstName("ABC Events");
+                    newCust.setLastName("LLC");
+                    newCust.setCompanyName("ABC Events LLC");
+                    newCust.setEmail("contact@abcevents-demo.com");
+                    newCust.setPhone("+1 555-019-9988");
+                    newCust.setCustomerType(CustomerType.CORPORATE);
+                    newCust.setStatus(CustomerStatus.ACTIVE);
+                    return customerRepository.save(newCust);
+                });
+        UUID customerId = c.getId();
 
         // 4. Seed Demo Event: Wedding Reception
-        UUID eventId = UUID.fromString("e4444444-4444-4444-4444-444444444444");
-        if (eventRepository.findById(eventId).isEmpty()) {
-            Event e = new Event();
-            e.setId(eventId);
-            e.setTenantId(tenantId);
-            e.setCustomerId(customerId);
-            e.setEventName("Wedding Reception");
-            e.setEventType(EventType.WEDDING);
-            e.setEventDate(LocalDate.now().plusDays(1));
-            e.setStartTime("10:00");
-            e.setEndTime("22:00");
-            e.setGuestCount(150);
-            e.setVenueName("Grand Ballroom");
-            e.setVenueAddress("500 Celebration Blvd");
-            e.setCity("Dallas");
-            e.setState("TX");
-            e.setZipCode("75202");
-            e.setStatus(EventStatus.BOOKED);
-            eventRepository.save(e);
-        }
+        Event e = eventRepository.findByTenantIdAndCustomerId(tenantId, customerId).stream().findFirst()
+                .orElseGet(() -> {
+                    Event newEvent = new Event();
+                    newEvent.setTenantId(tenantId);
+                    newEvent.setCustomerId(customerId);
+                    newEvent.setEventName("Wedding Reception");
+                    newEvent.setEventType(EventType.WEDDING);
+                    newEvent.setEventDate(LocalDate.now().plusDays(1));
+                    newEvent.setStartTime("10:00");
+                    newEvent.setEndTime("22:00");
+                    newEvent.setGuestCount(150);
+                    newEvent.setVenueName("Grand Ballroom");
+                    newEvent.setVenueAddress("500 Celebration Blvd");
+                    newEvent.setCity("Dallas");
+                    newEvent.setState("TX");
+                    newEvent.setZipCode("75202");
+                    newEvent.setStatus(EventStatus.BOOKED);
+                    return eventRepository.save(newEvent);
+                });
+        UUID eventId = e.getId();
 
         // 5. Ensure Products exist (Chiavari Chair, Table, Linen, Lighting Kit, Replacement White Folding Chair)
         Product chiavari = productRepository.findByTenantId(tenantId).stream().filter(p -> p.getSku() != null && p.getSku().contains("CHI")).findFirst().orElse(null);

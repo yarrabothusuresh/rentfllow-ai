@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-export type RoleType = 'OWNER' | 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'WAREHOUSE_MANAGER' | 'WAREHOUSE_OPERATOR' | 'FINANCE' | 'DRIVER' | 'CUSTOMER';
+export type RoleType = 'OWNER' | 'ADMIN' | 'SALES' | 'WAREHOUSE' | 'WAREHOUSE_MANAGER' | 'WAREHOUSE_OPERATOR' | 'OPERATIONS_MANAGER' | 'FINANCE' | 'DRIVER' | 'CUSTOMER';
 
 export interface DemoUser {
   id: string;
@@ -71,6 +71,11 @@ export class RoleStateService {
       'DASHBOARD_VIEW', 'PRODUCT_VIEW', 'INVENTORY_VIEW', 'BOOKING_VIEW',
       'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE'
     ],
+    OPERATIONS_MANAGER: [
+      'DASHBOARD_VIEW', 'CUSTOMER_VIEW', 'LEAD_VIEW', 'PRODUCT_VIEW', 'PRODUCT_CREATE', 'PRODUCT_UPDATE',
+      'INVENTORY_VIEW', 'INVENTORY_UPDATE', 'INVENTORY_RESERVE', 'QUOTE_VIEW', 'BOOKING_VIEW', 'BOOKING_UPDATE',
+      'WAREHOUSE_VIEW', 'WAREHOUSE_UPDATE', 'DELIVERY_VIEW', 'DELIVERY_UPDATE'
+    ],
     FINANCE: [
       'DASHBOARD_VIEW', 'BOOKING_VIEW', 'PAYMENT_VIEW', 'PAYMENT_CREATE', 'INVOICE_VIEW', 'WAREHOUSE_VIEW'
     ],
@@ -89,6 +94,10 @@ export class RoleStateService {
   }
 
   getCurrentRole(): RoleType {
+    return this.currentRoleSubject.value;
+  }
+
+  currentRole(): RoleType {
     return this.currentRoleSubject.value;
   }
 
