@@ -1,343 +1,404 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { WarehouseService, WarehouseDashboard, WarehouseOrder } from '../../services/warehouse.service';
+import { WarehouseFulfillmentService, WarehouseMetrics } from '../../services/warehouse-fulfillment.service';
+import { RoleStateService } from '../../services/role-state.service';
 
 @Component({
   selector: 'app-warehouse-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="warehouse-dashboard-container" *ngIf="dashboard">
+    <div class="warehouse-dashboard animate-fade-in">
       <!-- Header -->
       <div class="page-header">
         <div>
-          <h2>🏬 Warehouse Operations Dashboard</h2>
-          <p class="subtitle">Real-time fulfillment metrics, picking queues, and staging status.</p>
+          <div class="badge-tag">WAREHOUSE OPERATIONS 2.0</div>
+          <h2>🏬 Fulfillment Operations Center</h2>
+          <p class="subtitle">Real-time Pick, Pack, Kit, Load & Driver Handoff Execution Pipeline.</p>
         </div>
         <div class="header-actions">
-          <a routerLink="/warehouse/pick" class="btn btn-primary">🚜 Pick List</a>
-          <a routerLink="/warehouse/packing" class="btn btn-warning">📦 Packing Checklist</a>
-          <a routerLink="/warehouse/shortages" class="btn btn-danger" *ngIf="dashboard.shortageOrdersCount > 0">
-            ⚠️ Shortages ({{ dashboard.shortageOrdersCount }})
-          </a>
+          <a routerLink="/warehouse/my-work" class="btn btn-accent">👷 My Active Work</a>
+          <a routerLink="/warehouse/pick-lists" class="btn btn-primary">🚜 Pick Lists</a>
+          <a routerLink="/warehouse/pack-lists" class="btn btn-secondary">📦 Pack Lists</a>
+          <a routerLink="/warehouse/load-lists" class="btn btn-secondary">🚚 Load & Handoff</a>
         </div>
       </div>
 
-      <!-- Metrics Row -->
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <span class="metric-icon">📋</span>
-          <div class="metric-info">
-            <span class="metric-value">{{ dashboard.totalActiveWorkOrders }}</span>
-            <span class="metric-label">Active Work Orders</span>
+      <!-- Live Pipeline Funnel -->
+      <div class="pipeline-funnel" *ngIf="metrics">
+        <div class="funnel-step" routerLink="/warehouse/pick-lists" [queryParams]="{status: 'PENDING'}">
+          <div class="step-icon">📋</div>
+          <div class="step-info">
+            <span class="step-num">{{ metrics.ordersReadyToPick }}</span>
+            <span class="step-title">Ready to Pick</span>
           </div>
+          <div class="step-arrow">➔</div>
         </div>
 
-        <div class="metric-card card-picking">
-          <span class="metric-icon">🚜</span>
-          <div class="metric-info">
-            <span class="metric-value">{{ dashboard.ordersInPicking }}</span>
-            <span class="metric-label">In Picking</span>
+        <div class="funnel-step active-step" routerLink="/warehouse/pick-lists" [queryParams]="{status: 'IN_PROGRESS'}">
+          <div class="step-icon">🚜</div>
+          <div class="step-info">
+            <span class="step-num text-warning">{{ metrics.ordersPicking }}</span>
+            <span class="step-title">Picking</span>
           </div>
+          <div class="step-arrow">➔</div>
         </div>
 
-        <div class="metric-card card-packing">
-          <span class="metric-icon">📦</span>
-          <div class="metric-info">
-            <span class="metric-value">{{ dashboard.ordersInPacking }}</span>
-            <span class="metric-label">In Packing</span>
+        <div class="funnel-step" routerLink="/warehouse/pick-lists" [queryParams]="{status: 'COMPLETED'}">
+          <div class="step-icon">🔍</div>
+          <div class="step-info">
+            <span class="step-num text-info">{{ metrics.ordersVerifying }}</span>
+            <span class="step-title">Verifying</span>
           </div>
+          <div class="step-arrow">➔</div>
         </div>
 
-        <div class="metric-card card-ready">
-          <span class="metric-icon">🚚</span>
-          <div class="metric-info">
-            <span class="metric-value">{{ dashboard.readyForDeliveryOrders }}</span>
-            <span class="metric-label">Ready for Delivery</span>
+        <div class="funnel-step" routerLink="/warehouse/pack-lists">
+          <div class="step-icon">📦</div>
+          <div class="step-info">
+            <span class="step-num text-purple">{{ metrics.ordersPacking }}</span>
+            <span class="step-title">Packing / Kits</span>
           </div>
+          <div class="step-arrow">➔</div>
         </div>
 
-        <div class="metric-card card-shortage" [class.alert]="dashboard.shortageOrdersCount > 0">
-          <span class="metric-icon">⚠️</span>
-          <div class="metric-info">
-            <span class="metric-value">{{ dashboard.shortageOrdersCount }}</span>
-            <span class="metric-label">Shortages Reported</span>
+        <div class="funnel-step" routerLink="/warehouse/load-lists">
+          <div class="step-icon">🚚</div>
+          <div class="step-info">
+            <span class="step-num text-success">{{ metrics.ordersLoading }}</span>
+            <span class="step-title">Loading Vehicle</span>
+          </div>
+          <div class="step-arrow">➔</div>
+        </div>
+
+        <div class="funnel-step" routerLink="/warehouse/load-lists" [queryParams]="{status: 'HANDED_OFF'}">
+          <div class="step-icon">🤝</div>
+          <div class="step-info">
+            <span class="step-num text-cyan">{{ metrics.ordersHandedOff }}</span>
+            <span class="step-title">Driver Handoff</span>
           </div>
         </div>
       </div>
 
-      <!-- Main Section: Priority Work Orders & Audit Feed -->
-      <div class="dashboard-main-grid">
-        <!-- Urgent Work Orders Table -->
-        <div class="card-section flex-2">
-          <div class="section-header">
-            <h3>Urgent & Upcoming Work Orders</h3>
-            <a routerLink="/warehouse/orders" class="link-view-all">View All Work Orders &rarr;</a>
+      <!-- Key Alert Banners -->
+      <div class="alerts-container" *ngIf="metrics">
+        <div class="alert-card alert-danger" *ngIf="metrics.blockingExceptionsCount > 0" routerLink="/warehouse/exceptions">
+          <span class="alert-icon">🚨</span>
+          <div class="alert-content">
+            <h4>{{ metrics.blockingExceptionsCount }} Blocking Warehouse Exception(s)</h4>
+            <p>Unresolved shortage or damage holding up pick verification & fulfillment.</p>
           </div>
+          <span class="btn btn-sm btn-danger">Resolve Now</span>
+        </div>
 
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Order #</th>
-                  <th>Event & Customer</th>
-                  <th>Event Date</th>
-                  <th>Priority</th>
-                  <th>Progress</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of dashboard.urgentOrders">
-                  <td class="font-bold">{{ order.orderNumber }}</td>
-                  <td>
-                    <div class="cell-stacked">
-                      <span class="font-semibold">{{ order.eventName || 'Event Rental' }}</span>
-                      <span class="sub-text">👤 {{ order.customerName }}</span>
-                    </div>
-                  </td>
-                  <td>{{ order.eventDate ? (order.eventDate | date:'mediumDate') : 'Aug 30, 2026' }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getPriorityClass(order.priority)">{{ order.priority }}</span>
-                  </td>
-                  <td>
-                    <div class="progress-container">
-                      <span class="progress-text">{{ order.totalQuantityPicked }} / {{ order.totalQuantityRequired }}</span>
-                      <div class="progress-bar">
-                        <div class="progress-fill" [style.width.%]="order.pickingProgressPercentage"></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
-                  </td>
-                  <td>
-                    <a [routerLink]="['/warehouse/orders', order.id]" class="btn btn-sm btn-outline">Manage</a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="alert-card alert-warning" *ngIf="metrics.pendingSubstitutionsCount > 0" routerLink="/warehouse/substitutions">
+          <span class="alert-icon">🔄</span>
+          <div class="alert-content">
+            <h4>{{ metrics.pendingSubstitutionsCount }} Substitution(s) Awaiting Manager Approval</h4>
+            <p>Product substitutions proposed by warehouse crew require approval.</p>
+          </div>
+          <span class="btn btn-sm btn-warning">Review</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Navigation Hub -->
+      <div class="modules-grid">
+        <div class="module-card" routerLink="/warehouse/my-work">
+          <div class="module-icon-wrap bg-blue">👷</div>
+          <div class="module-body">
+            <h3>Operator "My Work"</h3>
+            <p>Focused single-operator view with assigned pick lists, pack lists, and quick load actions.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">Open My Work ➔</span>
           </div>
         </div>
 
-        <!-- Recent Audit Log -->
-        <div class="card-section flex-1">
-          <div class="section-header">
-            <h3>Recent Warehouse Activity</h3>
+        <div class="module-card" routerLink="/warehouse/pick-lists">
+          <div class="module-icon-wrap bg-orange">🚜</div>
+          <div class="module-body">
+            <h3>Pick Lists & Mobile Pick</h3>
+            <p>Location-ordered pick routing, 1D/2D serialized scanning, bulk qty +/- buttons, and verification.</p>
           </div>
+          <div class="module-footer">
+            <span class="link-text">Manage Picks ➔</span>
+          </div>
+        </div>
 
-          <div class="activity-feed">
-            <div class="activity-item" *ngFor="let audit of dashboard.recentActivity">
-              <div class="activity-bullet"></div>
-              <div class="activity-content">
-                <span class="activity-action">{{ audit.action }}</span>
-                <p class="activity-details">{{ audit.details }}</p>
-                <span class="activity-time">By {{ audit.performedBy }} • {{ audit.timestamp | date:'shortTime' }}</span>
-              </div>
-            </div>
+        <div class="module-card" routerLink="/warehouse/pack-lists">
+          <div class="module-icon-wrap bg-purple">📦</div>
+          <div class="module-body">
+            <h3>Packing & Kit Verification</h3>
+            <p>Container packing (Bags, Cases, Rolling Carts) and composite kit component validation.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">Manage Packs ➔</span>
+          </div>
+        </div>
+
+        <div class="module-card" routerLink="/warehouse/load-lists">
+          <div class="module-icon-wrap bg-green">🚚</div>
+          <div class="module-body">
+            <h3>Load Verification & Driver Handoff</h3>
+            <p>Vehicle capacity checking, container-level loading, and driver sign-off integration.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">Manage Loads ➔</span>
+          </div>
+        </div>
+
+        <div class="module-card" routerLink="/warehouse/exceptions">
+          <div class="module-icon-wrap bg-red">⚠️</div>
+          <div class="module-body">
+            <h3>Exception & Shortage Center</h3>
+            <p>Log and resolve missing inventory, damaged goods, and wrong bin locations with full audit.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">View Exceptions ({{ metrics?.openExceptionsCount || 0 }}) ➔</span>
+          </div>
+        </div>
+
+        <div class="module-card" routerLink="/warehouse/substitutions">
+          <div class="module-icon-wrap bg-amber">🔄</div>
+          <div class="module-body">
+            <h3>Controlled Substitutions</h3>
+            <p>Propose replacement items with real-time stock and price delta checks, then submit for manager sign-off.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">Substitutions ({{ metrics?.pendingSubstitutionsCount || 0 }}) ➔</span>
+          </div>
+        </div>
+
+        <div class="module-card" routerLink="/warehouse/containers">
+          <div class="module-icon-wrap bg-teal">🧰</div>
+          <div class="module-body">
+            <h3>Containers & Transport Gear</h3>
+            <p>Track reusable bags, flight cases, carts, and pallets with live allocation status.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">View Containers ({{ (metrics?.availableContainersCount || 0) + (metrics?.inUseContainersCount || 0) }}) ➔</span>
+          </div>
+        </div>
+
+        <div class="module-card" routerLink="/warehouse/orders">
+          <div class="module-icon-wrap bg-indigo">📋</div>
+          <div class="module-body">
+            <h3>All Warehouse Orders</h3>
+            <p>Search and manage warehouse orders connected to Bookings, Events, and Invoices.</p>
+          </div>
+          <div class="module-footer">
+            <span class="link-text">Browse Orders ➔</span>
           </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .warehouse-dashboard-container { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-    .page-header h2 { margin: 0; font-size: 1.6rem; color: #0f172a; }
-    .subtitle { color: #64748b; margin-top: 0.2rem; }
-    .header-actions { display: flex; gap: 0.75rem; }
+    .warehouse-dashboard {
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      color: var(--text-color, #e2e8f0);
+    }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .badge-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 0.4rem;
+    }
+    .page-header h2 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .subtitle {
+      margin: 0;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
     .btn {
       padding: 0.6rem 1.2rem;
       border-radius: 8px;
       font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      cursor: pointer;
-      border: none;
+      border: 1px solid transparent;
       transition: all 0.2s ease;
     }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-secondary { background: #64748b; color: white; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #334155; color: #f8fafc; border-color: #475569; }
     .btn-secondary:hover { background: #475569; }
-    .btn-outline-danger { border: 1px solid #ef4444; color: #ef4444; background: transparent; }
-    .btn-outline-danger:hover { background: #fee2e2; }
-    .btn-outline { border: 1px solid #cbd5e1; color: #475569; background: white; }
-    .btn-outline:hover { background: #f8fafc; }
-    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+    .btn-accent { background: #7c3aed; color: #fff; }
+    .btn-accent:hover { background: #6d28d9; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-warning { background: #d97706; color: #fff; }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 6px; }
 
-    .metrics-grid {
+    /* Pipeline Funnel */
+    .pipeline-funnel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-    .metric-card {
-      background: white;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      background: #1e293b;
+      padding: 1rem;
       border-radius: 12px;
-      padding: 1.25rem;
+      border: 1px solid #334155;
+    }
+    .funnel-step {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      border: 1px solid #e2e8f0;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: #0f172a;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
-    .metric-icon {
-      font-size: 2rem;
+    .funnel-step:hover {
+      transform: translateY(-2px);
+      border-color: #38bdf8;
     }
-    .metric-content {
+    .step-icon { font-size: 1.5rem; }
+    .step-info { display: flex; flex-direction: column; }
+    .step-num { font-size: 1.4rem; font-weight: 700; color: #f8fafc; }
+    .step-title { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
+    .step-arrow { color: #475569; font-size: 1.1rem; }
+
+    .text-warning { color: #f59e0b !important; }
+    .text-info { color: #38bdf8 !important; }
+    .text-purple { color: #a855f7 !important; }
+    .text-success { color: #10b981 !important; }
+    .text-cyan { color: #06b6d4 !important; }
+
+    /* Alerts */
+    .alerts-container {
       display: flex;
       flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
-    .metric-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      line-height: 1.2;
-      color: #0f172a;
-    }
-    .metric-label {
-      font-size: 0.85rem;
-      color: #64748b;
-      font-weight: 500;
-    }
-
-    .priorities-section {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      border: 1px solid #e2e8f0;
-    }
-    .section-header {
+    .alert-card {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
     }
-    .section-header h3 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #0f172a;
-    }
-    .view-all-link {
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .priorities-grid {
+    .alert-card:hover { transform: scale(1.01); }
+    .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); }
+    .alert-warning { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .alert-icon { font-size: 1.8rem; }
+    .alert-content { flex: 1; }
+    .alert-content h4 { margin: 0 0 0.2rem 0; font-size: 1rem; font-weight: 600; color: #f8fafc; }
+    .alert-content p { margin: 0; font-size: 0.85rem; color: #cbd5e1; }
+
+    /* Modules Grid */
+    .modules-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.25rem;
     }
-    .priority-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
+    .module-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
       padding: 1.25rem;
-      background: #f8fafc;
-    }
-    .card-header {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .module-card:hover {
+      transform: translateY(-3px);
+      border-color: #60a5fa;
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+    }
+    .module-icon-wrap {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      display: flex;
       align-items: center;
-      margin-bottom: 0.75rem;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
     }
-    .order-number {
-      font-weight: 700;
-      color: #1e293b;
-    }
-    .badge {
-      padding: 0.25rem 0.6rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .badge-urgent { background: #fecaca; color: #991b1b; }
-    .badge-high { background: #fed7aa; color: #9a3412; }
-    .badge-normal { background: #e2e8f0; color: #334155; }
-    .event-name {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.1rem;
-      color: #0f172a;
-    }
-    .customer-name, .event-date {
-      margin: 0 0 0.4rem 0;
-      font-size: 0.85rem;
-      color: #475569;
-    }
-    .progress-bar-container {
-      margin-top: 1rem;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: #64748b;
-      margin-bottom: 0.3rem;
-    }
-    .progress-track {
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: #3b82f6;
-      border-radius: 4px;
-    }
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 1.25rem;
+    .bg-blue { background: rgba(59, 130, 246, 0.2); }
+    .bg-orange { background: rgba(249, 115, 22, 0.2); }
+    .bg-purple { background: rgba(168, 85, 247, 0.2); }
+    .bg-green { background: rgba(34, 197, 94, 0.2); }
+    .bg-red { background: rgba(239, 68, 68, 0.2); }
+    .bg-amber { background: rgba(245, 158, 11, 0.2); }
+    .bg-teal { background: rgba(20, 184, 166, 0.2); }
+    .bg-indigo { background: rgba(99, 102, 241, 0.2); }
+
+    .module-body { flex: 1; }
+    .module-body h3 { margin: 0 0 0.4rem 0; font-size: 1.1rem; color: #f8fafc; font-weight: 600; }
+    .module-body p { margin: 0 0 1rem 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.4; }
+    .module-footer {
+      border-top: 1px solid #334155;
       padding-top: 0.75rem;
-      border-top: 1px solid #e2e8f0;
     }
-    .status-pill {
-      font-size: 0.8rem;
+    .link-text {
+      color: #38bdf8;
+      font-size: 0.85rem;
       font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
     }
-    .status-ready { background: #dbeafe; color: #1e40af; }
-    .status-picking { background: #fef3c7; color: #92400e; }
-    .status-packed { background: #dcfce7; color: #166534; }
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: #64748b;
-    }
+    .module-card:hover .link-text { color: #60a5fa; text-decoration: underline; }
   `]
 })
 export class WarehouseDashboardComponent implements OnInit {
-  dashboard: WarehouseDashboard | null = null;
+  metrics: WarehouseMetrics | null = null;
+  loading = true;
 
-  constructor(private warehouseService: WarehouseService) {}
+  constructor(
+    private fulfillmentService: WarehouseFulfillmentService,
+    public roleService: RoleStateService
+  ) {}
 
   ngOnInit(): void {
-    this.warehouseService.getDashboard().subscribe(data => {
-      this.dashboard = data;
+    this.loadMetrics();
+  }
+
+  loadMetrics(): void {
+    this.loading = true;
+    this.fulfillmentService.getMetrics().subscribe({
+      next: (m) => {
+        this.metrics = m;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
-  }
-
-  getPriorityClass(priority: string): string {
-    switch (priority) {
-      case 'URGENT': return 'badge-urgent';
-      case 'HIGH': return 'badge-high';
-      default: return 'badge-normal';
-    }
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'READY_TO_PICK': return 'status-ready';
-      case 'PICKING': return 'status-picking';
-      case 'PICKED': case 'PACKED': case 'READY_FOR_DELIVERY': return 'status-packed';
-      default: return 'status-ready';
-    }
   }
 }

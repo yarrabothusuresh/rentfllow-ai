@@ -296,6 +296,13 @@ public class DeliveryService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle must be assigned before starting delivery.");
         }
 
+        if (delivery.getWarehouseOrderId() != null) {
+            WarehouseOrder whOrder = warehouseOrderRepository.findByTenantIdAndId(tenantId, delivery.getWarehouseOrderId()).orElse(null);
+            if (whOrder != null && whOrder.getStatus() != WarehouseOrderStatus.HANDED_TO_DRIVER && whOrder.getStatus() != WarehouseOrderStatus.READY_FOR_DELIVERY) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse handoff is not complete.");
+            }
+        }
+
         transitionService.validateTransition(delivery.getStatus(), DeliveryStatus.OUT_FOR_DELIVERY);
 
         delivery.setStatus(DeliveryStatus.OUT_FOR_DELIVERY);

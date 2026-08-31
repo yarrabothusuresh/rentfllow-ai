@@ -54,14 +54,28 @@ import { QuoteRequestSuccessComponent } from './rentals/quote-request-success.co
 
 import { CustomerRequestsDashboardComponent } from './customers/customer-requests-dashboard.component';
 import { Customer360Component } from './customers/customer-360.component';
-
 import { NotificationsListComponent } from './pages/notifications/notifications-list/notifications-list.component';
+
 import { WarehouseDashboardComponent } from './pages/warehouse/warehouse-dashboard.component';
 import { WarehouseOrdersListComponent } from './pages/warehouse/warehouse-orders-list.component';
 import { WarehouseOrderDetailComponent } from './pages/warehouse/warehouse-order-detail.component';
 import { WarehousePickListComponent } from './pages/warehouse/warehouse-pick-list.component';
 import { WarehousePackingComponent } from './pages/warehouse/warehouse-packing.component';
 import { WarehouseShortagesComponent } from './pages/warehouse/warehouse-shortages.component';
+import { WarehouseCheckoutComponent } from './pages/warehouse/warehouse-checkout.component';
+
+// Day 23 Warehouse Operations 2.0 Components
+import { WarehouseMyWorkComponent } from './pages/warehouse/warehouse-my-work.component';
+import { WarehousePickListsComponent } from './pages/warehouse/warehouse-pick-lists.component';
+import { WarehousePickListDetailComponent } from './pages/warehouse/warehouse-pick-list-detail.component';
+import { WarehouseMobilePickComponent } from './pages/warehouse/warehouse-mobile-pick.component';
+import { WarehousePackListsComponent } from './pages/warehouse/warehouse-pack-lists.component';
+import { WarehousePackListDetailComponent } from './pages/warehouse/warehouse-pack-list-detail.component';
+import { WarehouseLoadListsComponent } from './pages/warehouse/warehouse-load-lists.component';
+import { WarehouseLoadListDetailComponent } from './pages/warehouse/warehouse-load-list-detail.component';
+import { WarehouseExceptionsComponent } from './pages/warehouse/warehouse-exceptions.component';
+import { WarehouseSubstitutionsComponent } from './pages/warehouse/warehouse-substitutions.component';
+import { WarehouseContainersComponent } from './pages/warehouse/warehouse-containers.component';
 
 import { InventoryDashboardComponent } from './pages/inventory/inventory-dashboard.component';
 import { InventoryAvailabilityCalendarComponent } from './pages/inventory/inventory-availability-calendar.component';
@@ -169,6 +183,13 @@ export const routes: Routes = [
   // Warehouse sub-routes redirects
   { path: 'warehouse', redirectTo: 'dashboard/warehouse/dashboard', pathMatch: 'full' },
   { path: 'warehouse/dashboard', redirectTo: 'dashboard/warehouse/dashboard', pathMatch: 'full' },
+  { path: 'warehouse/my-work', redirectTo: 'dashboard/warehouse/my-work', pathMatch: 'full' },
+  { path: 'warehouse/pick-lists', redirectTo: 'dashboard/warehouse/pick-lists', pathMatch: 'full' },
+  { path: 'warehouse/pack-lists', redirectTo: 'dashboard/warehouse/pack-lists', pathMatch: 'full' },
+  { path: 'warehouse/load-lists', redirectTo: 'dashboard/warehouse/load-lists', pathMatch: 'full' },
+  { path: 'warehouse/exceptions', redirectTo: 'dashboard/warehouse/exceptions', pathMatch: 'full' },
+  { path: 'warehouse/substitutions', redirectTo: 'dashboard/warehouse/substitutions', pathMatch: 'full' },
+  { path: 'warehouse/containers', redirectTo: 'dashboard/warehouse/containers', pathMatch: 'full' },
   { path: 'warehouse/orders', redirectTo: 'dashboard/warehouse/orders', pathMatch: 'full' },
   { path: 'warehouse/pick', redirectTo: 'dashboard/warehouse/pick', pathMatch: 'full' },
   { path: 'warehouse/packing', redirectTo: 'dashboard/warehouse/packing', pathMatch: 'full' },
@@ -253,6 +274,17 @@ export const routes: Routes = [
       { path: 'invoices/:id', component: InvoiceDetailComponent },
       { path: 'notifications', component: NotificationsListComponent },
       { path: 'warehouse/dashboard', component: WarehouseDashboardComponent },
+      { path: 'warehouse/my-work', component: WarehouseMyWorkComponent },
+      { path: 'warehouse/pick-lists', component: WarehousePickListsComponent },
+      { path: 'warehouse/pick-lists/:id', component: WarehousePickListDetailComponent },
+      { path: 'warehouse/pick-lists/:id/mobile', component: WarehouseMobilePickComponent },
+      { path: 'warehouse/pack-lists', component: WarehousePackListsComponent },
+      { path: 'warehouse/pack-lists/:id', component: WarehousePackListDetailComponent },
+      { path: 'warehouse/load-lists', component: WarehouseLoadListsComponent },
+      { path: 'warehouse/load-lists/:id', component: WarehouseLoadListDetailComponent },
+      { path: 'warehouse/exceptions', component: WarehouseExceptionsComponent },
+      { path: 'warehouse/substitutions', component: WarehouseSubstitutionsComponent },
+      { path: 'warehouse/containers', component: WarehouseContainersComponent },
       { path: 'warehouse/orders', component: WarehouseOrdersListComponent },
       { path: 'warehouse/orders/:id', component: WarehouseOrderDetailComponent },
       { path: 'warehouse/pick', component: WarehousePickListComponent },

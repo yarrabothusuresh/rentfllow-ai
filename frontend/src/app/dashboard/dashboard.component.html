@@ -23,6 +23,7 @@
       <a routerLink="/dashboard/inventory/availability" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('INVENTORY_VIEW')">Availability Calendar</a>
       <a routerLink="/dashboard/products" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('PRODUCT_VIEW')">Products</a>
       <a routerLink="/dashboard/warehouse/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">Warehouse Operations</a>
+      <a routerLink="/dashboard/warehouse/my-work" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('WAREHOUSE_VIEW')">↳ Operator "My Work"</a>
       <a routerLink="/dashboard/delivery/dashboard" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('DELIVERY_VIEW')">Delivery & Dispatch</a>
       <a routerLink="/dashboard/returns/dashboard" routerLinkActive="active" class="nav-item">Returns & Pickups</a>
       <a routerLink="/dashboard/damage-claims/dashboard" routerLinkActive="active" class="nav-item">Claims & Loss Control</a>

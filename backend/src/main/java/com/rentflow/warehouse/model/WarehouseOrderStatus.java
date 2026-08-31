@@ -8,8 +8,14 @@ public enum WarehouseOrderStatus {
     READY_TO_PICK,
     PICKING,
     PICKED,
+    VERIFYING,
     PACKING,
     PACKED,
+    LOADING,
+    LOADED,
     READY_FOR_DELIVERY,
+    HANDED_TO_DRIVER,
+    SHORT,
+    BLOCKED,
     CANCELLED
 }
