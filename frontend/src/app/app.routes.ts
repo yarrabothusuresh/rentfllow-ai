@@ -102,6 +102,19 @@ import { DamageClaimDetailComponent } from './pages/claims/damage-claim-detail.c
 import { RepairsDashboardComponent } from './pages/maintenance/repairs-dashboard.component';
 import { RepairDetailComponent } from './pages/maintenance/repair-detail.component';
 import { ReplacementsListComponent } from './pages/replacements/replacements-list.component';
+
+// Day 24 Business Intelligence & Analytics Components
+import { AnalyticsDashboardComponent } from './dashboard/analytics/analytics-dashboard.component';
+import { RevenueAnalyticsComponent } from './dashboard/analytics/revenue-analytics.component';
+import { BookingProfitabilityComponent } from './dashboard/analytics/booking-profitability.component';
+import { BookingProfitDetailComponent } from './dashboard/analytics/booking-profit-detail.component';
+import { ProductProfitabilityComponent } from './dashboard/analytics/product-profitability.component';
+import { ProductProfitDetailComponent } from './dashboard/analytics/product-profit-detail.component';
+import { UtilizationAnalyticsComponent } from './dashboard/analytics/utilization-analytics.component';
+import { CustomerAnalyticsComponent } from './dashboard/analytics/customer-analytics.component';
+import { CustomerAnalyticsDetailComponent } from './dashboard/analytics/customer-analytics-detail.component';
+import { QuoteAnalyticsComponent } from './dashboard/analytics/quote-analytics.component';
+import { OperationsAnalyticsComponent } from './dashboard/analytics/operations-analytics.component';
 import { PortalDamageClaimsComponent } from './pages/claims/portal-damage-claims.component';
 
 // Day 21 Rental Calendar & Advanced Availability Components
@@ -214,6 +227,17 @@ export const routes: Routes = [
   { path: 'calendar/inventory', redirectTo: 'dashboard/calendar/inventory', pathMatch: 'full' },
   { path: 'calendar/conflicts', redirectTo: 'dashboard/calendar/conflicts', pathMatch: 'full' },
 
+  // Day 24 Analytics sub-routes redirects
+  { path: 'analytics', redirectTo: 'dashboard/analytics/dashboard', pathMatch: 'full' },
+  { path: 'analytics/dashboard', redirectTo: 'dashboard/analytics/dashboard', pathMatch: 'full' },
+  { path: 'analytics/revenue', redirectTo: 'dashboard/analytics/revenue', pathMatch: 'full' },
+  { path: 'analytics/bookings', redirectTo: 'dashboard/analytics/bookings', pathMatch: 'full' },
+  { path: 'analytics/products', redirectTo: 'dashboard/analytics/products', pathMatch: 'full' },
+  { path: 'analytics/utilization', redirectTo: 'dashboard/analytics/utilization', pathMatch: 'full' },
+  { path: 'analytics/customers', redirectTo: 'dashboard/analytics/customers', pathMatch: 'full' },
+  { path: 'analytics/quotes', redirectTo: 'dashboard/analytics/quotes', pathMatch: 'full' },
+  { path: 'analytics/operations', redirectTo: 'dashboard/analytics/operations', pathMatch: 'full' },
+
   { 
     path: 'dashboard', 
     component: DashboardComponent,
@@ -305,7 +329,21 @@ export const routes: Routes = [
       { path: 'calendar/vehicles', component: VehicleCalendarComponent },
       { path: 'calendar/warehouse', component: WarehouseCalendarComponent },
       { path: 'calendar/inventory', component: InventoryCalendarComponent },
-      { path: 'calendar/conflicts', component: ConflictDashboardComponent }
+      { path: 'calendar/conflicts', component: ConflictDashboardComponent },
+
+      // Day 24 Business Intelligence & Analytics sub-routes
+      { path: 'analytics', redirectTo: 'analytics/dashboard', pathMatch: 'full' },
+      { path: 'analytics/dashboard', component: AnalyticsDashboardComponent },
+      { path: 'analytics/revenue', component: RevenueAnalyticsComponent },
+      { path: 'analytics/bookings', component: BookingProfitabilityComponent },
+      { path: 'analytics/bookings/:id', component: BookingProfitDetailComponent },
+      { path: 'analytics/products', component: ProductProfitabilityComponent },
+      { path: 'analytics/products/:id', component: ProductProfitDetailComponent },
+      { path: 'analytics/utilization', component: UtilizationAnalyticsComponent },
+      { path: 'analytics/customers', component: CustomerAnalyticsComponent },
+      { path: 'analytics/customers/:id', component: CustomerAnalyticsDetailComponent },
+      { path: 'analytics/quotes', component: QuoteAnalyticsComponent },
+      { path: 'analytics/operations', component: OperationsAnalyticsComponent }
     ]
   },
   { path: '**', redirectTo: '' }
