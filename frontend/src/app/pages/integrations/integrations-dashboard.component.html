@@ -1,0 +1,178 @@
+<div class="integrations-page">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">PLATFORM & CONNECTORS</div>
+      <h1>Integrations & External APIs</h1>
+      <p class="subtitle">Connect RentFlow AI to accounting software, CRM pipelines, e-commerce storefronts, and automated webhooks.</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/settings/integrations/webhooks" class="btn btn-secondary">
+        <span class="icon">📡</span> Webhooks
+      </a>
+      <a routerLink="/settings/api-keys" class="btn btn-secondary">
+        <span class="icon">🔑</span> API Keys
+      </a>
+      <a routerLink="/settings/integrations/events" class="btn btn-secondary">
+        <span class="icon">📜</span> Event Logs
+      </a>
+      <a routerLink="/settings/integrations/dead-letter" class="btn btn-warning" *ngIf="summary && summary.deadLetterCount > 0">
+        <span class="icon">⚠️</span> Dead-Letter ({{ summary.deadLetterCount }})
+      </a>
+    </div>
+  </header>
+
+  <!-- KPI Overview Metrics -->
+  <div class="kpi-grid" *ngIf="summary">
+    <div class="kpi-card">
+      <div class="kpi-icon icon-connected">🔌</div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ summary.connectedIntegrations }}</span>
+        <span class="kpi-label">Connected Integrations</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon icon-webhooks">📡</div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ summary.webhookEndpoints }}</span>
+        <span class="kpi-label">Webhook Endpoints</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon icon-events">⚡</div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ summary.eventsToday }}</span>
+        <span class="kpi-label">Events Dispatched Today</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon icon-success">✅</div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ summary.successRate | number:'1.1-1' }}%</span>
+        <span class="kpi-label">Delivery Success Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connected Integrations Active Table -->
+  <section class="section-container" *ngIf="connections.length > 0">
+    <div class="section-header">
+      <h2>Active Connections ({{ connections.length }})</h2>
+      <span class="section-desc">Managed third-party synchronization and background connectors</span>
+    </div>
+
+    <div class="connections-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Capabilities</th>
+            <th>Credentials</th>
+            <th>Last Sync</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let conn of connections">
+            <td>
+              <div class="provider-pill">
+                <span class="provider-badge">{{ conn.provider }}</span>
+              </div>
+            </td>
+            <td>
+              <strong>{{ conn.name }}</strong>
+            </td>
+            <td>
+              <span class="status-chip" [ngClass]="'status-' + conn.status.toLowerCase()">
+                {{ conn.status }}
+              </span>
+            </td>
+            <td>
+              <div class="capabilities-list">
+                <span class="cap-tag" *ngFor="let cap of conn.capabilities">{{ cap }}</span>
+              </div>
+            </td>
+            <td>
+              <code class="masked-code">{{ conn.maskedCredential || '••••••••' }}</code>
+            </td>
+            <td>
+              <span class="text-muted" *ngIf="conn.lastSyncAt">{{ conn.lastSyncAt | date:'medium' }}</span>
+              <span class="text-muted" *ngIf="!conn.lastSyncAt">Never</span>
+            </td>
+            <td class="action-cell">
+              <a [routerLink]="['/settings/integrations', conn.id]" class="btn btn-sm btn-outline">Details</a>
+              <button class="btn btn-sm btn-primary" (click)="syncConnection(conn.id)">Sync Now</button>
+              <button class="btn btn-sm btn-secondary" (click)="testConnection(conn.id)">Test</button>
+              <button class="btn btn-sm btn-danger-outline" (click)="disconnect(conn.id)">Disconnect</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Integration Catalog -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Integration & Connector Catalog</h2>
+      <span class="section-desc">Connect your rental workflow to accounting, CRM, storefronts, and low-code automations</span>
+    </div>
+
+    <div class="catalog-grid">
+      <div class="catalog-card" *ngFor="let item of availableCatalog">
+        <div class="card-top">
+          <div class="item-icon">{{ item.icon }}</div>
+          <div class="item-meta">
+            <span class="category-tag">{{ item.category }}</span>
+            <span class="connected-badge" *ngIf="isConnected(item.provider)">CONNECTED</span>
+          </div>
+        </div>
+        <h3>{{ item.name }}</h3>
+        <p class="description">{{ item.description }}</p>
+
+        <div class="card-footer">
+          <button class="btn btn-outline" *ngIf="isConnected(item.provider)" [routerLink]="['/settings/integrations', getConnection(item.provider)?.id]">
+            Manage Connection
+          </button>
+          <button class="btn btn-primary" *ngIf="!isConnected(item.provider)" (click)="openConnectModal(item.provider, item.name)">
+            Connect
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Connect Modal -->
+  <div class="modal-backdrop" *ngIf="showConnectModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Connect {{ connectionName }}</h3>
+        <button class="close-btn" (click)="closeConnectModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Connection Name</label>
+          <input type="text" [(ngModel)]="connectionName" class="form-control" placeholder="e.g. QuickBooks Production" />
+        </div>
+        <div class="form-group">
+          <label>API Key / Client Secret / OAuth Token</label>
+          <input type="password" [(ngModel)]="apiSecret" class="form-control" placeholder="Enter API secret or token" />
+          <small class="help-text">Credentials are encrypted at rest and never exposed to the client or log files.</small>
+        </div>
+        <div class="form-group">
+          <label>Configuration JSON (Optional)</label>
+          <textarea [(ngModel)]="configText" class="form-control code-editor" rows="4"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeConnectModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitConnect()">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>

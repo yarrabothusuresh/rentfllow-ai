@@ -137,6 +137,14 @@ import { StockTransfersComponent } from './pages/inventory/stock-transfers.compo
 import { ScanScreenComponent } from './pages/inventory/scan-screen.component';
 import { CycleCountComponent } from './pages/inventory/cycle-count.component';
 import { InventoryHistoryComponent } from './pages/inventory/inventory-history.component';
+// Day 25 Integrations, Webhooks, External API Platform & Connector Foundation
+import { IntegrationsDashboardComponent } from './pages/integrations/integrations-dashboard.component';
+import { IntegrationDetailComponent } from './pages/integrations/integration-detail.component';
+import { WebhooksListComponent } from './pages/integrations/webhooks-list.component';
+import { WebhookDetailComponent } from './pages/integrations/webhook-detail.component';
+import { IntegrationEventsComponent } from './pages/integrations/integration-events.component';
+import { DeadLetterComponent } from './pages/integrations/dead-letter.component';
+import { ApiKeysComponent } from './pages/integrations/api-keys.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -343,8 +351,34 @@ export const routes: Routes = [
       { path: 'analytics/customers', component: CustomerAnalyticsComponent },
       { path: 'analytics/customers/:id', component: CustomerAnalyticsDetailComponent },
       { path: 'analytics/quotes', component: QuoteAnalyticsComponent },
-      { path: 'analytics/operations', component: OperationsAnalyticsComponent }
+      { path: 'analytics/operations', component: OperationsAnalyticsComponent },
+
+      // Day 25 Integrations & Developer Platform sub-routes
+      { path: 'integrations', component: IntegrationsDashboardComponent },
+      { path: 'integrations/dashboard', component: IntegrationsDashboardComponent },
+      { path: 'integrations/webhooks', component: WebhooksListComponent },
+      { path: 'integrations/webhooks/:id', component: WebhookDetailComponent },
+      { path: 'integrations/events', component: IntegrationEventsComponent },
+      { path: 'integrations/dead-letter', component: DeadLetterComponent },
+      { path: 'integrations/:id', component: IntegrationDetailComponent },
+      { path: 'api-keys', component: ApiKeysComponent },
+      { path: 'settings/integrations', component: IntegrationsDashboardComponent },
+      { path: 'settings/integrations/webhooks', component: WebhooksListComponent },
+      { path: 'settings/integrations/webhooks/:id', component: WebhookDetailComponent },
+      { path: 'settings/integrations/events', component: IntegrationEventsComponent },
+      { path: 'settings/integrations/dead-letter', component: DeadLetterComponent },
+      { path: 'settings/integrations/:id', component: IntegrationDetailComponent },
+      { path: 'settings/api-keys', component: ApiKeysComponent }
     ]
   },
+  // Top-level direct redirects for settings/integrations
+  { path: 'settings/integrations', redirectTo: 'dashboard/integrations', pathMatch: 'full' },
+  { path: 'settings/integrations/webhooks', redirectTo: 'dashboard/integrations/webhooks', pathMatch: 'full' },
+  { path: 'settings/integrations/webhooks/:id', redirectTo: 'dashboard/integrations/webhooks/:id', pathMatch: 'full' },
+  { path: 'settings/integrations/events', redirectTo: 'dashboard/integrations/events', pathMatch: 'full' },
+  { path: 'settings/integrations/dead-letter', redirectTo: 'dashboard/integrations/dead-letter', pathMatch: 'full' },
+  { path: 'settings/integrations/:id', redirectTo: 'dashboard/integrations/:id', pathMatch: 'full' },
+  { path: 'settings/api-keys', redirectTo: 'dashboard/api-keys', pathMatch: 'full' },
+  { path: 'integrations', redirectTo: 'dashboard/integrations', pathMatch: 'full' },
   { path: '**', redirectTo: '' }
 ];

@@ -1,0 +1,122 @@
+<div class="integration-detail-page" *ngIf="connection">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations">← Back to Integrations</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="provider-pill">
+        <span class="badge">{{ connection.provider }}</span>
+      </div>
+      <h1>{{ connection.name }}</h1>
+      <p class="subtitle">Tenant synchronization, external ID mappings, and connector health</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="testConnection()">Test Connection</button>
+      <button class="btn btn-primary" (click)="syncNow()">Sync Now</button>
+      <button class="btn btn-danger-outline" (click)="disconnect()">Disconnect</button>
+    </div>
+  </header>
+
+  <!-- Health & Config Grid -->
+  <div class="grid-2col">
+    <div class="card">
+      <h3>Connection Status</h3>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="label">Status</span>
+          <span class="status-chip" [ngClass]="'status-' + connection.status.toLowerCase()">{{ connection.status }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Last Connected</span>
+          <span class="val">{{ connection.lastConnectedAt ? (connection.lastConnectedAt | date:'medium') : 'Never' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Last Sync</span>
+          <span class="val">{{ connection.lastSyncAt ? (connection.lastSyncAt | date:'medium') : 'Never' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Stored Credentials</span>
+          <code>{{ connection.maskedCredential || '••••••••' }}</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Connector Capabilities</h3>
+      <p class="section-desc">Supported bi-directional entity pipelines for this provider</p>
+      <div class="caps-grid">
+        <div class="cap-box" *ngFor="let cap of connection.capabilities">
+          <span class="check-icon">✓</span>
+          <span class="cap-name">{{ cap }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Synced Entities Mapping -->
+  <section class="section-container" *ngIf="mappings.length > 0">
+    <div class="section-header">
+      <h2>External Entity Mappings ({{ mappings.length }})</h2>
+      <span class="section-desc">Authoritative links between RentFlow IDs and external system references</span>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Entity Type</th>
+          <th>Internal RentFlow ID</th>
+          <th>External System ID</th>
+          <th>Sync Status</th>
+          <th>Last Synced</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of mappings">
+          <td><span class="entity-badge">{{ m.entityType }}</span></td>
+          <td><code>{{ m.internalId }}</code></td>
+          <td><strong class="ext-id">{{ m.externalId }}</strong></td>
+          <td><span class="status-chip status-connected">{{ m.syncStatus }}</span></td>
+          <td>{{ m.lastSyncedAt | date:'medium' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Historical Sync Jobs -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Sync History ({{ syncJobs.length }})</h2>
+      <span class="section-desc">Audit trail of automated background and manual synchronization runs</span>
+    </div>
+
+    <div class="empty-state" *ngIf="syncJobs.length === 0">
+      <p>No synchronization jobs recorded yet.</p>
+    </div>
+
+    <table class="data-table" *ngIf="syncJobs.length > 0">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Completed</th>
+          <th>Type</th>
+          <th>Processed</th>
+          <th>Failed</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of syncJobs">
+          <td>{{ job.startedAt | date:'medium' }}</td>
+          <td>{{ job.completedAt ? (job.completedAt | date:'medium') : 'Running...' }}</td>
+          <td>{{ job.syncType }}</td>
+          <td><strong>{{ job.recordsProcessed }}</strong></td>
+          <td><span [class.text-danger]="job.recordsFailed > 0">{{ job.recordsFailed }}</span></td>
+          <td><span class="status-chip" [ngClass]="'status-' + job.status.toLowerCase()">{{ job.status }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>

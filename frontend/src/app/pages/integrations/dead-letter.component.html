@@ -1,0 +1,91 @@
+<div class="dead-letter-page">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations">← Back to Integrations</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag tag-danger">FAULT TOLERANCE & DLQ</div>
+      <h1>Dead-Letter Queue</h1>
+      <p class="subtitle">Failed deliveries that exceeded maximum retry thresholds or suffered unrecoverable third-party errors</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadData()">↻ Refresh Queue</button>
+    </div>
+  </header>
+
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Dead-Letter Items ({{ deadDeliveries.length }})</h2>
+      <span class="section-desc">Audit failures and manually trigger retries after fixing target endpoint configurations</span>
+    </div>
+
+    <div class="empty-state" *ngIf="deadDeliveries.length === 0">
+      <div class="empty-icon">🎉</div>
+      <h3>Dead-Letter Queue is Empty</h3>
+      <p>All outbound webhooks and connector dispatches are healthy or actively retrying within normal parameters.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="deadDeliveries.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Event Type</th>
+            <th>Target Webhook</th>
+            <th>Attempts</th>
+            <th>Last Error / Response</th>
+            <th>Failed At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of deadDeliveries">
+            <td><code>{{ d.integrationEventId }}</code></td>
+            <td><span class="event-pill">{{ d.eventType }}</span></td>
+            <td>
+              <strong>{{ d.webhookName || 'Webhook' }}</strong>
+              <div class="url-sub">{{ d.endpointUrl }}</div>
+            </td>
+            <td><span class="attempts-badge">{{ d.attemptNumber }} / 5</span></td>
+            <td>
+              <div class="error-summary-box">{{ d.responseSummary || 'HTTP timeout / connection dropped' }}</div>
+            </td>
+            <td>{{ d.completedAt ? (d.completedAt | date:'medium') : (d.createdAt | date:'medium') }}</td>
+            <td class="action-cell">
+              <button class="btn btn-sm btn-primary" (click)="retry(d.id)">Retry</button>
+              <button class="btn btn-sm btn-outline" (click)="viewDetail(d)">View</button>
+              <button class="btn btn-sm btn-danger-outline" (click)="ignore(d.id)">Dismiss</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Payload Modal -->
+  <div class="modal-backdrop" *ngIf="selectedDelivery">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>Dead-Letter Detail: {{ selectedDelivery.eventType }}</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="code-section">
+          <label>Failure Response</label>
+          <pre class="code-block error-code">{{ selectedDelivery.responseSummary }}</pre>
+        </div>
+        <div class="code-section">
+          <label>Original Request Payload</label>
+          <pre class="code-block">{{ selectedDelivery.requestPayload }}</pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+        <button class="btn btn-primary" (click)="retry(selectedDelivery.id); closeModal()">Retry Now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>

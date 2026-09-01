@@ -7,12 +7,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    private final com.rentflow.integration.security.ExternalApiKeyInterceptor externalApiKeyInterceptor;
+
+    public WebConfig(com.rentflow.integration.security.ExternalApiKeyInterceptor externalApiKeyInterceptor) {
+        this.externalApiKeyInterceptor = externalApiKeyInterceptor;
+    }
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+        registry.addMapping("/**")
                 .allowedOrigins("http://localhost:4200")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+    }
+
+    @Override
+    public void addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry registry) {
+        registry.addInterceptor(externalApiKeyInterceptor)
+                .addPathPatterns("/api/v1/external/**");
     }
 }

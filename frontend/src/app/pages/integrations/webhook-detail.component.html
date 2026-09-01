@@ -1,0 +1,129 @@
+<div class="webhook-detail-page" *ngIf="endpoint">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations/webhooks">← Back to Webhooks</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">WEBHOOK LISTENER</div>
+      <h1>{{ endpoint.name }}</h1>
+      <code class="url-badge">{{ endpoint.endpointUrl }}</code>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="testWebhook()">Test Webhook</button>
+    </div>
+  </header>
+
+  <!-- Overview Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Delivery Health</span>
+      <span class="stat-val status-connected">{{ endpoint.status }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Success Rate</span>
+      <span class="stat-val">{{ endpoint.successRate | number:'1.0-1' }}%</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total Deliveries</span>
+      <span class="stat-val">{{ endpoint.totalDeliveries }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Signing Secret</span>
+      <code class="secret-val">{{ endpoint.maskedSecret }}</code>
+    </div>
+  </div>
+
+  <!-- Deliveries Table -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Delivery History & Audit Log ({{ deliveries.length }})</h2>
+      <span class="section-desc">Historical delivery attempts, HTTP response status codes, and latency</span>
+    </div>
+
+    <div class="empty-state" *ngIf="deliveries.length === 0">
+      <p>No deliveries recorded for this endpoint yet. Click "Test Webhook" to send a test event.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="deliveries.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Event Type</th>
+            <th>Attempt</th>
+            <th>Status</th>
+            <th>HTTP Code</th>
+            <th>Duration</th>
+            <th>Delivered At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of deliveries">
+            <td><code>{{ d.integrationEventId }}</code></td>
+            <td><span class="event-pill">{{ d.eventType }}</span></td>
+            <td>Attempt #{{ d.attemptNumber }}</td>
+            <td>
+              <span class="status-chip" [ngClass]="'status-' + d.status.toLowerCase()">
+                {{ d.status }}
+              </span>
+            </td>
+            <td>
+              <span class="http-badge" [class.http-2xx]="d.httpStatus && d.httpStatus >= 200 && d.httpStatus < 300"
+                                      [class.http-error]="!d.httpStatus || d.httpStatus >= 400">
+                {{ d.httpStatus || 'N/A' }}
+              </span>
+            </td>
+            <td>{{ d.durationMs ? d.durationMs + 'ms' : '—' }}</td>
+            <td>{{ d.createdAt | date:'medium' }}</td>
+            <td class="action-cell">
+              <button class="btn btn-sm btn-outline" (click)="viewPayload(d)">Payload</button>
+              <button class="btn btn-sm btn-secondary" (click)="retryDelivery(d.id)" *ngIf="d.status === 'FAILED' || d.status === 'DEAD_LETTER' || d.status === 'RETRYING'">
+                Retry
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Payload Viewer Modal -->
+  <div class="modal-backdrop" *ngIf="selectedDelivery">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>Delivery Details: {{ selectedDelivery.eventType }}</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-row-grid">
+          <div><strong>Status:</strong> {{ selectedDelivery.status }}</div>
+          <div><strong>HTTP Status:</strong> {{ selectedDelivery.httpStatus || 'N/A' }}</div>
+          <div><strong>Duration:</strong> {{ selectedDelivery.durationMs }}ms</div>
+          <div><strong>Attempt:</strong> #{{ selectedDelivery.attemptNumber }}</div>
+        </div>
+
+        <div class="code-section">
+          <label>Request Headers (HMAC & Traceability)</label>
+          <pre class="code-block">{{ selectedDelivery.requestHeaders }}</pre>
+        </div>
+
+        <div class="code-section">
+          <label>Request Payload (JSON Envelope)</label>
+          <pre class="code-block">{{ selectedDelivery.requestPayload }}</pre>
+        </div>
+
+        <div class="code-section" *ngIf="selectedDelivery.responseSummary">
+          <label>Response Summary</label>
+          <pre class="code-block response-block">{{ selectedDelivery.responseSummary }}</pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>

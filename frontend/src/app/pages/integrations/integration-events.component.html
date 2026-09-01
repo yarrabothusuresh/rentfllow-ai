@@ -1,0 +1,74 @@
+<div class="events-page">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations">← Back to Integrations</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">EVENT AUDIT LOG</div>
+      <h1>Domain Integration Events</h1>
+      <p class="subtitle">Complete audit stream of all business events captured and queued for webhook and connector delivery</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadEvents()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Recent Events ({{ events.length }})</h2>
+      <span class="section-desc">Events dispatched using standard 1.0 envelope format</span>
+    </div>
+
+    <div class="empty-state" *ngIf="events.length === 0">
+      <p>No integration events recorded yet.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="events.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Event Type</th>
+            <th>Aggregate Type</th>
+            <th>Aggregate ID</th>
+            <th>Status</th>
+            <th>Occurred At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ev of events">
+            <td><code>{{ ev.eventId }}</code></td>
+            <td><span class="event-pill">{{ ev.eventType }}</span></td>
+            <td><strong>{{ ev.aggregateType || '—' }}</strong></td>
+            <td><code>{{ ev.aggregateId || '—' }}</code></td>
+            <td>
+              <span class="status-chip" [ngClass]="'status-' + ev.status.toLowerCase()">{{ ev.status }}</span>
+            </td>
+            <td>{{ ev.occurredAt | date:'medium' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline" (click)="viewPayload(ev)">View Envelope</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Payload Modal -->
+  <div class="modal-backdrop" *ngIf="selectedEvent">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>Event Envelope: {{ selectedEvent.eventType }}</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <pre class="code-block">{{ selectedEvent.payload }}</pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

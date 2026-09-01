@@ -1,0 +1,144 @@
+<div class="api-keys-page">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations">← Back to Integrations</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">EXTERNAL DEVELOPER PLATFORM</div>
+      <h1>External API Keys</h1>
+      <p class="subtitle">Secure tokens for programmatic access to customers, catalog, availability checks, and bookings</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openCreateModal()">+ Generate API Key</button>
+    </div>
+  </header>
+
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Active Keys ({{ apiKeys.length }})</h2>
+      <span class="section-desc">Scoped credentials hashed with SHA-256 and verified per request</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && apiKeys.length === 0">
+      <p>No API keys generated yet. Click "+ Generate API Key" to provision developer access.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="apiKeys.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Prefix & Token</th>
+            <th>Status</th>
+            <th>Scopes</th>
+            <th>Rate Limit</th>
+            <th>Last Used</th>
+            <th>Expires</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let k of apiKeys">
+            <td>
+              <strong>{{ k.name }}</strong>
+            </td>
+            <td>
+              <code class="prefix-code">{{ k.keyPrefix }}••••••••</code>
+            </td>
+            <td>
+              <span class="status-chip" [ngClass]="'status-' + k.status.toLowerCase()">
+                {{ k.status }}
+              </span>
+            </td>
+            <td>
+              <div class="scopes-wrap">
+                <span class="scope-pill" *ngFor="let s of k.scopes">{{ s }}</span>
+              </div>
+            </td>
+            <td>{{ k.rateLimitPerMinute }} req/min</td>
+            <td>
+              <span class="text-muted" *ngIf="k.lastUsedAt">{{ k.lastUsedAt | date:'medium' }}</span>
+              <span class="text-muted" *ngIf="!k.lastUsedAt">Never</span>
+            </td>
+            <td>
+              <span *ngIf="k.expiresAt">{{ k.expiresAt | date:'mediumDate' }}</span>
+              <span *ngIf="!k.expiresAt">Never</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-danger-outline" (click)="revokeKey(k.id)" *ngIf="k.status === 'ACTIVE'">
+                Revoke
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Create API Key Modal -->
+  <div class="modal-backdrop" *ngIf="showCreateModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Generate External API Key</h3>
+        <button class="close-btn" (click)="closeCreateModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Key Name / Description</label>
+          <input type="text" [(ngModel)]="newKeyName" class="form-control" placeholder="e.g. Next.js Public Catalog Integration" />
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Rate Limit (Req / Min)</label>
+            <input type="number" [(ngModel)]="newRateLimit" class="form-control" />
+          </div>
+          <div class="form-group flex-1">
+            <label>Valid For (Days)</label>
+            <input type="number" [(ngModel)]="expiresInDays" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Permission Scopes</label>
+          <div class="scopes-checkbox-grid">
+            <label class="checkbox-label" *ngFor="let sc of availableScopes">
+              <input type="checkbox" [(ngModel)]="selectedScopes[sc.code]" />
+              <div class="scope-text-wrap">
+                <span class="scope-name"><code>{{ sc.code }}</code> — {{ sc.name }}</span>
+                <span class="scope-desc">{{ sc.desc }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitCreate()">Generate Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- One-Time API Key Reveal Modal -->
+  <div class="modal-backdrop" *ngIf="showKeyModal">
+    <div class="modal-card modal-secret">
+      <div class="modal-header">
+        <h3>🔑 External API Key Created</h3>
+      </div>
+      <div class="modal-body">
+        <div class="alert-box">
+          <strong>Important:</strong> Copy your API key now. It is hashed with SHA-256 before storage and will <strong>never</strong> be displayed again.
+        </div>
+        <div class="secret-box">
+          <code>{{ newGeneratedKey }}</code>
+        </div>
+        <p class="help-text">Authenticate requests by passing header <code>X-API-Key: {{ newGeneratedKey }}</code> or <code>Authorization: Bearer {{ newGeneratedKey }}</code>.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="closeKeyModal()">I Have Safely Saved My Key</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>

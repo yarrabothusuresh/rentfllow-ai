@@ -1,0 +1,137 @@
+<div class="webhooks-page">
+  <div class="breadcrumb">
+    <a routerLink="/settings/integrations">← Back to Integrations</a>
+  </div>
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">OUTBOUND EVENTS</div>
+      <h1>Outbound Webhooks</h1>
+      <p class="subtitle">Deliver HMAC-SHA256 signed event payloads directly to external services and internal endpoints</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openCreateModal()">+ Add Webhook Endpoint</button>
+    </div>
+  </header>
+
+  <!-- Webhooks Endpoints Table -->
+  <section class="section-container">
+    <div class="section-header">
+      <h2>Registered Endpoints ({{ webhooks.length }})</h2>
+      <span class="section-desc">Reliable HTTP dispatch with automatic retries and dead-letter routing</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && webhooks.length === 0">
+      <p>No webhook endpoints created yet. Click "+ Add Webhook Endpoint" to configure your first listener.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="webhooks.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Endpoint URL</th>
+            <th>Subscribed Events</th>
+            <th>Signing Secret</th>
+            <th>Success Rate</th>
+            <th>Deliveries</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let wh of webhooks">
+            <td>
+              <strong>{{ wh.name }}</strong>
+              <div class="desc-text" *ngIf="wh.description">{{ wh.description }}</div>
+            </td>
+            <td>
+              <code class="url-code">{{ wh.endpointUrl }}</code>
+            </td>
+            <td>
+              <div class="events-wrap">
+                <span class="event-pill" *ngFor="let ev of wh.subscribedEvents">{{ ev }}</span>
+              </div>
+            </td>
+            <td>
+              <code class="secret-code">{{ wh.maskedSecret }}</code>
+            </td>
+            <td>
+              <span class="rate-badge" [class.rate-good]="wh.successRate >= 95" [class.rate-warn]="wh.successRate < 95">
+                {{ wh.successRate | number:'1.0-1' }}%
+              </span>
+            </td>
+            <td>
+              <span class="text-muted">{{ wh.totalDeliveries }} total</span>
+            </td>
+            <td class="action-cell">
+              <a [routerLink]="['/settings/integrations/webhooks', wh.id]" class="btn btn-sm btn-outline">Deliveries</a>
+              <button class="btn btn-sm btn-secondary" (click)="testWebhook(wh.id)">Test</button>
+              <button class="btn btn-sm btn-secondary" (click)="rotateSecret(wh.id)">Rotate Secret</button>
+              <button class="btn btn-sm btn-danger-outline" (click)="deleteWebhook(wh.id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Create Modal -->
+  <div class="modal-backdrop" *ngIf="showCreateModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Webhook Endpoint</h3>
+        <button class="close-btn" (click)="closeCreateModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Endpoint Name</label>
+          <input type="text" [(ngModel)]="newWebhookName" class="form-control" placeholder="e.g. Production n8n Order Pipeline" />
+        </div>
+        <div class="form-group">
+          <label>Destination HTTPS URL</label>
+          <input type="url" [(ngModel)]="newWebhookUrl" class="form-control" placeholder="https://api.yourdomain.com/rentflow-webhook" />
+          <small class="help-text">RentFlow signs payloads with HMAC-SHA256 and includes header <code>X-RentFlow-Signature</code>.</small>
+        </div>
+        <div class="form-group">
+          <label>Description (Optional)</label>
+          <input type="text" [(ngModel)]="newWebhookDesc" class="form-control" placeholder="Purpose of this webhook integration" />
+        </div>
+        <div class="form-group">
+          <label>Subscribed Events</label>
+          <div class="events-checkbox-grid">
+            <label class="checkbox-label" *ngFor="let ev of availableEventTypes">
+              <input type="checkbox" [(ngModel)]="selectedEvents[ev.code]" />
+              <span class="chk-text"><strong>{{ ev.code }}</strong> - {{ ev.label }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitCreate()">Create Endpoint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- One-Time Secret Reveal Modal -->
+  <div class="modal-backdrop" *ngIf="showSecretModal">
+    <div class="modal-card modal-secret">
+      <div class="modal-header">
+        <h3>🔒 Webhook Signing Secret</h3>
+      </div>
+      <div class="modal-body">
+        <div class="alert-box">
+          <strong>Important:</strong> Copy this secret now. For security, RentFlow AI encrypts secrets at rest and will <strong>never</strong> display it again in full.
+        </div>
+        <div class="secret-box">
+          <code>{{ newSigningSecret }}</code>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="closeSecretModal()">I Have Saved My Secret</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-popup" *ngIf="toastMessage">{{ toastMessage }}</div>
+</div>
