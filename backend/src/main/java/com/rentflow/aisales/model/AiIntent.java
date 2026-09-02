@@ -1,0 +1,14 @@
+package com.rentflow.aisales.model;
+
+public enum AiIntent {
+    PRODUCT_SEARCH,
+    AVAILABILITY_CHECK,
+    RENTAL_RECOMMENDATION,
+    PRICE_ESTIMATE,
+    QUOTE_REQUEST,
+    QUOTE_STATUS,
+    BOOKING_QUESTION,
+    GENERAL_RENTAL_QUESTION,
+    HUMAN_ASSISTANCE,
+    UNKNOWN
+}

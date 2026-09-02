@@ -46,8 +46,13 @@ public class QuoteService {
     }
 
     public synchronized String generateQuoteNumber(String tenantId) {
-        long count = quoteRepository.countByTenantId(tenantId) + 1;
-        return String.format("QUO-%06d", count);
+        long count = quoteRepository.count() + 1;
+        String candidate = String.format("QUO-%06d", count);
+        while (quoteRepository.findByQuoteNumber(candidate).isPresent()) {
+            count++;
+            candidate = String.format("QUO-%06d", count);
+        }
+        return candidate;
     }
 
     @Transactional

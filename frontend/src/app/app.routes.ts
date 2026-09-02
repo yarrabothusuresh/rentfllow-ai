@@ -24,6 +24,14 @@ import { QuotePreviewComponent } from './pages/quotes/quote-preview.component';
 import { BookingsListComponent } from './pages/bookings/bookings-list.component';
 import { BookingDetailComponent } from './pages/bookings/booking-detail.component';
 
+import { AiSalesDashboardComponent } from './pages/ai-sales/ai-sales-dashboard.component';
+import { AiConversationsListComponent } from './pages/ai-sales/ai-conversations-list.component';
+import { AiConversationDetailComponent } from './pages/ai-sales/ai-conversation-detail.component';
+import { AiQuoteReviewComponent } from './pages/ai-sales/ai-quote-review.component';
+import { AiEscalationsListComponent } from './pages/ai-sales/ai-escalations-list.component';
+import { AiSalesSettingsComponent } from './pages/ai-sales/ai-sales-settings.component';
+import { PortalAssistantComponent } from './portal/portal-assistant.component';
+
 import { InvoicesListComponent } from './pages/invoices/invoices-list.component';
 import { InvoiceDetailComponent } from './pages/invoices/invoice-detail.component';
 
@@ -179,7 +187,8 @@ export const routes: Routes = [
       { path: 'addresses', component: PortalAddressesComponent },
       { path: 'profile', component: PortalProfileComponent },
       { path: 'requests', component: PortalRequestsComponent },
-      { path: 'notifications', component: NotificationsListComponent }
+      { path: 'notifications', component: NotificationsListComponent },
+      { path: 'assistant', component: PortalAssistantComponent }
     ]
   },
   { path: 'ideal-customer', component: IdealCustomerComponent },
@@ -368,9 +377,26 @@ export const routes: Routes = [
       { path: 'settings/integrations/events', component: IntegrationEventsComponent },
       { path: 'settings/integrations/dead-letter', component: DeadLetterComponent },
       { path: 'settings/integrations/:id', component: IntegrationDetailComponent },
-      { path: 'settings/api-keys', component: ApiKeysComponent }
+      { path: 'settings/api-keys', component: ApiKeysComponent },
+
+      // Day 26 AI Sales Agent sub-routes
+      { path: 'ai-sales', component: AiSalesDashboardComponent },
+      { path: 'ai-sales/dashboard', component: AiSalesDashboardComponent },
+      { path: 'ai-sales/conversations', component: AiConversationsListComponent },
+      { path: 'ai-sales/conversations/:id', component: AiConversationDetailComponent },
+      { path: 'ai-sales/quotes/:id/review', component: AiQuoteReviewComponent },
+      { path: 'ai-sales/escalations', component: AiEscalationsListComponent },
+      { path: 'ai-sales/settings', component: AiSalesSettingsComponent }
     ]
   },
+  // Top-level direct redirects for AI Sales
+  { path: 'ai-sales', redirectTo: 'dashboard/ai-sales', pathMatch: 'full' },
+  { path: 'ai-sales/dashboard', redirectTo: 'dashboard/ai-sales', pathMatch: 'full' },
+  { path: 'ai-sales/conversations', redirectTo: 'dashboard/ai-sales/conversations', pathMatch: 'full' },
+  { path: 'ai-sales/conversations/:id', redirectTo: 'dashboard/ai-sales/conversations/:id', pathMatch: 'full' },
+  { path: 'ai-sales/quotes/:id/review', redirectTo: 'dashboard/ai-sales/quotes/:id/review', pathMatch: 'full' },
+  { path: 'ai-sales/escalations', redirectTo: 'dashboard/ai-sales/escalations', pathMatch: 'full' },
+  { path: 'ai-sales/settings', redirectTo: 'dashboard/ai-sales/settings', pathMatch: 'full' },
   // Top-level direct redirects for settings/integrations
   { path: 'settings/integrations', redirectTo: 'dashboard/integrations', pathMatch: 'full' },
   { path: 'settings/integrations/webhooks', redirectTo: 'dashboard/integrations/webhooks', pathMatch: 'full' },
