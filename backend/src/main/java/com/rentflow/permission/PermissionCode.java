@@ -48,5 +48,10 @@ public enum PermissionCode {
     AI_SALES_MANAGE,
     AI_SALES_USE,
     AI_QUOTE_APPROVE,
-    AI_SETTINGS_MANAGE
+    AI_SETTINGS_MANAGE,
+    CRM_VIEW,
+    CRM_MANAGE,
+    CRM_ASSIGN,
+    CRM_QUALIFY,
+    CRM_QUOTE
 }

@@ -10,6 +10,11 @@
       <a routerLink="/dashboard/workflow" routerLinkActive="active" class="nav-item">Rental Workflow</a>
       <a routerLink="/dashboard/ai-copilot" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('AI_COPILOT_USE')">AI Copilot</a>
       
+      <div class="nav-section">CRM & Sales Pipeline</div>
+      <a routerLink="/dashboard/crm/dashboard" routerLinkActive="active" class="nav-item">CRM Overview</a>
+      <a routerLink="/dashboard/crm/leads" routerLinkActive="active" class="nav-item">↳ Leads & Inquiries</a>
+      <a routerLink="/dashboard/crm/pipeline" routerLinkActive="active" class="nav-item">↳ Visual Pipeline</a>
+
       <div class="nav-section">AI Sales Agent</div>
       <a routerLink="/dashboard/ai-sales" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">AI Sales Console</a>
       <a routerLink="/dashboard/ai-sales/conversations" routerLinkActive="active" class="nav-item">↳ Inquiries & Chats</a>

@@ -44,7 +44,7 @@ export class LeadsListComponent implements OnInit {
 
   loadLeads(): void {
     this.loading = true;
-    this.crmService.getLeads().subscribe({
+    this.crmService.getLegacyLeads().subscribe({
       next: (data) => {
         this.leads = data;
         this.calculateStats();

@@ -108,7 +108,7 @@ export class QuoteBuilderComponent implements OnInit {
     });
 
     this.crmService.getEvents().subscribe({
-      next: (data: EventItem[]) => {
+      next: (data: any) => {
         this.events = data;
         if (data.length > 0 && !this.quote.eventId) {
           this.quote.eventId = data[0].id || '';

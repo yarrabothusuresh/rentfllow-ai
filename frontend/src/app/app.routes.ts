@@ -154,6 +154,13 @@ import { IntegrationEventsComponent } from './pages/integrations/integration-eve
 import { DeadLetterComponent } from './pages/integrations/dead-letter.component';
 import { ApiKeysComponent } from './pages/integrations/api-keys.component';
 
+// Day 26 CRM / Leads / Inquiry Management Components
+import { CrmDashboardComponent } from './pages/crm/crm-dashboard.component';
+import { CrmLeadsListComponent } from './pages/crm/crm-leads-list.component';
+import { CrmLeadDetailComponent } from './pages/crm/crm-lead-detail.component';
+import { CrmPipelineComponent } from './pages/crm/crm-pipeline.component';
+import { PublicContactComponent } from './pages/crm/public-contact.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'rentals', component: PublicCatalogComponent },
@@ -164,6 +171,7 @@ export const routes: Routes = [
   { path: 'checkout/success', component: CheckoutSuccessComponent },
   { path: 'quote-request/success', component: QuoteRequestSuccessComponent },
   { path: 'store/:tenantSlug', component: PublicCatalogComponent },
+  { path: 'store/:tenantSlug/contact', component: PublicContactComponent },
   { path: 'customer-requests', component: CustomerRequestsDashboardComponent },
 
   { path: 'portal/login', component: PortalLoginComponent },
@@ -379,6 +387,14 @@ export const routes: Routes = [
       { path: 'settings/integrations/:id', component: IntegrationDetailComponent },
       { path: 'settings/api-keys', component: ApiKeysComponent },
 
+      // Day 26 CRM / Leads / Inquiry Management sub-routes
+      { path: 'crm', component: CrmDashboardComponent },
+      { path: 'crm/dashboard', component: CrmDashboardComponent },
+      { path: 'crm/leads', component: CrmLeadsListComponent },
+      { path: 'crm/leads/new', component: CrmLeadsListComponent },
+      { path: 'crm/leads/:id', component: CrmLeadDetailComponent },
+      { path: 'crm/pipeline', component: CrmPipelineComponent },
+
       // Day 26 AI Sales Agent sub-routes
       { path: 'ai-sales', component: AiSalesDashboardComponent },
       { path: 'ai-sales/dashboard', component: AiSalesDashboardComponent },
@@ -389,6 +405,13 @@ export const routes: Routes = [
       { path: 'ai-sales/settings', component: AiSalesSettingsComponent }
     ]
   },
+  // Top-level direct redirects for CRM
+  { path: 'crm', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },
+  { path: 'crm/dashboard', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },
+  { path: 'crm/leads', redirectTo: 'dashboard/crm/leads', pathMatch: 'full' },
+  { path: 'crm/leads/new', redirectTo: 'dashboard/crm/leads', pathMatch: 'full' },
+  { path: 'crm/leads/:id', redirectTo: 'dashboard/crm/leads/:id', pathMatch: 'full' },
+  { path: 'crm/pipeline', redirectTo: 'dashboard/crm/pipeline', pathMatch: 'full' },
   // Top-level direct redirects for AI Sales
   { path: 'ai-sales', redirectTo: 'dashboard/ai-sales', pathMatch: 'full' },
   { path: 'ai-sales/dashboard', redirectTo: 'dashboard/ai-sales', pathMatch: 'full' },
