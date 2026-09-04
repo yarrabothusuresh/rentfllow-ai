@@ -25,11 +25,23 @@ public class AiSalesConversation {
 
     private UUID customerId;
     private UUID leadId;
+    private UUID rentalRequestId;
     private UUID quoteId;
+    private String storefrontSessionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AiConversationType conversationType = AiConversationType.SALES_AGENT;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AiSalesChannel channel = AiSalesChannel.INTERNAL;
+
+    private String locale = "en-US";
+    private String provider = "mock";
+    private String model = "mock-sales-v1";
+    private String promptVersion = "v1.0";
+    private LocalDateTime completedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -118,6 +130,30 @@ public class AiSalesConversation {
 
     public LocalDateTime getClosedAt() { return closedAt; }
     public void setClosedAt(LocalDateTime closedAt) { this.closedAt = closedAt; }
+
+    public UUID getRentalRequestId() { return rentalRequestId; }
+    public void setRentalRequestId(UUID rentalRequestId) { this.rentalRequestId = rentalRequestId; }
+
+    public String getStorefrontSessionId() { return storefrontSessionId; }
+    public void setStorefrontSessionId(String storefrontSessionId) { this.storefrontSessionId = storefrontSessionId; }
+
+    public AiConversationType getConversationType() { return conversationType; }
+    public void setConversationType(AiConversationType conversationType) { this.conversationType = conversationType; }
+
+    public String getLocale() { return locale; }
+    public void setLocale(String locale) { this.locale = locale; }
+
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
+
+    public String getModel() { return model; }
+    public void setModel(String model) { this.model = model; }
+
+    public String getPromptVersion() { return promptVersion; }
+    public void setPromptVersion(String promptVersion) { this.promptVersion = promptVersion; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

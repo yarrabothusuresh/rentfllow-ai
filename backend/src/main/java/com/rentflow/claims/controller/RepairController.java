@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/repairs")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class RepairController {
 
     private final RepairService repairService;

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/warehouse")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class WarehouseFulfillmentController {
 
     private final WarehouseFulfillmentService fulfillmentService;

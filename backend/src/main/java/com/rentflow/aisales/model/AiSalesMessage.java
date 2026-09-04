@@ -30,6 +30,17 @@ public class AiSalesMessage {
     @Column(nullable = false)
     private AiMessageType messageType = AiMessageType.TEXT;
 
+    @Enumerated(EnumType.STRING)
+    private AiRole role;
+
+    @Column(nullable = false)
+    private boolean customerVisible = true;
+
+    private String toolName;
+    private String toolCallReference;
+    private Integer tokenCount;
+    private Long latencyMs;
+
     @Column(nullable = false, length = 4000)
     private String content;
 
@@ -64,6 +75,37 @@ public class AiSalesMessage {
 
     public String getStructuredData() { return structuredData; }
     public void setStructuredData(String structuredData) { this.structuredData = structuredData; }
+
+    public AiRole getRole() {
+        if (role == null && senderType != null) {
+            switch (senderType) {
+                case CUSTOMER:
+                case SALES_USER:
+                    return AiRole.USER;
+                case AI:
+                    return AiRole.ASSISTANT;
+                case SYSTEM:
+                    return AiRole.SYSTEM;
+            }
+        }
+        return role;
+    }
+    public void setRole(AiRole role) { this.role = role; }
+
+    public boolean isCustomerVisible() { return customerVisible; }
+    public void setCustomerVisible(boolean customerVisible) { this.customerVisible = customerVisible; }
+
+    public String getToolName() { return toolName; }
+    public void setToolName(String toolName) { this.toolName = toolName; }
+
+    public String getToolCallReference() { return toolCallReference; }
+    public void setToolCallReference(String toolCallReference) { this.toolCallReference = toolCallReference; }
+
+    public Integer getTokenCount() { return tokenCount; }
+    public void setTokenCount(Integer tokenCount) { this.tokenCount = tokenCount; }
+
+    public Long getLatencyMs() { return latencyMs; }
+    public void setLatencyMs(Long latencyMs) { this.latencyMs = latencyMs; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

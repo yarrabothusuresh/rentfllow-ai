@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/leads")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class LeadController {
 
     private final LeadService leadService;

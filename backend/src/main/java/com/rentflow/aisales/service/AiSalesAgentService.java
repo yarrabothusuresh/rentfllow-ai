@@ -62,7 +62,7 @@ public class AiSalesAgentService {
         AiTenantSettings settings = settingsService.getSettings(tenantId);
         if (!settings.isAiEnabled()) {
             AiSalesChatResponseDTO disabledResp = new AiSalesChatResponseDTO();
-            disabledResp.setReplyText("The AI Sales Assistant is currently offline for scheduled maintenance. A sales specialist will be notified.");
+            disabledResp.setReplyText("AI assistance is currently unavailable. You can continue browsing our catalog or submit a rental request.");
             disabledResp.setStatus(AiConversationStatus.WAITING_FOR_HUMAN);
             return disabledResp;
         }
@@ -139,6 +139,12 @@ public class AiSalesAgentService {
         }
         if (responseDTO.getQuoteDraftId() != null) {
             conv.setQuoteId(responseDTO.getQuoteDraftId());
+        }
+        if (inquiry.getLeadId() != null && conv.getLeadId() == null) {
+            conv.setLeadId(inquiry.getLeadId());
+        }
+        if (inquiry.getRentalRequestId() != null && conv.getRentalRequestId() == null) {
+            conv.setRentalRequestId(inquiry.getRentalRequestId());
         }
         conversationRepository.save(conv);
         inquiryRepository.save(inquiry);

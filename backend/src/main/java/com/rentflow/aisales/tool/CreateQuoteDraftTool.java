@@ -60,6 +60,34 @@ public class CreateQuoteDraftTool implements AiSalesTool {
     public ToolCallResultDTO execute(String tenantId, String userRole, ToolCallRequestDTO request) {
         Map<String, Object> args = request.getArguments();
 
+        String convIdStr = (String) args.get("conversationId");
+        UUID convId = null;
+        if (convIdStr != null && !convIdStr.trim().isEmpty()) {
+            try { convId = UUID.fromString(convIdStr.trim()); } catch (Exception ignored) {}
+        }
+
+        // Idempotency: check if quote already exists in arguments or conversation
+        if (args.get("quoteId") != null && !args.get("quoteId").toString().trim().isEmpty()) {
+            try {
+                UUID existingQuoteId = UUID.fromString(args.get("quoteId").toString().trim());
+                Optional<QuoteDTO> existing = quoteService.getQuoteById(tenantId, existingQuoteId, userRole != null ? userRole : "SALES");
+                if (existing.isPresent()) {
+                    QuoteDTO q = existing.get();
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("quoteId", q.getId());
+                    result.put("quoteNumber", q.getQuoteNumber());
+                    result.put("status", q.getStatus().name());
+                    result.put("totalAmount", q.getTotalAmount());
+                    result.put("subtotal", q.getSubtotal());
+                    result.put("deliveryFee", q.getDeliveryFee());
+                    result.put("taxAmount", q.getTaxAmount());
+                    result.put("message", "Draft quote already prepared (" + q.getQuoteNumber() + "). Awaiting human sales approval.");
+                    result.put("action", "EXISTING");
+                    return ToolCallResultDTO.success(getName(), result, false);
+                }
+            } catch (Exception ignored) {}
+        }
+
         // 1. Resolve or create customer
         UUID customerId = resolveCustomerId(tenantId, args);
 
@@ -121,7 +149,8 @@ public class CreateQuoteDraftTool implements AiSalesTool {
             result.put("subtotal", created.getSubtotal());
             result.put("deliveryFee", created.getDeliveryFee());
             result.put("taxAmount", created.getTaxAmount());
-            result.put("message", "Draft quote created successfully. Awaiting human sales approval.");
+            result.put("message", "Draft quote created successfully (" + created.getQuoteNumber() + "). Awaiting human sales approval.");
+            result.put("action", "CREATED");
 
             return ToolCallResultDTO.success(getName(), result, false);
         } catch (Exception e) {

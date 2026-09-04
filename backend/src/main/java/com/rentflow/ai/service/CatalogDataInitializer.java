@@ -65,9 +65,9 @@ public class CatalogDataInitializer implements CommandLineRunner {
         ProductCategory tables = new ProductCategory(UUID.fromString("c0000000-0000-0000-0000-000000000011"), tenantId, "Tables", "Event tables", furniture.getId());
         categoryRepository.saveAll(List.of(chairs, tables));
 
-        // Seed 10 Demo Products
+        // Seed Demo Products
         Product chiavari = new Product(
-                CHIAVARI_CHAIR_ID, tenantId, "CHI-001", "Chiavari Chair",
+                CHIAVARI_CHAIR_ID, tenantId, "CHI-001", "Gold Chiavari Chair",
                 "Elegant gold Chiavari chair with plush cushion", chairs.getId(),
                 ProductType.RENTAL_ITEM, ProductStatus.ACTIVE,
                 new BigDecimal("8.00"), new BigDecimal("65.00"),
@@ -85,13 +85,22 @@ public class CatalogDataInitializer implements CommandLineRunner {
         whiteFolding.setImageUrl("https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80");
 
         Product roundTable = new Product(
-                ROUND_TABLE_ID, tenantId, "TBL-060", "Round Table 60\"",
+                ROUND_TABLE_ID, tenantId, "TBL-060", "60-inch Round Table",
                 "60-inch round wood folding table (Seats 8-10)", tables.getId(),
                 ProductType.RENTAL_ITEM, ProductStatus.ACTIVE,
                 new BigDecimal("14.00"), new BigDecimal("120.00"),
                 60, 2, 1, 0
         );
         roundTable.setImageUrl("https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=500&q=80");
+
+        Product banquetTable = new Product(
+                UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), tenantId, "TBL-BNQ6", "6-foot Banquet Table",
+                "6-foot rectangular folding banquet table (Seats 6-8)", tables.getId(),
+                ProductType.RENTAL_ITEM, ProductStatus.ACTIVE,
+                new BigDecimal("12.00"), new BigDecimal("100.00"),
+                50, 0, 0, 0
+        );
+        banquetTable.setImageUrl("https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=500&q=80");
 
         Product cocktailTable = new Product(
                 UUID.fromString("44444444-4444-4444-4444-444444444444"), tenantId, "TBL-CKT", "Cocktail Table",
@@ -107,9 +116,18 @@ public class CatalogDataInitializer implements CommandLineRunner {
                 "120-inch round white polyester table linen", linensCat.getId(),
                 ProductType.RENTAL_ITEM, ProductStatus.ACTIVE,
                 new BigDecimal("10.00"), new BigDecimal("45.00"),
-                150, 5, 2, 1
+                185, 3, 2, 0
         );
         linen.setImageUrl("https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80");
+
+        Product ivoryLinen = new Product(
+                UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"), tenantId, "LIN-IVR", "Ivory Table Linen",
+                "120-inch round ivory polyester table linen", linensCat.getId(),
+                ProductType.RENTAL_ITEM, ProductStatus.ACTIVE,
+                new BigDecimal("10.00"), new BigDecimal("45.00"),
+                100, 2, 0, 0
+        );
+        ivoryLinen.setImageUrl("https://images.unsplash.com/photo-1519741497674-611481863552?w=500&q=80");
 
         Product uplight = new Product(
                 UUID.fromString("66666666-6666-6666-6666-666666666666"), tenantId, "LGT-LED", "LED Uplight",
@@ -156,13 +174,14 @@ public class CatalogDataInitializer implements CommandLineRunner {
         );
         stage.setImageUrl("https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80");
 
-        productRepository.saveAll(List.of(
-                chiavari, whiteFolding, roundTable, cocktailTable, linen,
-                uplight, bistroChair, tent, danceFloor, stage
-        ));
+        List<Product> allSeeded = List.of(
+                chiavari, whiteFolding, roundTable, banquetTable, cocktailTable,
+                linen, ivoryLinen, uplight, bistroChair, tent, danceFloor, stage
+        );
+        productRepository.saveAll(allSeeded);
 
         // Initial Purchase Transaction Logs
-        for (Product p : List.of(chiavari, whiteFolding, roundTable, cocktailTable, linen, uplight, bistroChair, tent, danceFloor, stage)) {
+        for (Product p : allSeeded) {
             InventoryTransaction tx = new InventoryTransaction(
                     UUID.randomUUID(), tenantId, p.getId(), TransactionType.PURCHASE,
                     p.getQuantityOwned(), "INITIAL_PURCHASE", null,

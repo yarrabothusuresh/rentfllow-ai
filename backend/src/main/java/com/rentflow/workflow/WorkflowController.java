@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/workflows")
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class WorkflowController {
 
     private final WorkflowStateMachine stateMachine;

@@ -2,6 +2,7 @@ package com.rentflow.crm.model;
 
 public enum LeadSource {
     STOREFRONT_REQUEST,
+    AI_STOREFRONT,
     WEBSITE_INQUIRY,
     PHONE,
     EMAIL,

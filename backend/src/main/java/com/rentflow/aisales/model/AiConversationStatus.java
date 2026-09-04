@@ -8,6 +8,7 @@ public enum AiConversationStatus {
     HUMAN_ACTIVE,
     QUOTE_DRAFTED,
     COMPLETED,
+    ABANDONED,
     CLOSED,
     ESCALATED
 }

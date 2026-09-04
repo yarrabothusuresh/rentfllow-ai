@@ -26,6 +26,13 @@ public class RentalInquiry {
 
     private UUID customerId;
     private UUID leadId;
+    private UUID rentalRequestId;
+    private UUID quoteId;
+
+    private String customerName;
+    private String companyName;
+    private String email;
+    private String phone;
 
     private String eventType;
     private String eventName;
@@ -33,14 +40,23 @@ public class RentalInquiry {
     private LocalDateTime rentalStart;
     private LocalDateTime rentalEnd;
 
+    private String venueName;
+    private String venueAddress;
+    private String city;
+
     private String deliveryAddress;
     private String deliveryCity;
     private String deliveryTime;
     private boolean deliveryRequired = true;
+    private boolean pickupRequired = false;
+    private boolean setupRequired = false;
 
     private Integer guestCount;
     private String tablePreference;
     private String chairPreference;
+    private String productPreferences;
+    private String productRequirements;
+    private String stylePreferences;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal budget;
@@ -53,6 +69,12 @@ public class RentalInquiry {
 
     @Column(length = 2000)
     private String notes;
+
+    private boolean availabilityChecked = false;
+    private boolean estimateGenerated = false;
+    private boolean leadCreated = false;
+    private boolean rentalRequestCreated = false;
+    private boolean quoteDraftCreated = false;
 
     @Column(nullable = false)
     private boolean complete = false;
@@ -138,6 +160,63 @@ public class RentalInquiry {
 
     public boolean isComplete() { return complete; }
     public void setComplete(boolean complete) { this.complete = complete; }
+
+    public UUID getRentalRequestId() { return rentalRequestId; }
+    public void setRentalRequestId(UUID rentalRequestId) { this.rentalRequestId = rentalRequestId; }
+
+    public UUID getQuoteId() { return quoteId; }
+    public void setQuoteId(UUID quoteId) { this.quoteId = quoteId; }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getVenueName() { return venueName; }
+    public void setVenueName(String venueName) { this.venueName = venueName; }
+
+    public String getVenueAddress() { return venueAddress; }
+    public void setVenueAddress(String venueAddress) { this.venueAddress = venueAddress; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public boolean isPickupRequired() { return pickupRequired; }
+    public void setPickupRequired(boolean pickupRequired) { this.pickupRequired = pickupRequired; }
+
+    public boolean isSetupRequired() { return setupRequired; }
+    public void setSetupRequired(boolean setupRequired) { this.setupRequired = setupRequired; }
+
+    public String getProductPreferences() { return productPreferences; }
+    public void setProductPreferences(String productPreferences) { this.productPreferences = productPreferences; }
+
+    public String getProductRequirements() { return productRequirements; }
+    public void setProductRequirements(String productRequirements) { this.productRequirements = productRequirements; }
+
+    public String getStylePreferences() { return stylePreferences; }
+    public void setStylePreferences(String stylePreferences) { this.stylePreferences = stylePreferences; }
+
+    public boolean isAvailabilityChecked() { return availabilityChecked; }
+    public void setAvailabilityChecked(boolean availabilityChecked) { this.availabilityChecked = availabilityChecked; }
+
+    public boolean isEstimateGenerated() { return estimateGenerated; }
+    public void setEstimateGenerated(boolean estimateGenerated) { this.estimateGenerated = estimateGenerated; }
+
+    public boolean isLeadCreated() { return leadCreated; }
+    public void setLeadCreated(boolean leadCreated) { this.leadCreated = leadCreated; }
+
+    public boolean isRentalRequestCreated() { return rentalRequestCreated; }
+    public void setRentalRequestCreated(boolean rentalRequestCreated) { this.rentalRequestCreated = rentalRequestCreated; }
+
+    public boolean isQuoteDraftCreated() { return quoteDraftCreated; }
+    public void setQuoteDraftCreated(boolean quoteDraftCreated) { this.quoteDraftCreated = quoteDraftCreated; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
