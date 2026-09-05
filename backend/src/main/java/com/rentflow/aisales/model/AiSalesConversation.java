@@ -51,6 +51,10 @@ public class AiSalesConversation {
     private AiIntent detectedIntent;
 
     private String assignedSalesUserId;
+    private String employeeUserId;
+    private String employeeRole;
+    private String pageContextType;
+    private String pageContextId;
     private String customerName;
     private String customerEmail;
 
@@ -154,6 +158,18 @@ public class AiSalesConversation {
 
     public LocalDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
+
+    public String getEmployeeUserId() { return employeeUserId; }
+    public void setEmployeeUserId(String employeeUserId) { this.employeeUserId = employeeUserId; }
+
+    public String getEmployeeRole() { return employeeRole; }
+    public void setEmployeeRole(String employeeRole) { this.employeeRole = employeeRole; }
+
+    public String getPageContextType() { return pageContextType; }
+    public void setPageContextType(String pageContextType) { this.pageContextType = pageContextType; }
+
+    public String getPageContextId() { return pageContextId; }
+    public void setPageContextId(String pageContextId) { this.pageContextId = pageContextId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

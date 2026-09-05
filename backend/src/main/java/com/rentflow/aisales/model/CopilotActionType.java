@@ -1,0 +1,11 @@
+package com.rentflow.aisales.model;
+
+public enum CopilotActionType {
+    CREATE_LEAD_FOLLOW_UP,
+    ADD_INTERNAL_LEAD_NOTE,
+    ADD_INTERNAL_BOOKING_NOTE,
+    ASSIGN_LEAD,
+    ASSIGN_DRIVER,
+    ASSIGN_WAREHOUSE_OPERATOR,
+    SEND_NOTIFICATION_TEMPLATE
+}

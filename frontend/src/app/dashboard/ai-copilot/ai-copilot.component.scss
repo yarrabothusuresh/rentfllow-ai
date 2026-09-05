@@ -557,7 +557,336 @@
       }
     }
 
-    .chat-input-bar {
+    .context-tag {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-left: 0.5rem;
+    }
+
+    .badge-deterministic {
+      background: #ecfdf5;
+      color: #059669;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .latency-tag {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    .data-blocks-wrapper {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+
+      .data-block-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+        .block-title {
+          font-size: 0.82rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #64748b;
+          margin-bottom: 0.75rem;
+        }
+
+        .kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 0.75rem;
+
+          .kpi-item {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 0.75rem;
+
+            .kpi-label {
+              font-size: 0.75rem;
+              color: #64748b;
+              margin-bottom: 0.25rem;
+            }
+
+            .kpi-value {
+              font-size: 1.15rem;
+              font-weight: 700;
+              color: #0f172a;
+            }
+          }
+        }
+
+        .table-container {
+          overflow-x: auto;
+
+          .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+
+            th {
+              text-align: left;
+              padding: 0.6rem 0.75rem;
+              background: #f8fafc;
+              color: #475569;
+              font-weight: 600;
+              border-bottom: 1px solid #e2e8f0;
+            }
+
+            td {
+              padding: 0.6rem 0.75rem;
+              border-bottom: 1px solid #f1f5f9;
+              color: #1e293b;
+
+              .severity-high {
+                color: #ef4444;
+                font-weight: 700;
+              }
+
+              .severity-medium {
+                color: #f59e0b;
+                font-weight: 600;
+              }
+            }
+
+            tr:hover td {
+              background: #f8fafc;
+            }
+          }
+        }
+      }
+    }
+
+    .proposals-wrapper {
+      margin-top: 1rem;
+
+      .proposal-card {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+
+        .proposal-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+
+          .action-type-badge {
+            background: #d97706;
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+          }
+
+          .risk-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 6px;
+            font-weight: 600;
+
+            &.risk-medium {
+              background: #fef3c7;
+              color: #b45309;
+            }
+            &.risk-high {
+              background: #fee2e2;
+              color: #b91c1c;
+            }
+          }
+
+          .proposal-status {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: auto;
+
+            &.status-proposed { color: #d97706; }
+            &.status-executed { color: #059669; }
+            &.status-cancelled { color: #64748b; }
+            &.status-failed { color: #dc2626; }
+          }
+        }
+
+        .proposal-summary {
+          font-size: 0.92rem;
+          font-weight: 600;
+          color: #78350f;
+          margin-bottom: 0.85rem;
+        }
+
+        .proposal-actions {
+          display: flex;
+          gap: 0.75rem;
+
+          .btn-confirm {
+            background: #059669;
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem 1.1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+              background: #047857;
+            }
+          }
+
+          .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+
+            &:hover {
+              background: #e2e8f0;
+            }
+          }
+        }
+      }
+    }
+
+    .recommendations-wrapper {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .rec-card {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+
+        .rec-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.35rem;
+
+          .rec-priority {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+
+            &.priority-high { background: #fee2e2; color: #b91c1c; }
+            &.priority-medium { background: #fef3c7; color: #b45309; }
+            &.priority-low { background: #f1f5f9; color: #475569; }
+          }
+
+          .rec-title {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #166534;
+          }
+        }
+
+        .rec-rationale {
+          font-size: 0.82rem;
+          color: #15803d;
+        }
+
+        .rec-action {
+          margin-top: 0.35rem;
+          font-size: 0.8rem;
+          color: #14532d;
+        }
+      }
+    }
+
+    .sources-wrapper {
+      margin-top: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+
+      .sources-label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 600;
+      }
+
+      .source-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .source-badge {
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          padding: 0.25rem 0.65rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+          }
+        }
+      }
+    }
+
+    .msg-footer {
+      margin-top: 0.85rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .footer-note {
+        font-size: 0.72rem;
+        color: #94a3b8;
+      }
+
+      .feedback-actions {
+        display: flex;
+        gap: 0.35rem;
+
+        .btn-feedback {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-size: 0.85rem;
+          opacity: 0.6;
+          transition: opacity 0.2s;
+
+          &:hover, &.active {
+            opacity: 1;
+          }
+        }
+      }
+    }
+
+    .chat-input-container {
       padding: 1rem 1.5rem;
       background: #ffffff;
       border-top: 1px solid #e2e8f0;
@@ -590,9 +919,6 @@
           font-weight: 600;
           font-size: 0.95rem;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
           transition: all 0.2s ease;
 
           &:hover:not(:disabled) {

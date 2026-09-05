@@ -4,5 +4,6 @@ public enum AiSenderType {
     CUSTOMER,
     AI,
     SALES_USER,
+    EMPLOYEE,
     SYSTEM
 }
