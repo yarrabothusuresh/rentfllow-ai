@@ -1,0 +1,114 @@
+<div class="settings-container">
+
+  <!-- Nav -->
+  <nav class="breadcrumb-nav">
+    <a routerLink="/dashboard/phone-ai">← Back to Phone AI Center</a>
+  </nav>
+
+  <header class="page-header">
+    <h1>⚙️ Voice Telephony & Legal Compliance Settings</h1>
+    <p class="subtitle">Configure automated assistant disclosure, recording consent, transcription retention & human handoff queues.</p>
+  </header>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    ✓ {{ successMessage }}
+  </div>
+
+  <div class="settings-card" *ngIf="!isLoading">
+
+    <!-- Section 1: Activation -->
+    <div class="settings-section">
+      <h3>1. Voice AI Telephony Engine</h3>
+      
+      <div class="form-check">
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="settings.phoneAiEnabled">
+          <span class="slider round"></span>
+        </label>
+        <div class="check-text">
+          <strong>Enable Phone AI Assistant</strong>
+          <small>Allows automated answering and voice inquiry handling on configured phone lines.</small>
+        </div>
+      </div>
+
+      <div class="form-check">
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="settings.inboundEnabled">
+          <span class="slider round"></span>
+        </label>
+        <div class="check-text">
+          <strong>Allow Inbound Inquiries</strong>
+          <small>Accept incoming voice calls from prospective rental customers.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Telephony Provider -->
+    <div class="settings-section">
+      <h3>2. Telephony Provider</h3>
+      <div class="form-group">
+        <label>Active Adapter</label>
+        <select [(ngModel)]="settings.provider" class="form-control">
+          <option value="mock">Mock Telephony (Zero-Cost Local & CI Testing)</option>
+          <option value="twilio">Twilio Voice Adapter</option>
+          <option value="vonage">Vonage Voice API</option>
+          <option value="telnyx">Telnyx Telephony</option>
+        </select>
+        <small class="help-text">Mock provider simulates live voice turns, catalog searches, lead creation, and transfer events without external phone carrier costs.</small>
+      </div>
+    </div>
+
+    <!-- Section 3: Greetings & Compliance Disclosure -->
+    <div class="settings-section">
+      <h3>3. Greeting & Privacy Disclosure</h3>
+      
+      <div class="form-group">
+        <label>Initial Greeting (Identity Disclosure)</label>
+        <input type="text" [(ngModel)]="settings.greeting" class="form-control" />
+        <small class="help-text">Clearly identifies to the caller that they are speaking to an automated assistant.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Consent & Recording Disclosure Text</label>
+        <input type="text" [(ngModel)]="settings.disclosureText" class="form-control" />
+        <small class="help-text">Informed consent notification spoken prior to collecting inquiry details.</small>
+      </div>
+
+      <div class="form-check">
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="settings.recordingEnabled">
+          <span class="slider round"></span>
+        </label>
+        <div class="check-text">
+          <strong>Audio Recording (Default: Disabled)</strong>
+          <small>Strict privacy posture: Live audio is processed temporarily in memory without saving raw WAV/MP3 files unless intentionally enabled.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Transcript Retention Period (Days)</label>
+        <input type="number" [(ngModel)]="settings.transcriptRetentionDays" class="form-control number-input" min="1" max="365" />
+        <small class="help-text">Transcripts older than this window are automatically purged from database tables.</small>
+      </div>
+    </div>
+
+    <!-- Section 4: Human Escalation & Handoff -->
+    <div class="settings-section">
+      <h3>4. Human Transfer & Escalation</h3>
+
+      <div class="form-group">
+        <label>Live Specialist Transfer Number / Queue</label>
+        <input type="text" [(ngModel)]="settings.humanHandoffNumber" class="form-control" />
+        <small class="help-text">When a caller requests a human or expresses a complex dispute, calls are bridged to this destination.</small>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button class="btn btn-primary" [disabled]="isSaving" (click)="saveSettings()">
+        {{ isSaving ? 'Saving Settings...' : '💾 Save Voice Settings' }}
+      </button>
+    </div>
+
+  </div>
+
+</div>

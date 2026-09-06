@@ -169,6 +169,11 @@ import { ApprovalQueueComponent } from './pages/automation/approval-queue.compon
 import { AutomationRulesComponent } from './pages/automation/automation-rules.component';
 import { AutomationExecutionsComponent } from './pages/automation/automation-executions.component';
 
+// Day 30 Phone AI Voice Foundation
+import { PhoneDashboardComponent } from './pages/phone-ai/phone-dashboard.component';
+import { PhoneCallDetailComponent } from './pages/phone-ai/phone-call-detail.component';
+import { PhoneSettingsComponent } from './pages/phone-ai/phone-settings.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'rentals', component: PublicCatalogComponent },
@@ -419,7 +424,13 @@ export const routes: Routes = [
       { path: 'automation/recommendations/:id', component: RecommendationDetailComponent },
       { path: 'automation/approvals', component: ApprovalQueueComponent },
       { path: 'automation/rules', component: AutomationRulesComponent },
-      { path: 'automation/executions', component: AutomationExecutionsComponent }
+      { path: 'automation/executions', component: AutomationExecutionsComponent },
+
+      // Day 30 Phone AI Voice Foundation sub-routes
+      { path: 'phone-ai', component: PhoneDashboardComponent },
+      { path: 'phone-ai/dashboard', component: PhoneDashboardComponent },
+      { path: 'phone-ai/calls/:id', component: PhoneCallDetailComponent },
+      { path: 'phone-ai/settings', component: PhoneSettingsComponent }
     ]
   },
   // Top-level direct redirects for Automation
@@ -428,6 +439,11 @@ export const routes: Routes = [
   { path: 'automation/approvals', redirectTo: 'dashboard/automation/approvals', pathMatch: 'full' },
   { path: 'automation/rules', redirectTo: 'dashboard/automation/rules', pathMatch: 'full' },
   { path: 'automation/executions', redirectTo: 'dashboard/automation/executions', pathMatch: 'full' },
+  // Top-level direct redirects for Phone AI
+  { path: 'phone-ai', redirectTo: 'dashboard/phone-ai', pathMatch: 'full' },
+  { path: 'phone-ai/dashboard', redirectTo: 'dashboard/phone-ai', pathMatch: 'full' },
+  { path: 'phone-ai/calls/:id', redirectTo: 'dashboard/phone-ai/calls/:id', pathMatch: 'full' },
+  { path: 'phone-ai/settings', redirectTo: 'dashboard/phone-ai/settings', pathMatch: 'full' },
   // Top-level direct redirects for CRM
   { path: 'crm', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },
   { path: 'crm/dashboard', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },

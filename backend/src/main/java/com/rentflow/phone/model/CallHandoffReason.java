@@ -1,0 +1,14 @@
+package com.rentflow.phone.model;
+
+public enum CallHandoffReason {
+    CUSTOMER_REQUEST,
+    AI_UNCERTAIN,
+    COMPLEX_EVENT,
+    CUSTOM_PRODUCT,
+    PRICING_EXCEPTION,
+    AVAILABILITY_CONFLICT,
+    COMPLAINT,
+    PAYMENT_QUESTION,
+    CONTRACT_QUESTION,
+    OTHER
+}

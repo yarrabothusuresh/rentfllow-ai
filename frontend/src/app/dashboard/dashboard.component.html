@@ -27,6 +27,10 @@
       <a routerLink="/dashboard/automation/approvals" routerLinkActive="active" class="nav-item">↳ Approval Queue</a>
       <a routerLink="/dashboard/automation/rules" routerLinkActive="active" class="nav-item">↳ Rules & Governance</a>
       <a routerLink="/dashboard/automation/executions" routerLinkActive="active" class="nav-item">↳ Execution Audit</a>
+
+      <div class="nav-section">Phone AI Voice Center</div>
+      <a routerLink="/dashboard/phone-ai/dashboard" routerLinkActive="active" class="nav-item">Phone AI Command</a>
+      <a routerLink="/dashboard/phone-ai/settings" routerLinkActive="active" class="nav-item">↳ Voice Settings</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>
       <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>

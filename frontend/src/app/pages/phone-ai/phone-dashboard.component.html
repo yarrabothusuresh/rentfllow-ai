@@ -1,0 +1,231 @@
+<div class="phone-dashboard-container">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-badge">DAY 30 FOUNDATION</div>
+      <h1><span class="phone-icon">📞</span> Phone AI Voice Center</h1>
+      <p class="subtitle">Conversational voice telephony for inbound inquiries, automated catalog discovery & safe CRM lead creation</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/dashboard/phone-ai/settings" class="btn btn-secondary">
+        ⚙️ Voice Settings
+      </a>
+      <button class="btn btn-primary pulse-btn" (click)="openSimulator()">
+        🎙️ Live Call Simulator
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">📞</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Calls Today</span>
+        <span class="kpi-value">{{ metrics.callsToday }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card accent-green">
+      <div class="kpi-icon">🤖</div>
+      <div class="kpi-content">
+        <span class="kpi-label">AI Active</span>
+        <span class="kpi-value">{{ metrics.activeCalls }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card accent-amber">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Waiting for Human</span>
+        <span class="kpi-value">{{ metrics.waitingForHuman }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card accent-purple">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Leads Captured</span>
+        <span class="kpi-value">{{ metrics.leadsCreated }}</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-content">
+        <span class="kpi-label">Completed Calls</span>
+        <span class="kpi-value">{{ metrics.completedCalls }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Inbound Calls Table -->
+  <section class="calls-card">
+    <div class="card-header">
+      <div class="title-group">
+        <h2>Inbound Voice Sessions</h2>
+        <span class="count-badge">{{ recentCalls.length }} calls</span>
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn" [class.active]="statusFilter === ''" (click)="onFilterChange('')">All</button>
+        <button class="filter-btn" [class.active]="statusFilter === 'AI_ACTIVE'" (click)="onFilterChange('AI_ACTIVE')">AI Active</button>
+        <button class="filter-btn" [class.active]="statusFilter === 'WAITING_FOR_HUMAN'" (click)="onFilterChange('WAITING_FOR_HUMAN')">Needs Human</button>
+        <button class="filter-btn" [class.active]="statusFilter === 'COMPLETED'" (click)="onFilterChange('COMPLETED')">Completed</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="calls-table" *ngIf="recentCalls.length > 0; else noCalls">
+        <thead>
+          <tr>
+            <th>Call ID</th>
+            <th>Caller</th>
+            <th>Status</th>
+            <th>Consent</th>
+            <th>Lead / CRM</th>
+            <th>Started</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let call of recentCalls">
+            <td class="font-mono font-bold">{{ call.publicId }}</td>
+            <td>{{ call.callerNumberMasked }}</td>
+            <td>
+              <span class="badge" [ngClass]="getStatusClass(call.status)">
+                {{ call.status }}
+              </span>
+            </td>
+            <td>
+              <span class="consent-pill" [class.granted]="call.consentStatus === 'GRANTED'">
+                {{ call.consentStatus }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="call.leadId" class="lead-link">🎯 CRM Lead Linked</span>
+              <span *ngIf="!call.leadId" class="text-muted">—</span>
+            </td>
+            <td>{{ call.startedAt | date:'shortTime' }}</td>
+            <td>
+              <a [routerLink]="['/dashboard/phone-ai/calls', call.id]" class="view-btn">
+                Inspect Call →
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #noCalls>
+        <div class="empty-state">
+          <div class="empty-icon">📞</div>
+          <h3>No calls logged yet</h3>
+          <p>Click "Live Call Simulator" above to simulate an inbound customer phone inquiry.</p>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+
+  <!-- Live Call Simulator Drawer -->
+  <div class="simulator-backdrop" *ngIf="simulatorOpen" (click)="closeSimulator()"></div>
+
+  <aside class="simulator-drawer" *ngIf="simulatorOpen">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span class="drawer-icon">🎙️</span>
+        <h3>Voice Call Simulator</h3>
+      </div>
+      <button class="close-btn" (click)="closeSimulator()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+
+      <!-- Step 1: Start Call -->
+      <div *ngIf="!activeSimCall" class="sim-setup">
+        <p class="sim-desc">Test Phone AI voice interactions without needing an external telephony contract. Reuses Day 27 AI Sales Agent for real inventory and pricing checks.</p>
+        
+        <div class="form-group">
+          <label>Caller Phone Number</label>
+          <input type="text" [(ngModel)]="simCallerNumber" class="form-control" />
+        </div>
+
+        <button class="btn btn-primary btn-block" [disabled]="simLoading" (click)="startSimulatedCall()">
+          {{ simLoading ? 'Connecting...' : '📞 Connect Inbound Call' }}
+        </button>
+      </div>
+
+      <!-- Step 2: Live In-Call Conversation -->
+      <div *ngIf="activeSimCall" class="sim-active-call">
+        
+        <div class="call-banner" [ngClass]="getStatusClass(activeSimCall.status)">
+          <div class="call-meta">
+            <strong>{{ activeSimCall.publicId }}</strong>
+            <span class="caller-id">{{ activeSimCall.callerNumberMasked }}</span>
+          </div>
+          <div class="call-state-pill">{{ activeSimCall.status }}</div>
+        </div>
+
+        <!-- Transcript Feed -->
+        <div class="transcript-feed">
+          <div *ngFor="let seg of simTranscripts" class="transcript-msg" [ngClass]="seg.speaker.toLowerCase()">
+            <div class="msg-header">
+              <span class="speaker-label">{{ seg.speaker }}</span>
+              <span class="msg-time">{{ seg.timestamp | date:'HH:mm:ss' }}</span>
+            </div>
+            <div class="msg-bubble">{{ seg.text }}</div>
+          </div>
+
+          <div *ngIf="simLoading" class="typing-indicator">
+            <span></span><span></span><span></span>
+            <small>AI synthesizing voice reply...</small>
+          </div>
+        </div>
+
+        <!-- Speech Utterance Input -->
+        <div class="utterance-box" *ngIf="activeSimCall.status !== 'COMPLETED'">
+          <div class="preset-prompts">
+            <button class="chip-btn" (click)="simUtteranceInput = 'I need 100 white folding chairs for a wedding on October 10 in Dallas'">
+              "Wedding Chairs"
+            </button>
+            <button class="chip-btn" (click)="simUtteranceInput = 'Can I speak to someone?'">
+              "Human Handoff"
+            </button>
+            <button class="chip-btn" (click)="simUtteranceInput = 'Can I give you my credit card right now?'">
+              "Card Prohibited Test"
+            </button>
+          </div>
+
+          <div class="input-row">
+            <input 
+              type="text" 
+              [(ngModel)]="simUtteranceInput" 
+              placeholder="Type what caller says..." 
+              (keyup.enter)="sendSimUtterance()"
+              class="form-control" 
+              [disabled]="simLoading"
+            />
+            <button class="btn btn-primary send-btn" [disabled]="simLoading || !simUtteranceInput.trim()" (click)="sendSimUtterance()">
+              🗣️ Speak
+            </button>
+          </div>
+
+          <div class="call-actions-row">
+            <button class="btn btn-outline-warning btn-sm" [disabled]="simLoading || activeSimCall.status === 'WAITING_FOR_HUMAN'" (click)="triggerSimHandoff()">
+              👤 Transfer to Human
+            </button>
+            <button class="btn btn-outline-danger btn-sm" (click)="endSimCall()">
+              🔴 End Call
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="activeSimCall.status === 'COMPLETED'" class="call-ended-note">
+          ✓ Call has ended. Transcripts are archived in accordance with tenant retention policy.
+        </div>
+
+      </div>
+
+    </div>
+  </aside>
+
+</div>

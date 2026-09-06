@@ -1,0 +1,128 @@
+<div class="call-detail-container" *ngIf="call">
+
+  <!-- Breadcrumb & Nav -->
+  <nav class="breadcrumb-nav">
+    <a routerLink="/dashboard/phone-ai">← Back to Phone AI Center</a>
+  </nav>
+
+  <!-- Top Hero Header -->
+  <header class="call-header">
+    <div class="header-left">
+      <div class="header-meta">
+        <span class="badge" [ngClass]="getStatusBadgeClass(call.status)">{{ call.status }}</span>
+        <span class="provider-pill">Telephony: {{ call.provider }}</span>
+        <span class="direction-pill">{{ call.direction }}</span>
+      </div>
+      <h1>{{ call.publicId }}</h1>
+      <p class="caller-id">Caller: <strong>{{ call.callerNumberMasked }}</strong></p>
+    </div>
+
+    <div class="header-actions">
+      <button 
+        class="btn btn-warning" 
+        *ngIf="call.status !== 'COMPLETED' && call.status !== 'WAITING_FOR_HUMAN'"
+        [disabled]="actionLoading"
+        (click)="transferToHuman()"
+      >
+        👤 Transfer to Human
+      </button>
+
+      <button 
+        class="btn btn-danger" 
+        *ngIf="call.status !== 'COMPLETED'"
+        [disabled]="actionLoading"
+        (click)="endCall()"
+      >
+        🔴 End Call
+      </button>
+    </div>
+  </header>
+
+  <!-- 2-Column Layout -->
+  <div class="detail-grid">
+
+    <!-- Left: Conversational Transcript -->
+    <section class="transcript-section">
+      <div class="card-header">
+        <h2>Live Audio Transcript</h2>
+        <span class="count-badge">{{ transcripts.length }} segments</span>
+      </div>
+
+      <div class="transcript-list">
+        <div *ngFor="let seg of transcripts" class="segment-item" [ngClass]="seg.speaker.toLowerCase()">
+          <div class="segment-meta">
+            <span class="speaker-pill">{{ seg.speaker }}</span>
+            <span class="timestamp">{{ seg.timestamp | date:'mediumTime' }}</span>
+          </div>
+          <div class="segment-bubble">{{ seg.text }}</div>
+        </div>
+
+        <div *ngIf="transcripts.length === 0" class="empty-transcript">
+          No transcript segments recorded for this session.
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Structured Context & Linkages -->
+    <aside class="sidebar-section">
+
+      <!-- Session Facts -->
+      <div class="sidebar-card">
+        <h3>Call Session Facts</h3>
+        <ul class="fact-list">
+          <li>
+            <span class="fact-label">Started At</span>
+            <span class="fact-val">{{ call.startedAt | date:'medium' }}</span>
+          </li>
+          <li *ngIf="call.endedAt">
+            <span class="fact-label">Ended At</span>
+            <span class="fact-val">{{ call.endedAt | date:'medium' }}</span>
+          </li>
+          <li>
+            <span class="fact-label">Consent Status</span>
+            <span class="fact-val text-success font-bold">{{ call.consentStatus }}</span>
+          </li>
+          <li>
+            <span class="fact-label">Call Recording</span>
+            <span class="fact-val">{{ call.recordingStatus }}</span>
+          </li>
+          <li *ngIf="call.handoffReason">
+            <span class="fact-label">Handoff Reason</span>
+            <span class="fact-val text-warning font-bold">{{ call.handoffReason }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CRM & Sales Linkages -->
+      <div class="sidebar-card">
+        <h3>CRM & Lead Association</h3>
+        <div *ngIf="call.leadId" class="lead-info-box">
+          <div class="lead-icon">🎯</div>
+          <div class="lead-details">
+            <strong>CRM Lead Captured</strong>
+            <p>Lead automatically created by Phone AI from caller requirements.</p>
+            <a [routerLink]="['/dashboard/crm']" class="crm-link">View in CRM →</a>
+          </div>
+        </div>
+
+        <div *ngIf="!call.leadId" class="no-lead-box">
+          <p>No CRM lead linked yet. Caller inquiry may still be in discovery.</p>
+        </div>
+      </div>
+
+      <!-- Security & Compliance Boundary -->
+      <div class="sidebar-card security-card">
+        <h3>🛡️ Voice Security Boundary</h3>
+        <ul class="compliance-list">
+          <li>✓ Automated Assistant Disclosed</li>
+          <li>✓ Zero Credit Card Capture over Voice</li>
+          <li>✓ Human-in-the-loop Booking Verification</li>
+          <li>✓ Tenant-Scoped Transcript Retention</li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
