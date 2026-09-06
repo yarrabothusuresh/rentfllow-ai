@@ -1,0 +1,146 @@
+<div class="detail-container" *ngIf="recommendation">
+  <!-- Top Navigation & Actions -->
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/dashboard/automation/recommendations">← Back to Recommendations</a>
+      </div>
+      <div class="title-row">
+        <h1>{{ recommendation.recommendationNumber }}: {{ recommendation.title }}</h1>
+        <span class="badge badge-{{ recommendation.priority.toLowerCase() }}">{{ recommendation.priority }} Priority</span>
+        <span class="status-pill status-{{ recommendation.status.toLowerCase() }}">{{ recommendation.status }}</span>
+      </div>
+      <p class="subtitle">Category: {{ recommendation.category }} • Detected: {{ recommendation.createdAt | date:'medium' }}</p>
+    </div>
+
+    <div class="header-actions">
+      <button 
+        *ngIf="recommendation.status === 'NEW' || recommendation.status === 'REVIEWED'" 
+        class="btn btn-secondary" 
+        (click)="dismiss()"
+      >
+        Dismiss
+      </button>
+      <button 
+        *ngIf="recommendation.suggestedActionType && recommendation.status !== 'RESOLVED' && recommendation.status !== 'DISMISSED' && !createdApproval" 
+        class="btn btn-primary" 
+        (click)="proposeAction()" 
+        [disabled]="proposing"
+      >
+        <span *ngIf="proposing" class="spinner"></span> ⚡ Propose Safe Action
+      </button>
+      <a 
+        *ngIf="createdApproval" 
+        routerLink="/dashboard/automation/approvals" 
+        class="btn btn-warning"
+      >
+        Review in Approval Queue →
+      </a>
+    </div>
+  </div>
+
+  <!-- Banners -->
+  <div class="alert-banner success" *ngIf="proposalSuccessMessage">
+    <span>✓ {{ proposalSuccessMessage }}</span>
+    <button class="close-btn" (click)="proposalSuccessMessage = null">✕</button>
+  </div>
+  <div class="alert-banner error" *ngIf="errorMessage">
+    <span>⚠️ {{ errorMessage }}</span>
+    <button class="close-btn" (click)="errorMessage = null">✕</button>
+  </div>
+
+  <div class="content-grid">
+    <!-- Left Column: AI Explanation & Strategic Impact -->
+    <div class="left-col">
+      <!-- Explanation Card -->
+      <div class="card-panel explanation-card">
+        <div class="panel-header">
+          <h2>💡 AI-Assisted Recommendation Narrative</h2>
+          <span class="badge-tag">EXPLAINABLE INSIGHT</span>
+        </div>
+        <div class="panel-body">
+          <p class="summary-lead">{{ recommendation.summary }}</p>
+          
+          <div class="section-block" *ngIf="recommendation.detailedExplanation || recommendation.explanation">
+            <h4>Detailed Context & Cause</h4>
+            <p>{{ recommendation.detailedExplanation || recommendation.explanation }}</p>
+          </div>
+
+          <div class="section-block" *ngIf="recommendation.whyImportant || recommendation.whyItMatters">
+            <h4>Business Impact & Why It Matters</h4>
+            <p>{{ recommendation.whyImportant || recommendation.whyItMatters }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggested Action Card -->
+      <div class="card-panel action-card" *ngIf="recommendation.suggestedActionType">
+        <div class="panel-header">
+          <h2>🛡️ Recommended Safe Action</h2>
+          <span class="badge badge-action">{{ recommendation.suggestedActionType }}</span>
+        </div>
+        <div class="panel-body">
+          <p class="action-desc">Executing this action will enact a safe, deterministic operational step without altering financial ledger items directly.</p>
+          
+          <div class="payload-box" *ngIf="recommendation.suggestedActionPayloadJson || recommendation.actionPayloadJson">
+            <h4>Action Parameters</h4>
+            <pre><code>{{ recommendation.suggestedActionPayloadJson || recommendation.actionPayloadJson }}</code></pre>
+          </div>
+
+          <div class="action-footer">
+            <button 
+              *ngIf="recommendation.status !== 'RESOLVED' && recommendation.status !== 'DISMISSED' && !createdApproval" 
+              class="btn btn-primary" 
+              (click)="proposeAction()" 
+              [disabled]="proposing"
+            >
+              Propose This Action For Review
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Authoritative Deterministic Evidence -->
+    <div class="right-col">
+      <div class="card-panel evidence-card">
+        <div class="panel-header">
+          <h2>📊 Authoritative Facts & Evidence</h2>
+          <span class="badge badge-verified">100% NON-LLM FACT</span>
+        </div>
+        <div class="panel-body">
+          <p class="evidence-intro">
+            RentFlow detected this signal through deterministic queries on production records. The AI did not generate or invent these facts.
+          </p>
+
+          <div class="meta-row">
+            <span class="meta-label">Associated Entity:</span>
+            <span class="meta-val">{{ recommendation.sourceEntityType }} • <code>{{ recommendation.sourceEntityNumber || recommendation.sourceEntityId }}</code></span>
+          </div>
+
+          <div class="evidence-table-wrapper" *ngIf="recommendation.evidenceJson || recommendation.evidence">
+            <table class="evidence-table">
+              <thead>
+                <tr>
+                  <th>Fact Attribute</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of getEvidenceEntries(recommendation)">
+                  <td class="key-col"><code>{{ item.key }}</code></td>
+                  <td class="val-col"><strong>{{ item.value }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner large"></div>
+  <p>Loading recommendation details...</p>
+</div>

@@ -122,6 +122,7 @@ public class Day28CopilotOperationalTest {
         booking.setTenantId(TENANT_ID);
         booking.setBookingNumber("BKG-CTX-01");
         booking.setCustomerId(UUID.randomUUID());
+        booking.setQuoteId(UUID.randomUUID());
         booking.setEventId(UUID.randomUUID());
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setBookingDate(LocalDate.now());

@@ -90,6 +90,9 @@ public class Booking {
     @Column(length = 2000)
     private String internalNotes;
 
+    @Column(name = "contract_signed")
+    private Boolean contractSigned = false;
+
     private String createdBy;
 
     private LocalDateTime createdAt;
@@ -200,6 +203,9 @@ public class Booking {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Boolean getContractSigned() { return contractSigned; }
+    public void setContractSigned(Boolean contractSigned) { this.contractSigned = contractSigned; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }

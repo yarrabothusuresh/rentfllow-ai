@@ -1,0 +1,135 @@
+<div class="recommendations-container">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/dashboard/automation">← Back to Dashboard</a>
+      </div>
+      <h1>Active Recommendations</h1>
+      <p class="subtitle">AI-assisted recommendations based on verified, deterministic operational evidence</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadRecommendations()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span> ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <div class="filters-card">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Search by ID, title, or reference..." 
+        [(ngModel)]="searchQuery" 
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <div class="filter-controls">
+      <div class="control-group">
+        <label>Status</label>
+        <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="ALL">All Statuses</option>
+          <option value="NEW">New</option>
+          <option value="REVIEWED">Reviewed</option>
+          <option value="ACTION_PROPOSED">Action Proposed</option>
+          <option value="RESOLVED">Resolved</option>
+          <option value="DISMISSED">Dismissed</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Priority</label>
+        <select [(ngModel)]="priorityFilter" (change)="applyFilters()">
+          <option value="ALL">All Priorities</option>
+          <option value="CRITICAL">Critical</option>
+          <option value="HIGH">High</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="LOW">Low</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Category</label>
+        <select [(ngModel)]="categoryFilter" (change)="applyFilters()">
+          <option value="ALL">All Categories</option>
+          <option value="DELIVERY">Delivery</option>
+          <option value="SALES">Sales</option>
+          <option value="FINANCE">Finance</option>
+          <option value="WAREHOUSE">Warehouse</option>
+          <option value="PROFITABILITY">Profitability</option>
+          <option value="CRM">CRM</option>
+          <option value="DAMAGE">Damage</option>
+          <option value="INTEGRATION">Integration</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div class="card-panel">
+    <div class="table-container" *ngIf="filteredRecommendations.length > 0; else emptyState">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Priority</th>
+            <th>Category</th>
+            <th>Title & Summary</th>
+            <th>Entity</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let rec of filteredRecommendations">
+            <td>
+              <a [routerLink]="['/dashboard/automation/recommendations', rec.id]" class="entity-link">
+                {{ rec.recommendationNumber }}
+              </a>
+            </td>
+            <td>
+              <span class="badge badge-{{ rec.priority.toLowerCase() }}">{{ rec.priority }}</span>
+            </td>
+            <td>
+              <span class="category-tag">{{ rec.category }}</span>
+            </td>
+            <td>
+              <div class="rec-title">{{ rec.title }}</div>
+              <div class="rec-summary">{{ rec.summary }}</div>
+            </td>
+            <td>
+              <code>{{ rec.sourceEntityType }}: {{ rec.sourceEntityNumber || rec.sourceEntityId }}</code>
+            </td>
+            <td>
+              <span class="status-pill status-{{ rec.status.toLowerCase() }}">{{ rec.status }}</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a [routerLink]="['/dashboard/automation/recommendations', rec.id]" class="btn btn-sm btn-primary">
+                  Review & Propose →
+                </a>
+                <button 
+                  *ngIf="rec.status === 'NEW' || rec.status === 'REVIEWED'" 
+                  class="btn btn-sm btn-secondary" 
+                  (click)="dismiss(rec)"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <h3>No recommendations match your filters</h3>
+        <p>Your operations are running smoothly or filters are excluding items.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

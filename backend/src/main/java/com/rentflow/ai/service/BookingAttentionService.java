@@ -45,6 +45,11 @@ public class BookingAttentionService {
     }
 
     @Transactional(readOnly = true)
+    public List<BookingAttentionItemDTO> getBookingsNeedingAttention(String tenantId, int days) {
+        return getBookingsNeedingAttention(tenantId, LocalDate.now(), LocalDate.now().plusDays(days));
+    }
+
+    @Transactional(readOnly = true)
     public List<BookingAttentionItemDTO> getBookingsNeedingAttention(String tenantId, LocalDate startDate, LocalDate endDate) {
         List<Booking> bookings = bookingRepository.findByTenantId(tenantId);
         List<BookingAttentionItemDTO> attentionList = new ArrayList<>();
@@ -75,17 +80,18 @@ public class BookingAttentionService {
             );
 
             // Signal 1: Contract signed check
-            if (b.getStatus() == BookingStatus.DRAFT || b.getStatus() == BookingStatus.PENDING) {
+            if (b.getStatus() == BookingStatus.PENDING || b.getStatus() == BookingStatus.DEPOSIT_PENDING) {
                 item.getSignals().add(BookingAttentionSignal.UNSIGNED_CONTRACT);
                 item.getDetails().add("Contract / proposal is not yet executed");
                 item.setSeverity("HIGH");
             }
 
             // Signal 2: Deposit / Financial Check
-            List<Invoice> invoices = invoiceRepository.findByTenantIdAndBookingId(tenantId, b.getId());
+            Optional<Invoice> optInvoice = invoiceRepository.findByTenantIdAndBookingId(tenantId, b.getId());
             boolean depositPaid = false;
             boolean hasOverdue = false;
-            for (Invoice inv : invoices) {
+            if (optInvoice.isPresent()) {
+                Invoice inv = optInvoice.get();
                 if (inv.getStatus() == InvoiceStatus.OVERDUE || (inv.getDueDate() != null && inv.getDueDate().isBefore(LocalDate.now()) && inv.getStatus() != InvoiceStatus.PAID)) {
                     hasOverdue = true;
                 }
@@ -98,7 +104,7 @@ public class BookingAttentionService {
                 item.getSignals().add(BookingAttentionSignal.OVERDUE_INVOICE);
                 item.getDetails().add("Invoice payment is overdue");
                 item.setSeverity("HIGH");
-            } else if (!depositPaid && !invoices.isEmpty() && bDate != null && bDate.isBefore(LocalDate.now().plusDays(3))) {
+            } else if (!depositPaid && optInvoice.isPresent() && bDate != null && bDate.isBefore(LocalDate.now().plusDays(3))) {
                 item.getSignals().add(BookingAttentionSignal.UNPAID_DEPOSIT);
                 item.getDetails().add("Deposit payment not recorded within 3 days of event");
                 item.setSeverity("HIGH");

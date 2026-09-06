@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("aiSalesSearchCustomersTool")
 public class SearchCustomersTool implements AiSalesTool {
 
     private final CustomerRepository customerRepository;

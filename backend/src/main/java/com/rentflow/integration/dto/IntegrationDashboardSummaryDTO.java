@@ -35,4 +35,10 @@ public class IntegrationDashboardSummaryDTO {
 
     public double getSuccessRate() { return successRate; }
     public void setSuccessRate(double successRate) { this.successRate = successRate; }
+
+    public long getActiveConnectionsCount() { return connectedIntegrations; }
+    public long getTotalOutboxEvents() { return eventsToday; }
+    public long getPendingOutboxEvents() { return pendingRetries; }
+    public long getFailedOutboxEvents() { return deadLetterCount; }
+    public java.util.List<?> getRecentSyncJobs() { return java.util.Collections.emptyList(); }
 }

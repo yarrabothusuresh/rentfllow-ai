@@ -20,6 +20,13 @@
       <a routerLink="/dashboard/ai-sales/conversations" routerLinkActive="active" class="nav-item">↳ Inquiries & Chats</a>
       <a routerLink="/dashboard/ai-sales/escalations" routerLinkActive="active" class="nav-item">↳ Escalations</a>
       <a routerLink="/dashboard/ai-sales/settings" routerLinkActive="active" class="nav-item">↳ AI Settings</a>
+
+      <div class="nav-section">AI Recommendations & Automation</div>
+      <a routerLink="/dashboard/automation/dashboard" routerLinkActive="active" class="nav-item">Automation Command</a>
+      <a routerLink="/dashboard/automation/recommendations" routerLinkActive="active" class="nav-item">↳ Recommendations</a>
+      <a routerLink="/dashboard/automation/approvals" routerLinkActive="active" class="nav-item">↳ Approval Queue</a>
+      <a routerLink="/dashboard/automation/rules" routerLinkActive="active" class="nav-item">↳ Rules & Governance</a>
+      <a routerLink="/dashboard/automation/executions" routerLinkActive="active" class="nav-item">↳ Execution Audit</a>
       
       <div class="nav-section" *ngIf="hasAnyPermissionInOperations()">Operations</div>
       <a routerLink="/dashboard/leads" routerLinkActive="active" class="nav-item" *ngIf="hasPermission('LEAD_VIEW')">Leads</a>

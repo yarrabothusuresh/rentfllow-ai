@@ -228,7 +228,7 @@ export class AiCopilotService {
 
   private getFallbackResponseForQuery(query: string, role: string, convId: string): CopilotResponse {
     const q = query.toLowerCase();
-    if (q.contains?.('margin') || q.includes('margin')) {
+    if (q.includes('margin')) {
       return {
         conversationId: convId,
         role: 'assistant',

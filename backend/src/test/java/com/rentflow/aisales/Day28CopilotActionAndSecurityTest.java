@@ -97,7 +97,9 @@ public class Day28CopilotActionAndSecurityTest {
         delivery.setScheduledDate(LocalDate.now().plusDays(1));
         delivery.setStatus(DeliveryStatus.SCHEDULED);
         delivery.setBookingId(UUID.randomUUID());
+        delivery.setWarehouseOrderId(UUID.randomUUID());
         delivery.setCustomerId(UUID.randomUUID());
+        delivery.setEventId(UUID.randomUUID());
         Delivery savedDelivery = deliveryRepository.save(delivery);
 
         Driver driver = new Driver();

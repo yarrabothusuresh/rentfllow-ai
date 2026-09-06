@@ -29,6 +29,7 @@ public class KpiMetricDTO {
     public void setName(String name) { this.name = name; }
 
     public BigDecimal getValue() { return value; }
+    public BigDecimal getCurrentValue() { return value; }
     public void setValue(BigDecimal value) { this.value = value; }
 
     public String getFormattedValue() { return formattedValue; }

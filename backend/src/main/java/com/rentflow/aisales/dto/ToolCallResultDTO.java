@@ -34,6 +34,14 @@ public class ToolCallResultDTO {
     public Object getResult() { return result; }
     public void setResult(Object result) { this.result = result; }
 
+    @SuppressWarnings("unchecked")
+    public java.util.Map<String, Object> getData() {
+        if (result instanceof java.util.Map) {
+            return (java.util.Map<String, Object>) result;
+        }
+        return java.util.Collections.emptyMap();
+    }
+
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 

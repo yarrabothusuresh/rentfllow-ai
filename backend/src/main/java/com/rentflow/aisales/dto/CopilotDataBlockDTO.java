@@ -25,6 +25,26 @@ public class CopilotDataBlockDTO {
 
     public CopilotDataBlockDTO() {}
 
+    public CopilotDataBlockDTO(String type, String title, Map<String, Object> metrics) {
+        try {
+            this.type = BlockType.valueOf(type.toUpperCase());
+        } catch (Exception e) {
+            this.type = BlockType.KPI;
+        }
+        this.title = title;
+        this.metrics = metrics;
+    }
+
+    public CopilotDataBlockDTO(String type, String title, List<Map<String, Object>> rows) {
+        try {
+            this.type = BlockType.valueOf(type.toUpperCase());
+        } catch (Exception e) {
+            this.type = BlockType.TABLE;
+        }
+        this.title = title;
+        this.rows = rows;
+    }
+
     public static CopilotDataBlockDTO kpi(String title, Object value, String formattedValue, Double changePct, String trend, String period) {
         CopilotDataBlockDTO b = new CopilotDataBlockDTO();
         b.setType(BlockType.KPI);

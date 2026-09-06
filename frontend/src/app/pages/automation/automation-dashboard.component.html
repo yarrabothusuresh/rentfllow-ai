@@ -1,0 +1,231 @@
+<div class="automation-container">
+  <!-- Header with Proactive Scan and Mode Indicator -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">DAY 29 • AUTONOMOUS GOVERNANCE</div>
+      <h1>Proactive AI Recommendations & Safe Automation</h1>
+      <p class="subtitle">Deterministic signal detection • AI-assisted explanations • Human-in-the-loop approvals • Idempotent executions</p>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-secondary" (click)="loadDashboard()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span> ↻ Refresh
+      </button>
+      <button class="btn btn-primary btn-scan" (click)="triggerScan()" [disabled]="scanning">
+        <span *ngIf="scanning" class="spinner"></span> ⚡ Run Proactive Scan
+      </button>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div class="alert-banner" *ngIf="actionMessage">
+    <span>{{ actionMessage }}</span>
+    <button class="close-btn" (click)="actionMessage = null">✕</button>
+  </div>
+
+  <!-- Awaiting Approval Alert Card -->
+  <div class="approval-alert-card" *ngIf="dashboard && dashboard.pendingApprovals > 0">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+      <h3>{{ dashboard.pendingApprovals }} Action(s) Waiting for Human Confirmation</h3>
+      <p>High-impact operations are held safely in the approval queue until an authorized team member confirms or rejects them.</p>
+    </div>
+    <a routerLink="/dashboard/automation/approvals" class="btn btn-warning">Go to Approval Queue →</a>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid" *ngIf="dashboard">
+    <div class="kpi-card priority-critical">
+      <div class="kpi-icon">🚨</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Critical Priority</span>
+        <span class="kpi-val">{{ dashboard.criticalRecommendations }}</span>
+      </div>
+      <div class="kpi-sub">Immediate operational loss risk</div>
+    </div>
+
+    <div class="kpi-card priority-high">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-data">
+        <span class="kpi-label">High Priority</span>
+        <span class="kpi-val">{{ dashboard.highRecommendations }}</span>
+      </div>
+      <div class="kpi-sub">Attention needed today</div>
+    </div>
+
+    <div class="kpi-card priority-medium">
+      <div class="kpi-icon">📌</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Medium Priority</span>
+        <span class="kpi-val">{{ dashboard.mediumRecommendations }}</span>
+      </div>
+      <div class="kpi-sub">Optimization opportunities</div>
+    </div>
+
+    <div class="kpi-card kpi-neutral">
+      <div class="kpi-icon">🛡️</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Active Signals</span>
+        <span class="kpi-val">{{ dashboard.totalSignalsActive }}</span>
+      </div>
+      <div class="kpi-sub">Deduplicated business facts</div>
+    </div>
+
+    <div class="kpi-card kpi-success">
+      <div class="kpi-icon">✓</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Executions</span>
+        <span class="kpi-val">{{ dashboard.totalExecutions }}</span>
+      </div>
+      <div class="kpi-sub">Safe automations completed</div>
+    </div>
+  </div>
+
+  <!-- Main Grid: Recommendations & Pending Approvals -->
+  <div class="two-column-layout">
+    <!-- Left Column: Top Active Recommendations -->
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>Active AI Recommendations</h2>
+          <span class="badge badge-count">{{ dashboard?.recentRecommendations?.length || 0 }}</span>
+        </div>
+        <a routerLink="/dashboard/automation/recommendations" class="view-all-link">View All Filtered →</a>
+      </div>
+
+      <div class="table-container" *ngIf="dashboard?.recentRecommendations && dashboard!.recentRecommendations.length > 0; else noRecs">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Priority</th>
+              <th>Category</th>
+              <th>Recommendation</th>
+              <th>Suggested Action</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let rec of dashboard!.recentRecommendations">
+              <td class="rec-num">
+                <a [routerLink]="['/dashboard/automation/recommendations', rec.id]">{{ rec.recommendationNumber }}</a>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="'badge-' + rec.priority.toLowerCase()">{{ rec.priority }}</span>
+              </td>
+              <td>
+                <span class="category-chip">{{ rec.category }}</span>
+              </td>
+              <td class="rec-title-cell">
+                <div class="rec-title">{{ rec.title }}</div>
+                <div class="rec-summary">{{ rec.summary }}</div>
+              </td>
+              <td>
+                <code class="action-tag">{{ rec.suggestedActionType || 'NONE' }}</code>
+              </td>
+              <td>
+                <span class="status-pill" [ngClass]="'status-' + rec.status.toLowerCase()">{{ rec.status }}</span>
+              </td>
+              <td class="action-btns">
+                <a [routerLink]="['/dashboard/automation/recommendations', rec.id]" class="btn-sm btn-outline">Review</a>
+                <button (click)="dismissRecommendation(rec)" class="btn-sm btn-ghost">Dismiss</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noRecs>
+        <div class="empty-state">
+          <div class="empty-icon">✓</div>
+          <p>No active recommendations! All operational, finance, delivery, and sales signals are currently green.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Right Column: Pending Approvals & Executions -->
+    <div class="side-panel-stack">
+      <!-- Approvals Queue Widget -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Human Approval Queue</h2>
+            <span class="badge badge-warning">{{ dashboard?.pendingApprovalsList?.length || 0 }}</span>
+          </div>
+          <a routerLink="/dashboard/automation/approvals" class="view-all-link">Queue →</a>
+        </div>
+
+        <div class="approval-list" *ngIf="dashboard?.pendingApprovalsList && dashboard!.pendingApprovalsList.length > 0; else noApprovals">
+          <div class="approval-item" *ngFor="let app of dashboard!.pendingApprovalsList">
+            <div class="approval-top">
+              <span class="approval-action-badge">{{ app.actionType }}</span>
+              <span class="approval-date">{{ app.createdAt | date:'short' }}</span>
+            </div>
+            <div class="approval-desc">
+              Proposed by <strong>{{ app.requestedBy }}</strong> for tenant action confirmation.
+            </div>
+            <div class="approval-buttons">
+              <button class="btn-sm btn-success" (click)="openApprovalModal(app, 'APPROVE')">✓ Confirm & Execute</button>
+              <button class="btn-sm btn-danger" (click)="openApprovalModal(app, 'REJECT')">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noApprovals>
+          <div class="empty-state-sm">
+            <p>No actions waiting for human approval.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Recent Executions Widget -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Recent Automation Audit</h2>
+          </div>
+          <a routerLink="/dashboard/automation/executions" class="view-all-link">Full Audit →</a>
+        </div>
+
+        <div class="audit-list" *ngIf="dashboard?.recentExecutions && dashboard!.recentExecutions.length > 0; else noExecs">
+          <div class="audit-item" *ngFor="let exec of dashboard!.recentExecutions">
+            <div class="audit-header">
+              <span class="audit-status" [ngClass]="'audit-' + exec.executionStatus.toLowerCase()">{{ exec.executionStatus }}</span>
+              <span class="audit-time">{{ exec.completedAt || exec.createdAt | date:'HH:mm:ss' }}</span>
+            </div>
+            <div class="audit-summary">{{ exec.resultSummary || exec.actionType }}</div>
+            <div class="audit-meta">By: {{ exec.executedBy }} • Key: {{ exec.idempotencyKey }}</div>
+          </div>
+        </div>
+        <ng-template #noExecs>
+          <div class="empty-state-sm">
+            <p>No recent automations executed yet today.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="activeApproval">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>{{ approvalActionType === 'APPROVE' ? 'Confirm Action Execution' : 'Reject Action Proposal' }}</h3>
+        <button class="close-btn" (click)="closeApprovalModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Action Type:</strong> <code>{{ activeApproval.actionType }}</code></p>
+        <p><strong>Idempotent Governance:</strong> The system will revalidate underlying entity state before firing existing domain services.</p>
+        
+        <label for="reasonInput"><strong>Reason / Notes:</strong></label>
+        <textarea id="reasonInput" [(ngModel)]="approvalReason" rows="3" class="form-textarea" placeholder="Enter confirmation or rejection rationale..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeApprovalModal()" [disabled]="modalSubmitting">Cancel</button>
+        <button class="btn" [ngClass]="approvalActionType === 'APPROVE' ? 'btn-success' : 'btn-danger'" 
+                (click)="submitApprovalDecision()" [disabled]="modalSubmitting">
+          <span *ngIf="modalSubmitting" class="spinner"></span>
+          {{ approvalActionType === 'APPROVE' ? 'Execute Action' : 'Reject Proposal' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

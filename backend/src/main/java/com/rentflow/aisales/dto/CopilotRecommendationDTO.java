@@ -23,6 +23,18 @@ public class CopilotRecommendationDTO {
 
     public CopilotRecommendationDTO() {}
 
+    public CopilotRecommendationDTO(String title, String description, String priorityStr, String suggestedAction) {
+        this.title = title;
+        this.description = description;
+        try {
+            this.priority = Priority.valueOf(priorityStr.toUpperCase());
+        } catch (Exception e) {
+            this.priority = Priority.MEDIUM;
+        }
+        this.suggestedAction = suggestedAction;
+        this.actionable = true;
+    }
+
     public CopilotRecommendationDTO(String type, String title, String description, Priority priority, String evidence, String suggestedAction, boolean actionable) {
         this.type = type;
         this.title = title;

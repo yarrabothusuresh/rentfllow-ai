@@ -1,0 +1,85 @@
+<div class="rules-container">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/dashboard/automation">← Back to Dashboard</a>
+      </div>
+      <h1>Automation Rules & Safety Governance</h1>
+      <p class="subtitle">Deterministic rule policies: Control execution mode per business domain without modifying core logic</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="loadRules()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span> ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="alert-banner success" *ngIf="message">
+    <span>✓ {{ message }}</span>
+    <button class="close-btn" (click)="message = null">✕</button>
+  </div>
+
+  <div class="card-panel">
+    <div class="table-container" *ngIf="rules.length > 0; else noRules">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rule Code</th>
+            <th>Name & Description</th>
+            <th>Signal Type</th>
+            <th>Action Type</th>
+            <th>Status</th>
+            <th>Execution Mode</th>
+            <th>Cooldown</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let rule of rules">
+            <td>
+              <code>{{ rule.ruleCode }}</code>
+            </td>
+            <td>
+              <div class="rule-name">{{ rule.name }}</div>
+              <div class="rule-desc">{{ rule.description }}</div>
+            </td>
+            <td>
+              <span class="signal-tag">{{ rule.signalType }}</span>
+            </td>
+            <td>
+              <span class="action-tag">{{ rule.actionType }}</span>
+            </td>
+            <td>
+              <label class="toggle-switch">
+                <input type="checkbox" [checked]="rule.enabled" (change)="toggleEnabled(rule)">
+                <span class="slider"></span>
+              </label>
+              <span class="status-text">{{ rule.enabled ? 'Enabled' : 'Disabled' }}</span>
+            </td>
+            <td>
+              <select 
+                class="mode-select" 
+                [ngModel]="rule.mode" 
+                (ngModelChange)="updateMode(rule, $event)"
+              >
+                <option value="RECOMMEND_ONLY">RECOMMEND_ONLY (Advisory)</option>
+                <option value="APPROVAL_REQUIRED">APPROVAL_REQUIRED (Human Gate)</option>
+                <option value="AUTO_EXECUTE_LOW_RISK">AUTO_EXECUTE_LOW_RISK (Autonomous)</option>
+              </select>
+            </td>
+            <td>
+              <span class="cooldown-badge">{{ rule.cooldownMinutes }}m cooldown</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noRules>
+      <div class="empty-state">
+        <div class="empty-icon">⚙️</div>
+        <h3>No automation rules configured</h3>
+        <p>Run a proactive scan or check default rule seeding.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

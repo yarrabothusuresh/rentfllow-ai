@@ -24,6 +24,14 @@ public class CopilotSourceReferenceDTO {
         this.route = route;
     }
 
+    public CopilotSourceReferenceDTO(String displayName, String route, String entityType, String entityPublicId) {
+        this.displayName = displayName;
+        this.route = route;
+        this.entityType = entityType;
+        this.entityPublicId = entityPublicId;
+        this.type = entityType;
+    }
+
     public static CopilotSourceReferenceDTO of(String type, String displayName, String route) {
         return new CopilotSourceReferenceDTO(type, displayName, type, null, route);
     }

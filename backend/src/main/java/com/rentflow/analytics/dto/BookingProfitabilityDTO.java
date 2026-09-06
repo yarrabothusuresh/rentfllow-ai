@@ -54,5 +54,6 @@ public class BookingProfitabilityDTO {
     public void setMarginFlag(String marginFlag) { this.marginFlag = marginFlag; }
 
     public boolean isWarningFlag() { return warningFlag; }
+    public boolean getWarningFlag() { return warningFlag; }
     public void setWarningFlag(boolean warningFlag) { this.warningFlag = warningFlag; }
 }

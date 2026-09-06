@@ -161,6 +161,14 @@ import { CrmLeadDetailComponent } from './pages/crm/crm-lead-detail.component';
 import { CrmPipelineComponent } from './pages/crm/crm-pipeline.component';
 import { PublicContactComponent } from './pages/crm/public-contact.component';
 
+// Day 29 AI Recommendations & Safe Business Automation
+import { AutomationDashboardComponent } from './pages/automation/automation-dashboard.component';
+import { RecommendationsListComponent } from './pages/automation/recommendations-list.component';
+import { RecommendationDetailComponent } from './pages/automation/recommendation-detail.component';
+import { ApprovalQueueComponent } from './pages/automation/approval-queue.component';
+import { AutomationRulesComponent } from './pages/automation/automation-rules.component';
+import { AutomationExecutionsComponent } from './pages/automation/automation-executions.component';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'rentals', component: PublicCatalogComponent },
@@ -402,9 +410,24 @@ export const routes: Routes = [
       { path: 'ai-sales/conversations/:id', component: AiConversationDetailComponent },
       { path: 'ai-sales/quotes/:id/review', component: AiQuoteReviewComponent },
       { path: 'ai-sales/escalations', component: AiEscalationsListComponent },
-      { path: 'ai-sales/settings', component: AiSalesSettingsComponent }
+      { path: 'ai-sales/settings', component: AiSalesSettingsComponent },
+
+      // Day 29 AI Recommendations & Safe Business Automation sub-routes
+      { path: 'automation', component: AutomationDashboardComponent },
+      { path: 'automation/dashboard', component: AutomationDashboardComponent },
+      { path: 'automation/recommendations', component: RecommendationsListComponent },
+      { path: 'automation/recommendations/:id', component: RecommendationDetailComponent },
+      { path: 'automation/approvals', component: ApprovalQueueComponent },
+      { path: 'automation/rules', component: AutomationRulesComponent },
+      { path: 'automation/executions', component: AutomationExecutionsComponent }
     ]
   },
+  // Top-level direct redirects for Automation
+  { path: 'automation', redirectTo: 'dashboard/automation', pathMatch: 'full' },
+  { path: 'automation/recommendations', redirectTo: 'dashboard/automation/recommendations', pathMatch: 'full' },
+  { path: 'automation/approvals', redirectTo: 'dashboard/automation/approvals', pathMatch: 'full' },
+  { path: 'automation/rules', redirectTo: 'dashboard/automation/rules', pathMatch: 'full' },
+  { path: 'automation/executions', redirectTo: 'dashboard/automation/executions', pathMatch: 'full' },
   // Top-level direct redirects for CRM
   { path: 'crm', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },
   { path: 'crm/dashboard', redirectTo: 'dashboard/crm/dashboard', pathMatch: 'full' },

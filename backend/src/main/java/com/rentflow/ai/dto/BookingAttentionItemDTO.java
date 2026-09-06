@@ -38,12 +38,14 @@ public class BookingAttentionItemDTO {
 
     public LocalDate getEventDate() { return eventDate; }
     public void setEventDate(LocalDate eventDate) { this.eventDate = eventDate; }
+    public LocalDate getRentalStart() { return eventDate; }
 
     public List<BookingAttentionSignal> getSignals() { return signals; }
     public void setSignals(List<BookingAttentionSignal> signals) { this.signals = signals; }
 
     public List<String> getDetails() { return details; }
     public void setDetails(List<String> details) { this.details = details; }
+    public List<String> getSignalDetails() { return details; }
 
     public String getSeverity() { return severity; }
     public void setSeverity(String severity) { this.severity = severity; }
