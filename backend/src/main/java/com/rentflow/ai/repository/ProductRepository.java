@@ -3,7 +3,9 @@ package com.rentflow.ai.repository;
 import com.rentflow.ai.model.Product;
 import com.rentflow.ai.model.ProductStatus;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,6 +18,11 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findByTenantId(String tenantId);
     Optional<Product> findByTenantIdAndId(String tenantId, UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Product p WHERE p.tenantId = :tenantId AND p.id = :id")
+    Optional<Product> findWithLockByTenantIdAndId(@Param("tenantId") String tenantId, @Param("id") UUID id);
+
     Optional<Product> findByTenantIdAndSkuIgnoreCase(String tenantId, String sku);
     List<Product> findByTenantIdAndStatus(String tenantId, ProductStatus status);
     List<Product> findByTenantIdAndCategoryId(String tenantId, UUID categoryId);

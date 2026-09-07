@@ -135,7 +135,7 @@ public class InventoryService {
     }
 
     public InventoryReservationDTO createReservation(String tenantId, InventoryReservationDTO dto, String createdBy) {
-        Product product = productRepository.findByTenantIdAndId(tenantId, dto.getProductId())
+        Product product = productRepository.findWithLockByTenantIdAndId(tenantId, dto.getProductId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         LocalDateTime start = dto.getStartDateTime() != null ? dto.getStartDateTime() : LocalDateTime.now();

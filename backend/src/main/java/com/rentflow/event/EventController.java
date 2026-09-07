@@ -5,6 +5,7 @@ import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.service.EventService;
 import com.rentflow.event.dto.CreateEventRequest;
 import com.rentflow.event.dto.EventDTO;
+import com.rentflow.security.SecurityUtils;
 import com.rentflow.workflow.model.EventStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +40,23 @@ public class EventController {
 
     private String resolveTenantId(String tenantIdHeader) {
         return (tenantIdHeader != null && !tenantIdHeader.isBlank())
-                ? tenantIdHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+                ? tenantIdHeader : SecurityUtils.getCurrentTenantId();
+    }
+
+    private UUID resolveTenantUuid(String tenantIdHeader) {
+        String tenantStr = resolveTenantId(tenantIdHeader);
+        try {
+            return UUID.fromString(tenantStr);
+        } catch (IllegalArgumentException e) {
+            return DEFAULT_TENANT_ID;
+        }
     }
 
     @PostMapping
-    public ResponseEntity<EventDTO> createEvent(@RequestBody CreateEventRequest request) {
-        UUID tenantId = request.getTenantId() != null ? request.getTenantId() : DEFAULT_TENANT_ID;
+    public ResponseEntity<EventDTO> createEvent(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestBody CreateEventRequest request) {
+        UUID tenantId = resolveTenantUuid(tenantHeader);
 
         Event event = new Event();
         event.setId(UUID.randomUUID());
@@ -65,9 +77,14 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(saved));
     }
 
+    public ResponseEntity<EventDTO> createEvent(CreateEventRequest request) {
+        return createEvent(null, request);
+    }
+
     @GetMapping
-    public ResponseEntity<List<EventDTO>> getAllEvents(@RequestParam(required = false) UUID tenantId) {
-        UUID effectiveTenantId = tenantId != null ? tenantId : DEFAULT_TENANT_ID;
+    public ResponseEntity<List<EventDTO>> getAllEvents(
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        UUID effectiveTenantId = resolveTenantUuid(tenantHeader);
         List<Event> events = eventRepository.findByTenantId(effectiveTenantId);
 
         if (events.isEmpty()) {
@@ -94,16 +111,31 @@ public class EventController {
         return ResponseEntity.ok(dtos);
     }
 
+    public ResponseEntity<List<EventDTO>> getAllEvents(UUID tenantId) {
+        return getAllEvents(tenantId != null ? tenantId.toString() : null);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<EventDTO> getEventById(@PathVariable UUID id) {
-        Event event = eventRepository.findById(id)
+    public ResponseEntity<EventDTO> getEventById(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        UUID effectiveTenantId = resolveTenantUuid(tenantHeader);
+        Event event = eventRepository.findByIdAndTenantId(id, effectiveTenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found with ID: " + id));
         return ResponseEntity.ok(mapToDTO(event));
     }
 
+    public ResponseEntity<EventDTO> getEventById(UUID id) {
+        return getEventById(id, null);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<EventDTO> updateEvent(@PathVariable UUID id, @RequestBody EventDTO updateDTO) {
-        Event event = eventRepository.findById(id)
+    public ResponseEntity<EventDTO> updateEvent(
+            @PathVariable UUID id,
+            @RequestBody EventDTO updateDTO,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        UUID effectiveTenantId = resolveTenantUuid(tenantHeader);
+        Event event = eventRepository.findByIdAndTenantId(id, effectiveTenantId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found with ID: " + id));
 
         if (updateDTO.getEventName() != null) event.setEventName(updateDTO.getEventName());
@@ -119,6 +151,17 @@ public class EventController {
 
         Event saved = eventRepository.save(event);
         return ResponseEntity.ok(mapToDTO(saved));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable UUID id,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader) {
+        UUID effectiveTenantId = resolveTenantUuid(tenantHeader);
+        Event event = eventRepository.findByIdAndTenantId(id, effectiveTenantId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found with ID: " + id));
+        eventRepository.delete(event);
+        return ResponseEntity.noContent().build();
     }
 
     // Requirements Endpoints

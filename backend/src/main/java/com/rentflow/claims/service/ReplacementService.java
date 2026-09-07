@@ -111,7 +111,7 @@ public class ReplacementService {
         ReplacementOrder saved = replacementRepository.save(order);
 
         // Update product owned quantity
-        Product product = productRepository.findById(order.getProductId()).orElse(null);
+        Product product = productRepository.findByTenantIdAndId(tenantId, order.getProductId()).orElse(null);
         if (product != null) {
             product.setQuantityOwned(product.getQuantityOwned() + order.getQuantity());
             productRepository.save(product);
@@ -183,10 +183,10 @@ public class ReplacementService {
         dto.setCreatedAt(order.getCreatedAt());
         dto.setUpdatedAt(order.getUpdatedAt());
 
-        Optional<DamageClaim> claim = claimRepository.findById(order.getClaimId());
+        Optional<DamageClaim> claim = claimRepository.findByTenantIdAndId(order.getTenantId(), order.getClaimId());
         claim.ifPresent(c -> dto.setClaimNumber(c.getClaimNumber()));
 
-        Optional<Product> product = productRepository.findById(order.getProductId());
+        Optional<Product> product = productRepository.findByTenantIdAndId(order.getTenantId(), order.getProductId());
         product.ifPresent(p -> {
             dto.setProductName(p.getName());
             dto.setProductSku(p.getSku());

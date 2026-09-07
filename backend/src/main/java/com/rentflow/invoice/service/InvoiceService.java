@@ -94,7 +94,7 @@ public class InvoiceService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + bookingId));
 
         // 4. Load Customer
-        Customer customer = customerRepository.findById(booking.getCustomerId())
+        Customer customer = customerRepository.findByTenantIdAndId(tenantId, booking.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + booking.getCustomerId()));
 
         // 5. Load Booking Items
@@ -400,10 +400,10 @@ public class InvoiceService {
 
         // Booking Number & Event Name mapping
         if (i.getBookingId() != null) {
-            bookingRepository.findById(i.getBookingId()).ifPresent(b -> {
+            bookingRepository.findByTenantIdAndId(i.getTenantId(), i.getBookingId()).ifPresent(b -> {
                 dto.setBookingNumber(b.getBookingNumber());
                 if (b.getEventId() != null) {
-                    eventRepository.findById(b.getEventId()).ifPresent(e -> dto.setEventName(e.getEventName()));
+                    eventRepository.findByTenantIdAndId(i.getTenantId(), b.getEventId()).ifPresent(e -> dto.setEventName(e.getEventName()));
                 }
             });
         }

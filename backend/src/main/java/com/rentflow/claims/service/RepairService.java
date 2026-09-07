@@ -83,7 +83,7 @@ public class RepairService {
 
         // Product inventory state remains in MAINTENANCE during repair (Rule 17)
         logAudit(repair.getClaimId(), "REPAIR_STARTED", "Repair " + repair.getRepairNumber() + " started.");
-        DamageClaim claim = claimRepository.findById(repair.getClaimId()).orElse(null);
+        DamageClaim claim = claimRepository.findByTenantIdAndId(tenantId, repair.getClaimId()).orElse(null);
         if (claim != null && claim.getCustomerId() != null) {
             sendNotification(tenantId, claim.getCustomerId(), NotificationType.REPAIR_STARTED, "Repair Work Started", "Work has begun on repair order " + repair.getRepairNumber(), repairId.toString(), "REPAIR_ORDER");
         }
@@ -104,7 +104,7 @@ public class RepairService {
         RepairOrder saved = repairRepository.save(repair);
 
         // Restore inventory condition based on post-repair inspection
-        Product product = productRepository.findById(repair.getProductId()).orElse(null);
+        Product product = productRepository.findByTenantIdAndId(tenantId, repair.getProductId()).orElse(null);
         if (product != null) {
             if (conditionAfterRepair == InspectionCondition.GOOD) {
                 // Restoration: MAINTENANCE -> AVAILABLE
@@ -121,7 +121,7 @@ public class RepairService {
         }
 
         logAudit(repair.getClaimId(), "REPAIR_COMPLETED", "Repair " + repair.getRepairNumber() + " completed with condition " + conditionAfterRepair);
-        DamageClaim claim = claimRepository.findById(repair.getClaimId()).orElse(null);
+        DamageClaim claim = claimRepository.findByTenantIdAndId(tenantId, repair.getClaimId()).orElse(null);
         if (claim != null && claim.getCustomerId() != null) {
             sendNotification(tenantId, claim.getCustomerId(), NotificationType.REPAIR_COMPLETED, "Repair Order Completed", "Repair " + repair.getRepairNumber() + " completed successfully.", repairId.toString(), "REPAIR_ORDER");
         }
@@ -238,10 +238,10 @@ public class RepairService {
         dto.setCreatedAt(repair.getCreatedAt());
         dto.setUpdatedAt(repair.getUpdatedAt());
 
-        Optional<DamageClaim> claim = claimRepository.findById(repair.getClaimId());
+        Optional<DamageClaim> claim = claimRepository.findByTenantIdAndId(repair.getTenantId(), repair.getClaimId());
         claim.ifPresent(c -> dto.setClaimNumber(c.getClaimNumber()));
 
-        Optional<Product> product = productRepository.findById(repair.getProductId());
+        Optional<Product> product = productRepository.findByTenantIdAndId(repair.getTenantId(), repair.getProductId());
         product.ifPresent(p -> {
             dto.setProductName(p.getName());
             dto.setProductSku(p.getSku());

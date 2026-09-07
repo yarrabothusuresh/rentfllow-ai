@@ -3,6 +3,7 @@ package com.rentflow.ai.service;
 import com.rentflow.ai.dto.*;
 import com.rentflow.ai.model.*;
 import com.rentflow.ai.repository.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,8 @@ public class QuoteService {
     private final ProductRepository productRepository;
     private final AvailabilityService availabilityService;
     private final QuoteCalculationService calculationService;
+    private final CustomerRepository customerRepository;
+    private final EventRepository eventRepository;
 
     // Default max discount percentage for SALES role
     public static final BigDecimal SALES_MAX_DISCOUNT_PCT = new BigDecimal("20.00");
@@ -35,7 +38,9 @@ public class QuoteService {
                         QuoteFeeRepository quoteFeeRepository,
                         ProductRepository productRepository,
                         AvailabilityService availabilityService,
-                        QuoteCalculationService calculationService) {
+                        QuoteCalculationService calculationService,
+                        CustomerRepository customerRepository,
+                        @Qualifier("crmEventRepository") EventRepository eventRepository) {
         this.quoteRepository = quoteRepository;
         this.quoteItemRepository = quoteItemRepository;
         this.quoteDiscountRepository = quoteDiscountRepository;
@@ -43,6 +48,8 @@ public class QuoteService {
         this.productRepository = productRepository;
         this.availabilityService = availabilityService;
         this.calculationService = calculationService;
+        this.customerRepository = customerRepository;
+        this.eventRepository = eventRepository;
     }
 
     public synchronized String generateQuoteNumber(String tenantId) {
@@ -58,6 +65,33 @@ public class QuoteService {
     @Transactional
     public QuoteDTO createQuote(String tenantId, QuoteDTO dto, String userRole) {
         validateRolePricingPermission(userRole, dto);
+
+        // Cross-tenant reference prevention: prevent linking to another tenant's entities
+        if (dto.getCustomerId() != null) {
+            customerRepository.findById(dto.getCustomerId()).ifPresent(c -> {
+                if (!tenantId.equals(c.getTenantId())) {
+                    throw new IllegalArgumentException("Customer does not belong to tenant: " + tenantId);
+                }
+            });
+        }
+        if (dto.getEventId() != null) {
+            eventRepository.findById(dto.getEventId()).ifPresent(e -> {
+                if (!tenantId.equals(e.getTenantId())) {
+                    throw new IllegalArgumentException("Event does not belong to tenant: " + tenantId);
+                }
+            });
+        }
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            for (QuoteItemDTO itemDto : dto.getItems()) {
+                if (itemDto.getProductId() != null) {
+                    productRepository.findById(itemDto.getProductId()).ifPresent(p -> {
+                        if (!tenantId.equals(p.getTenantId())) {
+                            throw new IllegalArgumentException("Product does not belong to tenant: " + tenantId);
+                        }
+                    });
+                }
+            }
+        }
 
         Quote q = new Quote();
         q.setTenantId(tenantId);
@@ -128,8 +162,24 @@ public class QuoteService {
                 throw new IllegalStateException("Quote has expired or been cancelled and cannot be modified.");
             }
 
-            q.setCustomerId(dto.getCustomerId());
-            q.setEventId(dto.getEventId());
+            if (dto.getCustomerId() != null) {
+                customerRepository.findById(dto.getCustomerId()).ifPresent(c -> {
+                    if (!tenantId.equals(c.getTenantId())) {
+                        throw new IllegalArgumentException("Customer does not belong to tenant: " + tenantId);
+                    }
+                });
+                q.setCustomerId(dto.getCustomerId());
+            }
+
+            if (dto.getEventId() != null) {
+                eventRepository.findById(dto.getEventId()).ifPresent(e -> {
+                    if (!tenantId.equals(e.getTenantId())) {
+                        throw new IllegalArgumentException("Event does not belong to tenant: " + tenantId);
+                    }
+                });
+                q.setEventId(dto.getEventId());
+            }
+
             if (dto.getQuoteDate() != null) q.setQuoteDate(dto.getQuoteDate());
             if (dto.getValidUntil() != null) q.setValidUntil(dto.getValidUntil());
             if (dto.getRentalStartDateTime() != null) q.setRentalStartDateTime(dto.getRentalStartDateTime());

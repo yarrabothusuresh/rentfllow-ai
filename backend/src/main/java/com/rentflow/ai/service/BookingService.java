@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -89,6 +90,17 @@ public class BookingService {
         List<QuoteItem> quoteItems = quoteItemRepository.findByQuoteId(quote.getId());
         if (quoteItems.isEmpty()) {
             throw new IllegalStateException("Cannot create booking from a quote with no items.");
+        }
+
+        // 3.5 Acquire row-level pessimistic write locks on products in canonical order to prevent concurrent overselling
+        List<UUID> productIdsToLock = quoteItems.stream()
+                .map(QuoteItem::getProductId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        for (UUID pId : productIdsToLock) {
+            productRepository.findWithLockByTenantIdAndId(tenantId, pId);
         }
 
         // 4. Recheck availability for EVERY quote item inside transaction
@@ -212,6 +224,17 @@ public class BookingService {
         }
 
         List<BookingItem> items = bookingItemRepository.findByBookingId(booking.getId());
+
+        // Acquire row-level pessimistic write locks on products in canonical order
+        List<UUID> productIdsToLock = items.stream()
+                .map(BookingItem::getProductId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        for (UUID pId : productIdsToLock) {
+            productRepository.findWithLockByTenantIdAndId(tenantId, pId);
+        }
 
         // Recheck availability inside transaction
         List<BookingUnavailableDTO.ShortageItemDTO> shortages = new ArrayList<>();

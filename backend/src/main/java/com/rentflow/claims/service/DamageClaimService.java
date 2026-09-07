@@ -481,13 +481,13 @@ public class DamageClaimService {
         dto.setCreatedAt(claim.getCreatedAt());
         dto.setUpdatedAt(claim.getUpdatedAt());
 
-        Optional<Booking> booking = bookingRepository.findById(claim.getBookingId());
+        Optional<Booking> booking = bookingRepository.findByTenantIdAndId(claim.getTenantId(), claim.getBookingId());
         booking.ifPresent(b -> dto.setBookingNumber(b.getBookingNumber()));
 
-        Optional<ReturnOrder> ret = returnOrderRepository.findById(claim.getReturnOrderId());
+        Optional<ReturnOrder> ret = returnOrderRepository.findByTenantIdAndId(claim.getTenantId(), claim.getReturnOrderId());
         ret.ifPresent(r -> dto.setReturnNumber(r.getReturnNumber()));
 
-        Optional<Customer> customer = customerRepository.findById(claim.getCustomerId());
+        Optional<Customer> customer = customerRepository.findByTenantIdAndId(claim.getTenantId(), claim.getCustomerId());
         customer.ifPresent(c -> dto.setCustomerName((c.getFirstName() + " " + (c.getLastName() != null ? c.getLastName() : "")).trim()));
 
         List<DamageClaimItem> items = claimItemRepository.findByTenantIdAndClaimId(claim.getTenantId(), claim.getId());

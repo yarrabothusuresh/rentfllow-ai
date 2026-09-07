@@ -93,7 +93,7 @@ class EventControllerTest {
                 EventStatus.PLANNING
         );
 
-        when(eventRepository.findById(id)).thenReturn(Optional.of(event));
+        when(eventRepository.findByIdAndTenantId(eq(id), any())).thenReturn(Optional.of(event));
 
         ResponseEntity<EventDTO> response = eventController.getEventById(id);
 
