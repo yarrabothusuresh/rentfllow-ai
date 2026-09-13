@@ -18,19 +18,19 @@ import java.util.UUID;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, com.rentflow.security.CurrentUserService currentUserService) {
         this.bookingService = bookingService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     @PostMapping("/from-quote/{quoteId}")

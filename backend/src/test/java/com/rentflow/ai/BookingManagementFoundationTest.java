@@ -31,6 +31,9 @@ public class BookingManagementFoundationTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
+    @Autowired
     private BookingService bookingService;
 
     @Autowired
@@ -119,8 +122,11 @@ public class BookingManagementFoundationTest {
 
     private HttpHeaders createHeaders(String role, String tenant) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Role", role);
-        headers.set("X-Tenant-Id", tenant);
+        String effTenant = tenant != null ? tenant : "99999999-9999-9999-9999-999999999999";
+        String effRole = role != null ? role : "OWNER";
+        headers.set("Authorization", "Bearer " + testJwtFactory.createStaffToken(effTenant, effRole));
+        headers.set("X-Tenant-Id", effTenant);
+        headers.set("X-User-Role", effRole);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }

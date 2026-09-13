@@ -21,15 +21,18 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     public DataInitializer(TenantRepository tenantRepository,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
-                           PermissionRepository permissionRepository) {
+                           PermissionRepository permissionRepository,
+                           org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.tenantRepository = tenantRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -126,11 +129,16 @@ public class DataInitializer implements CommandLineRunner {
         Role customerRole = new Role(UUID.fromString("60000000-0000-0000-0000-000000000000"), RoleType.CUSTOMER, customerPerms);
         roleRepository.save(customerRole);
 
+        String demoHash = passwordEncoder.encode("ChangeMe123!");
+
         // 4. Initialize Demo Users
         // Owner - John Anderson
         User owner = new User(
             UUID.fromString("11111111-1111-1111-1111-111111111111"),
             "John Anderson",
+            "owner@demo.local",
+            demoHash,
+            true,
             tenant,
             Set.of(ownerRole)
         );
@@ -140,6 +148,9 @@ public class DataInitializer implements CommandLineRunner {
         User admin = new User(
             UUID.fromString("22222222-2222-2222-2222-222222222222"),
             "Sarah Miller",
+            "admin@demo.local",
+            demoHash,
+            true,
             tenant,
             Set.of(adminRole)
         );
@@ -149,6 +160,9 @@ public class DataInitializer implements CommandLineRunner {
         User sales = new User(
             UUID.fromString("33333333-3333-3333-3333-333333333333"),
             "Mike Johnson",
+            "sales@demo.local",
+            demoHash,
+            true,
             tenant,
             Set.of(salesRole)
         );
@@ -158,6 +172,9 @@ public class DataInitializer implements CommandLineRunner {
         User warehouse = new User(
             UUID.fromString("44444444-4444-4444-4444-444444444444"),
             "Robert Smith",
+            "warehouse@demo.local",
+            demoHash,
+            true,
             tenant,
             Set.of(warehouseRole)
         );
@@ -167,15 +184,21 @@ public class DataInitializer implements CommandLineRunner {
         User driver = new User(
             UUID.fromString("55555555-5555-5555-5555-555555555555"),
             "David Wilson",
+            "driver@demo.local",
+            demoHash,
+            true,
             tenant,
             Set.of(driverRole)
         );
         userRepository.save(driver);
 
-        // Customer - Emily Brown (Treat as external customer, null tenant or special customer tenant)
+        // Customer - Emily Brown
         User customer = new User(
             UUID.fromString("66666666-6666-6666-6666-666666666666"),
             "Emily Brown",
+            "customer@demo.local",
+            demoHash,
+            true,
             null, // External Customer
             Set.of(customerRole)
         );

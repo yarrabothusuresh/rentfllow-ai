@@ -18,19 +18,19 @@ import java.util.UUID;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, com.rentflow.security.CurrentUserService currentUserService) {
         this.paymentService = paymentService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     @GetMapping("/api/bookings/{bookingId}/payments")

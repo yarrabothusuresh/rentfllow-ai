@@ -38,6 +38,9 @@ public class InvoiceControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
+    @Autowired
     private InvoiceService invoiceService;
 
     @Autowired
@@ -98,6 +101,7 @@ public class InvoiceControllerTest {
     @DisplayName("POST /api/invoices/from-booking/{bookingId} creates invoice")
     public void testCreateInvoiceApi() throws Exception {
         mockMvc.perform(post("/api/invoices/from-booking/" + booking.getId())
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "ADMIN"))
                 .header("X-Tenant-Id", tenantId)
                 .header("X-User-Role", "ADMIN")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,6 +119,7 @@ public class InvoiceControllerTest {
         invoiceService.createInvoiceFromBooking(tenantId, booking.getId(), "List Test", LocalDate.now().plusDays(14), "OWNER");
 
         mockMvc.perform(get("/api/invoices")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "ADMIN"))
                 .header("X-Tenant-Id", tenantId)
                 .header("X-User-Role", "ADMIN"))
                 .andExpect(status().isOk())
@@ -128,6 +133,7 @@ public class InvoiceControllerTest {
         InvoiceDTO created = invoiceService.createInvoiceFromBooking(tenantId, booking.getId(), "Status API Test", LocalDate.now().plusDays(14), "OWNER");
 
         mockMvc.perform(patch("/api/invoices/" + created.getId() + "/status")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "ADMIN"))
                 .header("X-Tenant-Id", tenantId)
                 .header("X-User-Role", "ADMIN")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -142,6 +148,7 @@ public class InvoiceControllerTest {
         InvoiceDTO created = invoiceService.createInvoiceFromBooking(tenantId, booking.getId(), "Void API Test", LocalDate.now().plusDays(14), "OWNER");
 
         mockMvc.perform(post("/api/invoices/" + created.getId() + "/void")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "ADMIN"))
                 .header("X-Tenant-Id", tenantId)
                 .header("X-User-Role", "ADMIN")
                 .contentType(MediaType.APPLICATION_JSON)

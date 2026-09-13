@@ -128,13 +128,7 @@ export class ReturnsService {
   ) {}
 
   private getHeaders(): HttpHeaders {
-    let headers = new HttpHeaders();
-    const role = this.roleStateService.getCurrentRole();
-    if (role) {
-      headers = headers.set('X-User-Role', role);
-      headers = headers.set('X-User-Name', role);
-    }
-    return headers;
+    return new HttpHeaders();
   }
 
   createFromBooking(bookingId: string): Observable<ReturnOrder> {

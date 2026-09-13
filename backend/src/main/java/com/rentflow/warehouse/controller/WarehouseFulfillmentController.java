@@ -17,17 +17,20 @@ import java.util.UUID;
 public class WarehouseFulfillmentController {
 
     private final WarehouseFulfillmentService fulfillmentService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public WarehouseFulfillmentController(WarehouseFulfillmentService fulfillmentService) {
+    public WarehouseFulfillmentController(WarehouseFulfillmentService fulfillmentService,
+                                          com.rentflow.security.CurrentUserService currentUserService) {
         this.fulfillmentService = fulfillmentService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenant(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank()) ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenant(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank()) ? roleHeader : "WAREHOUSE_OPERATOR";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     // ==========================================

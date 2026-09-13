@@ -17,14 +17,16 @@ import java.util.UUID;
 public class ProductCategoryController {
 
     private final ProductCategoryService categoryService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public ProductCategoryController(ProductCategoryService categoryService) {
+    public ProductCategoryController(ProductCategoryService categoryService,
+                                     com.rentflow.security.CurrentUserService currentUserService) {
         this.categoryService = categoryService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
     @GetMapping

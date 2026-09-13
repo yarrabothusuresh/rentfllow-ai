@@ -241,9 +241,7 @@ export class WarehouseFulfillmentService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-User-Role': this.roleService.currentRole(),
-      'X-User-Name': this.roleService.currentRole()
+      'Content-Type': 'application/json'
     });
   }
 

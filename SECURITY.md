@@ -67,5 +67,113 @@ All responses automatically include:
 
 ---
 
-## 5. Vulnerability Reporting
+## 5. Authentication Foundation (Day 31)
+
+### Real Authenticated Identities (Spring Security + BCrypt + JWT)
+RentFlow AI replaced all demo and header-spoofing identity mechanisms with cryptographically signed, stateless JSON Web Tokens (JWT) using JJWT 0.12.5 and Spring Security 6:
+
+1. **Stateless Security Pipeline**:
+   - `JwtAuthenticationFilter` intercepts all incoming requests, extracts the Bearer token from the `Authorization` header, verifies the HMAC-SHA256 signature, validates token expiration and issuer, and constructs an immutable `RentFlowPrincipal`.
+   - `SecurityContextHolder` is populated with `UsernamePasswordAuthenticationToken` containing `RentFlowPrincipal` and `SimpleGrantedAuthority("ROLE_" + role)`.
+   - `TenantContextFilter` synchronously sets `TenantContext.setCurrentTenant(principal.getTenantId())` exclusively from the verified principal.
+
+2. **Zero-Trust Context Enforcement**:
+   - `SecurityUtils` has had all silent default fallbacks to `"evergreen-rentals"` and `"OWNER"` permanently removed.
+   - Any attempt to invoke secured tenant services without an authenticated principal throws `AuthenticationCredentialsNotFoundException`, resulting in an immediate structured `401 Unauthorized`.
+   - Untrusted request headers (`X-Tenant-Id`, `X-User-Role`, `X-Customer-Id`) cannot override or spoof the identity inside the verified JWT.
+
+3. **JWT Claims Architecture**:
+   - `sub`: User ID / Customer User ID (UUID string)
+   - `tenantId`: Tenant ID string
+   - `email`: Normalized lowercase email address
+   - `role`: Role string (`OWNER`, `ADMIN`, `SALES`, `OPERATIONS`, `WAREHOUSE`, `DRIVER`, `CUSTOMER`)
+   - `customerId`: Customer UUID string (present on `CUSTOMER` portal tokens)
+   - `type`: Token type (`ACCESS_TOKEN`)
+   - `iss`: `rentflow-ai`
+   - `iat` / `exp`: Issued at and expiration timestamps (default 8 hours)
+
+4. **BCrypt Password Security & Timing Attack Mitigation**:
+   - All passwords hashed using `BCryptPasswordEncoder` with strength `12`.
+   - `AuthenticationService` executes dummy BCrypt verification if a requested user does not exist, guaranteeing constant-time response profiles to thwart account enumeration and timing attacks.
+   - Passwords and password hashes are strictly omitted from `toString()`, JSON serializers, DTOs, and logging output.
+
+5. **Rate Limiting**:
+   - Login attempts (`/api/auth/login` and `/api/portal/auth/login`) are rate-limited per client IP (5 attempts per minute). Exceeding this threshold returns `429 Too Many Requests`.
+
+6. **Customer Portal Authentication**:
+   - Customer authentication is strictly isolated at `/api/portal/auth/login` and `/api/portal/auth/register`.
+   - Issues verified JWTs with `role: CUSTOMER` and embedded `customerId`.
+   - Legacy mock tokens (`demo-portal-token-...`) are completely deprecated and rejected by `SecurityConfig`.
+
+---
+
+## 6. Multi-Tenant Security & Customer IDOR Hardening (Day 32)
+
+### 1. Anti-Header-Spoofing Architecture
+- **Zero Trust for Client Identity Headers**: Raw client headers (`X-Tenant-Id`, `X-User-Role`, `X-User-Name`, `X-Customer-Id`) are strictly untrusted on all authenticated endpoints.
+- **Authoritative Identity Flow**:
+  ```text
+  Client Request (Authorization: Bearer <JWT>)
+    ↓
+  JwtAuthenticationFilter (validates signature, exp, issuer)
+    ↓
+  RentFlowPrincipal (holds verified userId, tenantId, email, role, customerId)
+    ↓
+  SecurityContextHolder
+    ↓
+  TenantContextFilter (ThreadLocal context with guaranteed finally { clearContext() })
+    ↓
+  CurrentUserService (provides fail-closed resolution to controllers & services)
+  ```
+- **Unauthenticated Fallback Deprecation**: All legacy fallbacks to demo tenants (e.g., `"evergreen"`) and default `"OWNER"` privileges have been eliminated. Missing or unverified credentials trigger immediate `AuthenticationCredentialsNotFoundException` or `401 Unauthorized`.
+
+### 2. Information Disclosure Prevention (404 Not Found Policy)
+- Cross-tenant reads, updates, and deletes return **`404 Not Found`** rather than `403 Forbidden`. Foreign tenant resource lookups behave identically to non-existent resources, preventing attackers from confirming or enumerating valid entity IDs across tenant boundaries.
+- Cross-tenant relationship injection (e.g., Tenant A submitting a quote or booking referencing a Customer ID from Tenant B) is caught and rejected with `400 Bad Request` before database persistence.
+
+### 3. Customer Portal IDOR Elimination
+- All Customer Portal endpoints (`/api/portal/**`) resolve `tenantId` and `customerId` directly from `CurrentUserService`.
+- Client requests cannot alter their targeted customer scope by sending spoofed headers (`X-Customer-Id`); the server strictly uses the cryptographically bound `customerId` claim from the JWT.
+- Attempts by Customer A to read or manipulate Customer B's quotes, bookings, invoices, or damage claims result in `404 Not Found`.
+- `ROLE_CUSTOMER` is restricted at the `SecurityConfig` layer from accessing staff routes (`/api/customers/**`, `/api/admin/**`, `/api/warehouse/**`, `/api/bookings/**`), returning `403 Forbidden`.
+
+### 4. Automated Security Test Matrix
+- `CrossTenantSecurityTest`: 7 automated tests proving spoofed header immunity, cross-tenant 404s on read/update/delete, relationship injection prevention, tenant-scoped search/list, and ThreadLocal cleanup.
+- `CustomerPortalIdorSecurityTest`: 7 automated tests proving customer portal IDOR immunity across quotes, bookings, invoices, damage claims, header spoofing resistance, and staff endpoint rejection.
+
+---
+
+## 7. Manual Verification via PowerShell
+
+```powershell
+# 1. Verify Unauthenticated Request returns 401
+Invoke-RestMethod -Uri "http://localhost:8080/api/bookings" -Method Get -SkipHttpErrorCheck
+
+# 2. Verify Staff Login returns JWT
+$loginBody = @{ email = "owner@demo.local"; password = "ChangeMe123!" } | ConvertTo-Json
+$auth = Invoke-RestMethod -Uri "http://localhost:8080/api/auth/login" -Method Post -ContentType "application/json" -Body $loginBody
+$token = $auth.accessToken
+
+# 3. Verify Authenticated Request succeeds (Header spoofing ignored)
+Invoke-RestMethod -Uri "http://localhost:8080/api/bookings" -Method Get -Headers @{ 
+    Authorization = "Bearer $token"
+    "X-Tenant-Id" = "malicious-foreign-tenant-id"
+}
+
+# 4. Verify Customer Portal Login
+$portalLogin = @{ email = "customer@abcevents.demo"; password = "demo" } | ConvertTo-Json
+$portalAuth = Invoke-RestMethod -Uri "http://localhost:8080/api/portal/auth/login" -Method Post -ContentType "application/json" -Body $portalLogin
+$portalToken = $portalAuth.token
+
+# 5. Verify Customer Portal Dashboard with Portal Token
+Invoke-RestMethod -Uri "http://localhost:8080/api/portal/dashboard" -Method Get -Headers @{ Authorization = "Bearer $portalToken" }
+
+# 6. Verify Customer Cannot Access Staff Endpoints (returns 403)
+Invoke-RestMethod -Uri "http://localhost:8080/api/customers" -Method Get -Headers @{ Authorization = "Bearer $portalToken" } -SkipHttpErrorCheck
+```
+
+---
+
+## 8. Vulnerability Reporting
 For security concerns or vulnerability disclosures, contact security@rentflow.ai.
+

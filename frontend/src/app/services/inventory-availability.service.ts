@@ -85,9 +85,7 @@ export class InventoryAvailabilityService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': 'evergreen',
-      'X-User-Role': this.roleState.getCurrentRole() || 'OWNER'
+      'Content-Type': 'application/json'
     });
   }
 

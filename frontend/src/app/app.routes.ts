@@ -174,8 +174,13 @@ import { PhoneDashboardComponent } from './pages/phone-ai/phone-dashboard.compon
 import { PhoneCallDetailComponent } from './pages/phone-ai/phone-call-detail.component';
 import { PhoneSettingsComponent } from './pages/phone-ai/phone-settings.component';
 
+// Day 31 Authentication Foundation
+import { LoginComponent } from './pages/auth/login/login.component';
+import { authGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'rentals', component: PublicCatalogComponent },
   { path: 'rentals/cart', component: RentalCartComponent },
   { path: 'rentals/request-quote', component: QuoteRequestComponent },
@@ -279,6 +284,7 @@ export const routes: Routes = [
   { 
     path: 'dashboard', 
     component: DashboardComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', component: OverviewComponent },
       { path: 'ai-copilot', component: AiCopilotComponent },

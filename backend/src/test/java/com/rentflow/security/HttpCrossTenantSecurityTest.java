@@ -50,6 +50,7 @@ public class HttpCrossTenantSecurityTest {
     @Autowired private LeadRepository leadRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private DamageClaimRepository damageClaimRepository;
+    @Autowired private TestJwtFactory testJwtFactory;
 
     private Lead leadA;
     private Product prodA;
@@ -68,30 +69,30 @@ public class HttpCrossTenantSecurityTest {
         leadA.setLastName("Confidential");
         leadA.setEmail("alice@tenanta.com");
         leadA.setEventName("Tenant A VIP Event");
+        leadA.setGuestCount(150);
+        leadA.setEstimatedBudget(BigDecimal.valueOf(5000));
+        leadA.setSource(LeadSource.PHONE);
         leadA.setStage(LeadStage.NEW);
-        leadA.setSource(LeadSource.WEBSITE);
-        leadA.setEstimatedValue(BigDecimal.valueOf(15000));
         leadA = leadRepository.save(leadA);
 
         prodA = new Product();
-        prodA.setId(UUID.randomUUID());
         prodA.setTenantId(TENANT_A);
-        prodA.setName("Tenant A Premium Sound System");
-        prodA.setSku("SKU-TENANT-A-SOUND");
+        prodA.setName("Tenant A Exclusive Gold Chair");
+        prodA.setSku("GOLD-CHAIR-A");
+        prodA.setRentalPrice(BigDecimal.valueOf(15.00));
         prodA.setProductType(ProductType.RENTAL_ITEM);
         prodA.setStatus(ProductStatus.ACTIVE);
-        prodA.setQuantityOwned(10);
-        prodA.setRentalPrice(BigDecimal.valueOf(1200));
         prodA = productRepository.save(prodA);
 
         claimA = new DamageClaim();
         claimA.setTenantId(TENANT_A);
-        claimA.setClaimNumber("CLM-A-HTTP-001");
-        claimA.setClaimType(ClaimType.DAMAGE);
-        claimA.setStatus(ClaimStatus.OPEN);
+        claimA.setClaimNumber("CLM-A-001");
         claimA.setBookingId(UUID.randomUUID());
         claimA.setReturnOrderId(UUID.randomUUID());
         claimA.setCustomerId(UUID.randomUUID());
+        claimA.setDescription("Broken Table Legs - Table returned with sheared leg");
+        claimA.setClaimType(ClaimType.DAMAGE);
+        claimA.setStatus(ClaimStatus.OPEN);
         claimA.setEstimatedTotalCost(BigDecimal.valueOf(450));
         claimA = damageClaimRepository.save(claimA);
     }
@@ -101,16 +102,14 @@ public class HttpCrossTenantSecurityTest {
     public void testCrmLeadsHttpTenantIsolation() throws Exception {
         // Tenant A sees lead A
         mockMvc.perform(get("/api/crm/leads")
-                .header("X-Tenant-Id", TENANT_A)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_A, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
                 .andExpect(jsonPath("$.content[?(@.id == '" + leadA.getId().toString() + "')]").exists());
 
         // Tenant B must NOT see lead A
         mockMvc.perform(get("/api/crm/leads")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[?(@.id == '" + leadA.getId().toString() + "')]").doesNotExist());
     }
@@ -120,16 +119,14 @@ public class HttpCrossTenantSecurityTest {
     public void testCrmLeadDetailHttpTenantIsolation() throws Exception {
         // Tenant A accesses lead A -> 200 OK
         mockMvc.perform(get("/api/crm/leads/" + leadA.getId())
-                .header("X-Tenant-Id", TENANT_A)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_A, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(leadA.getId().toString()))
                 .andExpect(jsonPath("$.firstName").value("Alice"));
 
         // Tenant B attempts to access lead A -> 404 Not Found
         mockMvc.perform(get("/api/crm/leads/" + leadA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
@@ -143,9 +140,7 @@ public class HttpCrossTenantSecurityTest {
         req.setEventName("Tenant B Gala");
 
         mockMvc.perform(post("/api/crm/leads")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES")
-                .header("X-User-Name", "Tenant B Agent")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -165,15 +160,13 @@ public class HttpCrossTenantSecurityTest {
     public void testInventoryProductsHttpTenantIsolation() throws Exception {
         // Tenant A sees prod A
         mockMvc.perform(get("/api/inventory/v2/products")
-                .header("X-Tenant-Id", TENANT_A)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_A, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == '" + prodA.getId().toString() + "')]").exists());
 
         // Tenant B must NOT see prod A
         mockMvc.perform(get("/api/inventory/v2/products")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == '" + prodA.getId().toString() + "')]").doesNotExist());
     }
@@ -183,15 +176,13 @@ public class HttpCrossTenantSecurityTest {
     public void testDamageClaimHttpTenantIsolation() throws Exception {
         // Tenant A can access their claims
         mockMvc.perform(get("/api/damage-claims")
-                .header("X-Tenant-Id", TENANT_A)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_A, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == '" + claimA.getId().toString() + "')]").exists());
 
         // Tenant B must NOT see Tenant A's claim
         mockMvc.perform(get("/api/damage-claims")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.id == '" + claimA.getId().toString() + "')]").doesNotExist());
     }
@@ -200,9 +191,7 @@ public class HttpCrossTenantSecurityTest {
     @DisplayName("Verify ThreadLocal context is safely cleared after HTTP request")
     public void testThreadLocalCleanupAfterRequest() throws Exception {
         mockMvc.perform(get("/api/crm/leads")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES")
-                .header("X-User-Name", "Tenant B Sales User"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES")))
                 .andExpect(status().isOk());
 
         // Context must be null/cleared on the thread now

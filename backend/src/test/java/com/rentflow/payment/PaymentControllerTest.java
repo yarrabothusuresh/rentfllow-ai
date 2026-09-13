@@ -32,6 +32,9 @@ public class PaymentControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
+    @Autowired
     private BookingRepository bookingRepository;
 
     private String tenantId;
@@ -65,6 +68,7 @@ public class PaymentControllerTest {
     @DisplayName("GET /api/bookings/{bookingId}/payments returns payment list")
     public void testGetPaymentsEndpoint() throws Exception {
         mockMvc.perform(get("/api/bookings/" + booking.getId() + "/payments")
+                        .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "OWNER"))
                         .header("X-Tenant-Id", tenantId)
                         .header("X-User-Role", "OWNER"))
                 .andExpect(status().isOk())
@@ -85,6 +89,7 @@ public class PaymentControllerTest {
                 """;
 
         mockMvc.perform(post("/api/bookings/" + booking.getId() + "/payments")
+                        .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "OWNER"))
                         .header("X-Tenant-Id", tenantId)
                         .header("X-User-Role", "OWNER")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -99,6 +104,7 @@ public class PaymentControllerTest {
     @DisplayName("GET /api/bookings/{bookingId}/financial-summary returns summary")
     public void testFinancialSummaryEndpoint() throws Exception {
         mockMvc.perform(get("/api/bookings/" + booking.getId() + "/financial-summary")
+                        .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(tenantId, "OWNER"))
                         .header("X-Tenant-Id", tenantId)
                         .header("X-User-Role", "OWNER"))
                 .andExpect(status().isOk())

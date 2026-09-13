@@ -197,11 +197,8 @@ export class CatalogService {
   constructor(private http: HttpClient, private roleState: RoleStateService) {}
 
   private getHeaders(): HttpHeaders {
-    const role = this.roleState.getCurrentRole();
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': this.tenantId,
-      'X-User-Role': role
+      'Content-Type': 'application/json'
     });
   }
 

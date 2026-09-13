@@ -64,31 +64,14 @@ export class CustomerPortalService {
     if (data) {
       try { return JSON.parse(data); } catch { return null; }
     }
-    return {
-      token: 'demo-portal-token',
-      userId: '66666666-6666-6666-6666-666666666666',
-      customerId: '33333333-3333-3333-3333-333333333333',
-      tenantId: '99999999-9999-9999-9999-999999999999',
-      email: 'customer@abcevents.demo',
-      customerName: 'Emily Brown',
-      companyName: 'ABC Events LLC',
-      role: 'CUSTOMER'
-    };
+    return null;
   }
 
   private getHeaders(): HttpHeaders {
     const session = this.currentCustomerSubject.value;
     let headers = new HttpHeaders();
-    if (session) {
-      headers = headers
-        .set('X-Tenant-Id', session.tenantId)
-        .set('X-Customer-Id', session.customerId)
-        .set('X-User-Role', 'CUSTOMER');
-    } else {
-      headers = headers
-        .set('X-Tenant-Id', '99999999-9999-9999-9999-999999999999')
-        .set('X-Customer-Id', '33333333-3333-3333-3333-333333333333')
-        .set('X-User-Role', 'CUSTOMER');
+    if (session?.token) {
+      headers = headers.set('Authorization', `Bearer ${session.token}`);
     }
     return headers;
   }

@@ -12,13 +12,16 @@ import java.util.UUID;
 public class StaffCustomerRequestController {
 
     private final StaffCustomerRequestService staffService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public StaffCustomerRequestController(StaffCustomerRequestService staffService) {
+    public StaffCustomerRequestController(StaffCustomerRequestService staffService,
+                                          com.rentflow.security.CurrentUserService currentUserService) {
         this.staffService = staffService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank()) ? tenantHeader : "99999999-9999-9999-9999-999999999999";
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
     @GetMapping("/api/customer-requests/dashboard")

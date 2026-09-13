@@ -81,15 +81,8 @@ export class AiCopilotService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(role: string = 'OWNER', userId: string = 'user-001', userName?: string): HttpHeaders {
-    let headers = new HttpHeaders()
-      .set('X-Tenant-Id', this.defaultTenantId)
-      .set('X-User-Role', role)
-      .set('X-User-Id', userId);
-    if (userName) {
-      headers = headers.set('X-User-Name', userName);
-    }
-    return headers;
+  private getHeaders(_role: string = 'OWNER', _userId: string = 'user-001', _userName?: string): HttpHeaders {
+    return new HttpHeaders();
   }
 
   startConversation(role: string = 'OWNER', userId: string = 'user-001',

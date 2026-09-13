@@ -17,11 +17,9 @@ export class QuoteService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(role: string = 'OWNER', tenantId: string = '11111111-1111-1111-1111-111111111111'): HttpHeaders {
+  private getHeaders(_role?: string): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-User-Role': role,
-      'X-Tenant-Id': tenantId,
+      'Content-Type': 'application/json'
     });
   }
 

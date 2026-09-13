@@ -29,6 +29,9 @@ class ProductInventoryFoundationTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
+    @Autowired
     private ProductRepository productRepository;
 
     @Autowired
@@ -57,6 +60,10 @@ class ProductInventoryFoundationTest {
     @BeforeEach
     void setUp() {
         tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
+        productRepository.findById(CatalogDataInitializer.CHIAVARI_CHAIR_ID).ifPresent(p -> {
+            p.setQuantityOwned(500);
+            productRepository.save(p);
+        });
         UUID sampleResId = UUID.fromString("77777777-7777-7777-7777-777777777777");
         if (!reservationRepository.existsById(sampleResId)) {
             InventoryReservation res = new InventoryReservation(
@@ -70,8 +77,11 @@ class ProductInventoryFoundationTest {
 
     private HttpHeaders createHeaders(String role, String tenant) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-User-Role", role != null ? role : "OWNER");
-        headers.set("X-Tenant-Id", tenant != null ? tenant : tenantId);
+        String effTenant = tenant != null ? tenant : tenantId;
+        String effRole = role != null ? role : "OWNER";
+        headers.set("Authorization", "Bearer " + testJwtFactory.createStaffToken(effTenant, effRole));
+        headers.set("X-Tenant-Id", effTenant);
+        headers.set("X-User-Role", effRole);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }

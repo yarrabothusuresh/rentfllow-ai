@@ -48,13 +48,16 @@ public class DeliveryServiceTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
     private String tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
 
     private HttpHeaders createHeaders(String role, String tenant) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Tenant-Id", tenant);
-        headers.set("X-User-Role", role);
-        headers.set("X-User-Name", "test-user");
+        String effTenant = tenant != null ? tenant : tenantId;
+        String effRole = role != null ? role : "OWNER";
+        headers.set("Authorization", "Bearer " + testJwtFactory.createStaffToken(effTenant, effRole));
         return headers;
     }
 

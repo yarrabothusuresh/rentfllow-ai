@@ -18,19 +18,31 @@ import java.util.UUID;
 public class LeadController {
 
     private final LeadService leadService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public LeadController(LeadService leadService) {
+    public LeadController(LeadService leadService, com.rentflow.security.CurrentUserService currentUserService) {
         this.leadService = leadService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantIdHeader) {
-        return (tenantIdHeader != null && !tenantIdHeader.isBlank())
-                ? tenantIdHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String headerTenantId) {
+        if (currentUserService != null && currentUserService.getTenantId().isPresent()) {
+            return currentUserService.requireTenantId();
+        }
+        if (headerTenantId != null && !headerTenantId.isBlank()) {
+            return headerTenantId;
+        }
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String headerRole) {
+        if (currentUserService != null && currentUserService.getRole().isPresent()) {
+            return currentUserService.requireRole();
+        }
+        if (headerRole != null && !headerRole.isBlank()) {
+            return headerRole;
+        }
+        return currentUserService.requireRole();
     }
 
     private boolean canRead(String role) {

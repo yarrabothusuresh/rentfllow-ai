@@ -31,19 +31,22 @@ public class CustomerPortalDataInitializer implements CommandLineRunner {
     private final BookingRepository bookingRepository;
     private final InvoiceRepository invoiceRepository;
     private final EventRepository eventRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     public CustomerPortalDataInitializer(CustomerUserRepository customerUserRepository,
                                        CustomerRepository customerRepository,
                                        QuoteRepository quoteRepository,
                                        BookingRepository bookingRepository,
                                        InvoiceRepository invoiceRepository,
-                                       EventRepository eventRepository) {
+                                       EventRepository eventRepository,
+                                       org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.customerUserRepository = customerUserRepository;
         this.customerRepository = customerRepository;
         this.quoteRepository = quoteRepository;
         this.bookingRepository = bookingRepository;
         this.invoiceRepository = invoiceRepository;
         this.eventRepository = eventRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -54,13 +57,15 @@ public class CustomerPortalDataInitializer implements CommandLineRunner {
             return;
         }
 
+        String demoHash = passwordEncoder.encode("demo");
+
         // 1. Seed Customer A Portal Account (ABC Events LLC / Emily Brown)
         CustomerUser cuA1 = new CustomerUser();
         cuA1.setTenantId(tenantId);
         cuA1.setCustomerId(CrmDataInitializer.EMILY_CUSTOMER_ID);
         cuA1.setUserId(UUID.fromString("66666666-6666-6666-6666-666666666666"));
         cuA1.setEmail("customer@abcevents.demo");
-        cuA1.setPasswordHash("demo");
+        cuA1.setPasswordHash(demoHash);
         cuA1.setActive(true);
         customerUserRepository.save(cuA1);
 
@@ -69,7 +74,7 @@ public class CustomerPortalDataInitializer implements CommandLineRunner {
         cuA2.setCustomerId(CrmDataInitializer.EMILY_CUSTOMER_ID);
         cuA2.setUserId(UUID.fromString("66666666-6666-6666-6666-666666666666"));
         cuA2.setEmail("emily.brown@example-demo.com");
-        cuA2.setPasswordHash("demo");
+        cuA2.setPasswordHash(demoHash);
         cuA2.setActive(true);
         customerUserRepository.save(cuA2);
 
@@ -95,7 +100,7 @@ public class CustomerPortalDataInitializer implements CommandLineRunner {
         cuB.setCustomerId(CUSTOMER_B_ID);
         cuB.setUserId(UUID.randomUUID());
         cuB.setEmail("customer.b@xyzevents.demo");
-        cuB.setPasswordHash("demo");
+        cuB.setPasswordHash(demoHash);
         cuB.setActive(true);
         customerUserRepository.save(cuB);
 

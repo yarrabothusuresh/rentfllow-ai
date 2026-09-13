@@ -21,13 +21,15 @@ import java.util.UUID;
 public class ReturnController {
 
     private final ReturnService returnService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public ReturnController(ReturnService returnService) {
+    public ReturnController(ReturnService returnService, com.rentflow.security.CurrentUserService currentUserService) {
         this.returnService = returnService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String headerTenantId) {
-        return (headerTenantId != null && !headerTenantId.trim().isEmpty()) ? headerTenantId : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
     // 1. Create Return from Booking

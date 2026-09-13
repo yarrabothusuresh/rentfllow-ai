@@ -46,6 +46,8 @@ public class CustomerPortalService {
     private final BookingService bookingService;
     private final DamageClaimService claimService;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.rentflow.security.JwtService jwtService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     public CustomerPortalService(CustomerUserRepository customerUserRepository,
                                 CustomerRequestRepository customerRequestRepository,
@@ -61,7 +63,9 @@ public class CustomerPortalService {
                                 PaymentService paymentService,
                                 BookingService bookingService,
                                 DamageClaimService claimService,
-                                ApplicationEventPublisher eventPublisher) {
+                                ApplicationEventPublisher eventPublisher,
+                                com.rentflow.security.JwtService jwtService,
+                                org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.customerUserRepository = customerUserRepository;
         this.customerRequestRepository = customerRequestRepository;
         this.customerRepository = customerRepository;
@@ -77,6 +81,8 @@ public class CustomerPortalService {
         this.bookingService = bookingService;
         this.claimService = claimService;
         this.eventPublisher = eventPublisher;
+        this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public CustomerAuthResponseDTO register(String tenantId, CustomerRegistrationRequestDTO req) {
@@ -108,12 +114,20 @@ public class CustomerPortalService {
         cu.setCustomerId(savedCustomer.getId());
         cu.setUserId(UUID.randomUUID());
         cu.setEmail(req.getEmail().toLowerCase());
-        cu.setPasswordHash(req.getPassword());
+        cu.setPasswordHash(passwordEncoder.encode(req.getPassword()));
         cu.setActive(true);
         CustomerUser savedUser = customerUserRepository.save(cu);
 
+        String token = jwtService.generateToken(
+                savedUser.getUserId(),
+                savedUser.getTenantId(),
+                savedUser.getEmail(),
+                "CUSTOMER",
+                savedUser.getCustomerId()
+        );
+
         CustomerAuthResponseDTO res = new CustomerAuthResponseDTO();
-        res.setToken("demo-portal-token-" + savedUser.getId());
+        res.setToken(token);
         res.setUserId(savedUser.getUserId());
         res.setCustomerId(savedUser.getCustomerId());
         res.setTenantId(savedUser.getTenantId());
@@ -130,7 +144,7 @@ public class CustomerPortalService {
             throw new IllegalArgumentException("Invalid credentials or customer user account inactive.");
         }
         CustomerUser cu = cuOpt.get();
-        if (!cu.getPasswordHash().equals(password)) {
+        if (!passwordEncoder.matches(password, cu.getPasswordHash())) {
             throw new IllegalArgumentException("Invalid credentials.");
         }
 
@@ -147,8 +161,16 @@ public class CustomerPortalService {
                     return customerRepository.save(fallback);
                 });
 
+        String token = jwtService.generateToken(
+                cu.getUserId(),
+                cu.getTenantId(),
+                cu.getEmail(),
+                "CUSTOMER",
+                cu.getCustomerId()
+        );
+
         CustomerAuthResponseDTO res = new CustomerAuthResponseDTO();
-        res.setToken("demo-portal-token-" + cu.getId());
+        res.setToken(token);
         res.setUserId(cu.getUserId());
         res.setCustomerId(cu.getCustomerId());
         res.setTenantId(cu.getTenantId());
@@ -251,7 +273,7 @@ public class CustomerPortalService {
         getCustomerWithAuth(tenantId, customerId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NoSuchElementException("Event not found."));
-        verifyOwnership(tenantId, customerId, event.getTenantId(), event.getCustomerId(), "Event");
+        verifyOwnership(tenantId, customerId, event.getTenantId() != null ? event.getTenantId().toString() : null, event.getCustomerId(), "Event");
         return mapEventToDTO(tenantId, event);
     }
 
@@ -362,7 +384,7 @@ public class CustomerPortalService {
     public DamageClaimDTO getCustomerClaimDetail(String tenantId, UUID customerId, UUID claimId) {
         getCustomerWithAuth(tenantId, customerId);
         DamageClaimDTO claim = claimService.getClaimById(claimId);
-        if (!customerId.equals(claim.getCustomerId())) {
+        if (claim == null || !customerId.equals(claim.getCustomerId())) {
             throw new SecurityException("Access Denied: You do not have permission to view this damage claim.");
         }
         return claim;
@@ -453,6 +475,9 @@ public class CustomerPortalService {
     }
 
     private Customer getCustomerWithAuth(String tenantId, UUID customerId) {
+        if (customerId == null) {
+            throw new SecurityException("Customer identity required");
+        }
         Customer customer = customerRepository.findById(customerId)
                 .orElseGet(() -> {
                     Customer fallback = new Customer();
@@ -465,15 +490,16 @@ public class CustomerPortalService {
                     fallback.setEmail("customer@demo.com");
                     return customerRepository.save(fallback);
                 });
-        if (!customer.getTenantId().equals(tenantId)) {
+        if (customer.getTenantId() == null || !customer.getTenantId().equals(tenantId)) {
             throw new SecurityException("Access Denied: Tenant mismatch.");
         }
         return customer;
     }
 
     private void verifyOwnership(String userTenantId, UUID userCustomerId, String resourceTenantId, UUID resourceCustomerId, String resourceName) {
-        if (!resourceTenantId.equals(userTenantId) || !resourceCustomerId.equals(userCustomerId)) {
-            throw new SecurityException("Access Denied: You do not have permission to access this " + resourceName + ".");
+        if (resourceTenantId == null || !userTenantId.equalsIgnoreCase(resourceTenantId)
+                || resourceCustomerId == null || !resourceCustomerId.equals(userCustomerId)) {
+            throw new SecurityException("Access denied: You do not have permission to access this " + resourceName);
         }
     }
 

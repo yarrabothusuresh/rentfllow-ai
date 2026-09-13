@@ -25,27 +25,27 @@ public class InventoryController {
     private final InventoryService inventoryService;
     private final AvailabilityService availabilityService;
     private final ProductService productService;
-
     private final InventoryAlternativeService alternativeService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
     public InventoryController(InventoryService inventoryService,
                                AvailabilityService availabilityService,
                                ProductService productService,
-                               InventoryAlternativeService alternativeService) {
+                               InventoryAlternativeService alternativeService,
+                               com.rentflow.security.CurrentUserService currentUserService) {
         this.inventoryService = inventoryService;
         this.availabilityService = availabilityService;
         this.productService = productService;
         this.alternativeService = alternativeService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     @GetMapping("/summary")

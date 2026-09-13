@@ -11,11 +11,9 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(role: string = 'OWNER', tenantId: string = '99999999-9999-9999-9999-999999999999'): HttpHeaders {
+  private getHeaders(_role?: string, _tenantId?: string): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'X-User-Role': role,
-      'X-Tenant-Id': tenantId,
     });
   }
 

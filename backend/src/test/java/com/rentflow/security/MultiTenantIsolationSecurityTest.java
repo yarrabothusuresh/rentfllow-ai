@@ -68,6 +68,7 @@ public class MultiTenantIsolationSecurityTest {
     @Autowired @org.springframework.beans.factory.annotation.Qualifier("crmEventRepository")
     private com.rentflow.ai.repository.EventRepository crmEventRepository;
     @Autowired private CustomerUserRepository customerUserRepository;
+    @Autowired private TestJwtFactory testJwtFactory;
 
     private Product productA;
     private Customer customerA;
@@ -181,8 +182,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-01: Tenant B cannot read Tenant A's Product by ID (404 Not Found)")
     public void testDirectObjectReferenceProductNotFound() throws Exception {
         mockMvc.perform(get("/api/products/" + productA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
@@ -190,8 +190,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-02: Tenant B cannot read Tenant A's Customer by ID (404 Not Found)")
     public void testDirectObjectReferenceCustomerNotFound() throws Exception {
         mockMvc.perform(get("/api/customers/" + customerA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES")))
                 .andExpect(status().isNotFound());
     }
 
@@ -199,8 +198,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-03: Tenant B cannot read Tenant A's Quote by ID (404 Not Found)")
     public void testDirectObjectReferenceQuoteNotFound() throws Exception {
         mockMvc.perform(get("/api/quotes/" + quoteA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES")))
                 .andExpect(status().isNotFound());
     }
 
@@ -208,8 +206,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-04: Tenant B cannot read Tenant A's Booking by ID (404 Not Found)")
     public void testDirectObjectReferenceBookingNotFound() throws Exception {
         mockMvc.perform(get("/api/bookings/" + bookingA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES")))
                 .andExpect(status().isNotFound());
     }
 
@@ -217,8 +214,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-05: Tenant B cannot read Tenant A's Invoice by ID (404 Not Found)")
     public void testDirectObjectReferenceInvoiceNotFound() throws Exception {
         mockMvc.perform(get("/api/invoices/" + invoiceA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
@@ -226,7 +222,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-06: Tenant B cannot read Tenant A's Event by ID (404 Not Found)")
     public void testDirectObjectReferenceEventNotFound() throws Exception {
         mockMvc.perform(get("/api/events/" + eventA.getId())
-                .header("X-Tenant-Id", TENANT_B))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
@@ -242,7 +238,7 @@ public class MultiTenantIsolationSecurityTest {
         hostileUpdate.setGuestCount(999);
 
         mockMvc.perform(put("/api/events/" + eventA.getId())
-                .header("X-Tenant-Id", TENANT_B)
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hostileUpdate)))
                 .andExpect(status().isNotFound());
@@ -257,7 +253,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-08: Tenant B cannot delete Tenant A's Event (404 Not Found)")
     public void testCrossTenantEventDeleteRejected() throws Exception {
         mockMvc.perform(delete("/api/events/" + eventA.getId())
-                .header("X-Tenant-Id", TENANT_B))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
 
         // Verify event still exists
@@ -268,8 +264,7 @@ public class MultiTenantIsolationSecurityTest {
     @DisplayName("PEN-09: Tenant B cannot delete Tenant A's Quote (404 Not Found)")
     public void testCrossTenantQuoteDeleteRejected() throws Exception {
         mockMvc.perform(delete("/api/quotes/" + quoteA.getId())
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "ADMIN"))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isNotFound());
 
         assertTrue(quoteRepository.existsById(quoteA.getId()), "Quote belonging to Tenant A must NOT be deleted by Tenant B");
@@ -290,7 +285,7 @@ public class MultiTenantIsolationSecurityTest {
         req.setGuestCount(50);
 
         mockMvc.perform(post("/api/events")
-                .header("X-Tenant-Id", TENANT_B)
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -312,7 +307,7 @@ public class MultiTenantIsolationSecurityTest {
         // Tenant B requests events with explicit query param trying to read Tenant A
         mockMvc.perform(get("/api/events")
                 .param("tenantId", TENANT_A)
-                .header("X-Tenant-Id", TENANT_B))
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[?(@.eventName == 'Tenant A Secret Board Summit')]").doesNotExist());
     }
@@ -340,8 +335,7 @@ public class MultiTenantIsolationSecurityTest {
         hostileQuote.setRentalEndDateTime(LocalDateTime.now().plusDays(12));
 
         mockMvc.perform(post("/api/quotes")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hostileQuote)))
                 .andExpect(status().isBadRequest())
@@ -384,8 +378,7 @@ public class MultiTenantIsolationSecurityTest {
         hostileQuote.setItems(List.of(item));
 
         mockMvc.perform(post("/api/quotes")
-                .header("X-Tenant-Id", TENANT_B)
-                .header("X-User-Role", "SALES")
+                .header("Authorization", "Bearer " + testJwtFactory.createStaffToken(TENANT_B, "SALES"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hostileQuote)))
                 .andExpect(status().isBadRequest())
@@ -435,8 +428,7 @@ public class MultiTenantIsolationSecurityTest {
 
         // Customer 1 tries to view Customer 2's quote
         mockMvc.perform(get("/api/portal/quotes/" + quoteA2.getId())
-                .header("X-Tenant-Id", TENANT_A)
-                .header("X-Customer-Id", customerA.getId().toString()))
+                .header("Authorization", "Bearer " + testJwtFactory.createCustomerToken(TENANT_A, customerA.getId())))
                 .andExpect(status().isForbidden());
     }
 

@@ -1,13 +1,12 @@
 package com.rentflow.portal.controller;
 
-import com.rentflow.ai.service.CrmDataInitializer;
 import com.rentflow.claims.dto.DamageClaimDTO;
-import com.rentflow.invoice.dto.InvoiceDTO;
 import com.rentflow.payment.dto.PaymentDTO;
 import com.rentflow.portal.dto.*;
 import com.rentflow.portal.service.CustomerAddressService;
 import com.rentflow.portal.service.CustomerMessagingService;
 import com.rentflow.portal.service.CustomerPortalService;
+import com.rentflow.security.CurrentUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,35 +15,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Customer Portal API Controller.
+ * Derives customer and tenant identity strictly from verified server-side JWT authentication.
+ * Spoofing via X-Customer-Id or X-Tenant-Id headers is strictly blocked.
+ */
 @RestController
 @RequestMapping("/api/portal")
+@CrossOrigin(originPatterns = "*")
 public class CustomerPortalController {
 
     private final CustomerPortalService portalService;
     private final CustomerAddressService addressService;
     private final CustomerMessagingService messagingService;
+    private final CurrentUserService currentUserService;
 
     public CustomerPortalController(CustomerPortalService portalService,
                                     CustomerAddressService addressService,
-                                    CustomerMessagingService messagingService) {
+                                    CustomerMessagingService messagingService,
+                                    CurrentUserService currentUserService) {
         this.portalService = portalService;
         this.addressService = addressService;
         this.messagingService = messagingService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank()) ? tenantHeader : "99999999-9999-9999-9999-999999999999";
+    private String resolveTenantId() {
+        return currentUserService.requireTenantId();
     }
 
-    private UUID resolveCustomerId(String customerHeader) {
-        if (customerHeader != null && !customerHeader.isBlank()) {
-            try {
-                return UUID.fromString(customerHeader);
-            } catch (IllegalArgumentException e) {
-                // fallback
-            }
-        }
-        return CrmDataInitializer.EMILY_CUSTOMER_ID;
+    private UUID resolveCustomerId() {
+        return currentUserService.requireCustomerId();
     }
 
     @PostMapping("/auth/register")
@@ -52,7 +53,9 @@ public class CustomerPortalController {
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestBody CustomerRegistrationRequestDTO request) {
         try {
-            String tenantId = resolveTenantId(tenantHeader);
+            String tenantId = (tenantHeader != null && !tenantHeader.isBlank())
+                    ? tenantHeader.trim()
+                    : "99999999-9999-9999-9999-999999999999";
             CustomerAuthResponseDTO response = portalService.register(tenantId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
@@ -71,187 +74,99 @@ public class CustomerPortalController {
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<CustomerPortalDashboardDTO> getDashboard(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getDashboard(tenantId, customerId));
+    public ResponseEntity<CustomerPortalDashboardDTO> getDashboard() {
+        return ResponseEntity.ok(portalService.getDashboard(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<CustomerProfileDTO> getProfile(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getProfile(tenantId, customerId));
+    public ResponseEntity<CustomerProfileDTO> getProfile() {
+        return ResponseEntity.ok(portalService.getProfile(resolveTenantId(), resolveCustomerId()));
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<CustomerProfileDTO> updateProfile(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
-            @RequestBody CustomerProfileDTO dto) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.updateProfile(tenantId, customerId, dto));
+    public ResponseEntity<CustomerProfileDTO> updateProfile(@RequestBody CustomerProfileDTO dto) {
+        return ResponseEntity.ok(portalService.updateProfile(resolveTenantId(), resolveCustomerId(), dto));
     }
 
     @GetMapping("/events")
-    public ResponseEntity<List<CustomerPortalEventDTO>> getEvents(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerEvents(tenantId, customerId));
+    public ResponseEntity<List<CustomerPortalEventDTO>> getEvents() {
+        return ResponseEntity.ok(portalService.getCustomerEvents(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/events/{id}")
-    public ResponseEntity<?> getEventDetail(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getEventDetail(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> getEventDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getEventDetail(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @GetMapping("/quotes")
-    public ResponseEntity<List<CustomerPortalQuoteDTO>> getQuotes(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerQuotes(tenantId, customerId));
+    public ResponseEntity<List<CustomerPortalQuoteDTO>> getQuotes() {
+        return ResponseEntity.ok(portalService.getCustomerQuotes(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/quotes/{id}")
-    public ResponseEntity<?> getQuoteDetail(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getQuoteDetail(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> getQuoteDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getQuoteDetail(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @PostMapping("/quotes/{id}/approve")
-    public ResponseEntity<?> approveQuote(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
+    public ResponseEntity<?> approveQuote(@PathVariable UUID id) {
         try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.acceptQuote(tenantId, customerId, id, "CUSTOMER"));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.ok(portalService.acceptQuote(resolveTenantId(), resolveCustomerId(), id, "CUSTOMER"));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @PostMapping("/quotes/{id}/accept")
-    public ResponseEntity<?> acceptQuote(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        return approveQuote(id, tenantHeader, customerHeader);
+    public ResponseEntity<?> acceptQuote(@PathVariable UUID id) {
+        return approveQuote(id);
     }
 
     @PostMapping("/quotes/{id}/decline")
     public ResponseEntity<?> declineQuote(
             @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
             @RequestBody(required = false) QuoteDeclineRequestDTO req) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            String reason = req != null ? req.getReason() : "Customer declined quote.";
-            return ResponseEntity.ok(portalService.declineQuote(tenantId, customerId, id, reason));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+        String reason = req != null ? req.getReason() : "Customer declined quote.";
+        return ResponseEntity.ok(portalService.declineQuote(resolveTenantId(), resolveCustomerId(), id, reason));
     }
 
     @PostMapping("/quotes/{id}/request-changes")
     public ResponseEntity<?> requestQuoteChanges(
             @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
             @RequestBody Map<String, String> body) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            String message = body != null ? body.get("message") : "Customer requested changes.";
-            return ResponseEntity.ok(portalService.requestQuoteChanges(tenantId, customerId, id, message, "CUSTOMER"));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+        String message = body != null ? body.get("message") : "Customer requested changes.";
+        return ResponseEntity.ok(portalService.requestQuoteChanges(resolveTenantId(), resolveCustomerId(), id, message, "CUSTOMER"));
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<CustomerPortalBookingDTO>> getBookings(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerBookings(tenantId, customerId));
+    public ResponseEntity<List<CustomerPortalBookingDTO>> getBookings() {
+        return ResponseEntity.ok(portalService.getCustomerBookings(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/bookings/{id}")
-    public ResponseEntity<?> getBookingDetail(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getBookingDetail(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> getBookingDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getBookingDetail(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @GetMapping("/invoices")
-    public ResponseEntity<List<CustomerPortalInvoiceDTO>> getInvoices(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerInvoices(tenantId, customerId));
+    public ResponseEntity<List<CustomerPortalInvoiceDTO>> getInvoices() {
+        return ResponseEntity.ok(portalService.getCustomerInvoices(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/invoices/{id}")
-    public ResponseEntity<?> getInvoiceDetail(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getInvoiceDetail(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> getInvoiceDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getInvoiceDetail(resolveTenantId(), resolveCustomerId(), id));
+    }
+
+    @GetMapping("/invoices/{id}/payments")
+    public ResponseEntity<List<PaymentDTO>> getInvoicePayments(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getInvoicePayments(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @GetMapping("/payments")
-    public ResponseEntity<?> getPayments(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
+    public ResponseEntity<?> getPayments() {
+        String tenantId = resolveTenantId();
+        UUID customerId = resolveCustomerId();
         List<CustomerPortalInvoiceDTO> invoices = portalService.getCustomerInvoices(tenantId, customerId);
         List<PaymentDTO> payments = new java.util.ArrayList<>();
         for (CustomerPortalInvoiceDTO inv : invoices) {
@@ -263,142 +178,79 @@ public class CustomerPortalController {
     }
 
     @GetMapping("/claims")
-    public ResponseEntity<List<DamageClaimDTO>> getClaims(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerClaims(tenantId, customerId));
+    public ResponseEntity<List<DamageClaimDTO>> getClaims() {
+        return ResponseEntity.ok(portalService.getCustomerClaims(resolveTenantId(), resolveCustomerId()));
     }
 
     @GetMapping("/claims/{id}")
-    public ResponseEntity<?> getClaimDetail(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.getCustomerClaimDetail(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> getClaimDetail(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.getCustomerClaimDetail(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @PostMapping("/claims/{id}/approve")
-    public ResponseEntity<?> approveClaim(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(portalService.approveClaim(tenantId, customerId, id));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> approveClaim(@PathVariable UUID id) {
+        return ResponseEntity.ok(portalService.approveClaim(resolveTenantId(), resolveCustomerId(), id));
     }
 
     @PostMapping("/claims/{id}/dispute")
     public ResponseEntity<?> disputeClaim(
             @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
             @RequestBody Map<String, String> body) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            String reason = body != null ? body.get("reason") : "Customer disputed claim";
-            return ResponseEntity.ok(portalService.disputeClaim(tenantId, customerId, id, reason));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+        String reason = body != null ? body.get("reason") : "Customer disputed claim";
+        return ResponseEntity.ok(portalService.disputeClaim(resolveTenantId(), resolveCustomerId(), id, reason));
     }
 
     @GetMapping("/messages")
-    public ResponseEntity<List<CustomerConversationDTO>> getConversations(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(messagingService.getCustomerConversations(tenantId, customerId));
+    public ResponseEntity<List<CustomerConversationDTO>> getConversations() {
+        return ResponseEntity.ok(messagingService.getCustomerConversations(resolveTenantId(), resolveCustomerId()));
     }
 
     @PostMapping("/messages")
-    public ResponseEntity<CustomerConversationDTO> sendMessage(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
-            @RequestBody CreateMessageRequestDTO dto) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(messagingService.createOrReplyMessage(tenantId, customerId, dto, "CUSTOMER"));
+    public ResponseEntity<CustomerConversationDTO> sendMessage(@RequestBody CreateMessageRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                messagingService.createOrReplyMessage(resolveTenantId(), resolveCustomerId(), dto, "CUSTOMER")
+        );
     }
 
     @GetMapping("/addresses")
-    public ResponseEntity<List<CustomerAddressDTO>> getAddresses(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(addressService.getCustomerAddresses(tenantId, customerId));
+    public ResponseEntity<List<CustomerAddressDTO>> getAddresses() {
+        return ResponseEntity.ok(addressService.getCustomerAddresses(resolveTenantId(), resolveCustomerId()));
     }
 
     @PostMapping("/addresses")
-    public ResponseEntity<CustomerAddressDTO> createAddress(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
-            @RequestBody CustomerAddressDTO dto) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(tenantId, customerId, dto));
+    public ResponseEntity<CustomerAddressDTO> createAddress(@RequestBody CustomerAddressDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                addressService.createAddress(resolveTenantId(), resolveCustomerId(), dto)
+        );
     }
 
     @PatchMapping("/addresses/{id}")
     public ResponseEntity<?> updateAddress(
             @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
             @RequestBody CustomerAddressDTO dto) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            return ResponseEntity.ok(addressService.updateAddress(tenantId, customerId, id, dto));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok(addressService.updateAddress(resolveTenantId(), resolveCustomerId(), id, dto));
     }
 
     @DeleteMapping("/addresses/{id}")
-    public ResponseEntity<?> deleteAddress(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            UUID customerId = resolveCustomerId(customerHeader);
-            addressService.deleteAddress(tenantId, customerId, id);
-            return ResponseEntity.noContent().build();
-        } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
-        }
+    public ResponseEntity<?> deleteAddress(@PathVariable UUID id) {
+        addressService.deleteAddress(resolveTenantId(), resolveCustomerId(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/requests")
-    public ResponseEntity<List<CustomerRequestDTO>> getRequests(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.ok(portalService.getCustomerRequests(tenantId, customerId));
+    public ResponseEntity<List<CustomerRequestDTO>> getRequests() {
+        return ResponseEntity.ok(portalService.getCustomerRequests(resolveTenantId(), resolveCustomerId()));
     }
 
     @PostMapping("/requests")
-    public ResponseEntity<CustomerRequestDTO> createRequest(
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
-            @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
-            @RequestBody CreateCustomerRequestDTO dto) {
-        String tenantId = resolveTenantId(tenantHeader);
-        UUID customerId = resolveCustomerId(customerHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(portalService.createCustomerRequest(tenantId, customerId, dto));
+    public ResponseEntity<CustomerRequestDTO> createRequest(@RequestBody CreateCustomerRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                portalService.createCustomerRequest(resolveTenantId(), resolveCustomerId(), dto)
+        );
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> handleSecurityException(SecurityException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
     }
 }

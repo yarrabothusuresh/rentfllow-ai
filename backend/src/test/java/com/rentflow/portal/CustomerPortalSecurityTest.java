@@ -48,6 +48,12 @@ public class CustomerPortalSecurityTest {
     @Autowired
     private QuoteRepository quoteRepository;
 
+    @Autowired
+    private com.rentflow.security.TestJwtFactory testJwtFactory;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     private String tenantId = "99999999-9999-9999-9999-999999999999";
     private UUID emilyCustomerId = UUID.fromString("33333333-3333-3333-3333-333333333333");
     private UUID customerBId = UUID.fromString("77777777-7777-7777-7777-777777777777");
@@ -87,7 +93,7 @@ public class CustomerPortalSecurityTest {
             cu.setCustomerId(emilyCustomerId);
             cu.setUserId(UUID.randomUUID());
             cu.setEmail("customer@abcevents.demo");
-            cu.setPasswordHash("demo");
+            cu.setPasswordHash(passwordEncoder.encode("demo"));
             cu.setActive(true);
             customerUserRepository.save(cu);
         }
@@ -109,8 +115,8 @@ public class CustomerPortalSecurityTest {
     }
 
     @Test
-    @DisplayName("POST /api/portal/auth/login succeeds")
-    public void testPortalLoginApi() throws Exception {
+    @DisplayName("POST /api/portal/auth/login succeeds and returns valid credentials")
+    public void testCustomerPortalLoginApi() throws Exception {
         CustomerLoginRequestDTO req = new CustomerLoginRequestDTO();
         req.setEmail("customer@abcevents.demo");
         req.setPassword("demo");
@@ -127,8 +133,7 @@ public class CustomerPortalSecurityTest {
     @DisplayName("GET /api/portal/dashboard succeeds")
     public void testGetDashboardApi() throws Exception {
         mockMvc.perform(get("/api/portal/dashboard")
-                .header("X-Tenant-Id", tenantId)
-                .header("X-Customer-Id", emilyCustomerId.toString()))
+                .header("Authorization", "Bearer " + testJwtFactory.createCustomerToken(tenantId, emilyCustomerId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customerName").exists());
     }
@@ -137,8 +142,7 @@ public class CustomerPortalSecurityTest {
     @DisplayName("GET /api/portal/quotes/{otherCustomerQuoteId} returns 403 FORBIDDEN")
     public void testCrossCustomerQuoteForbidden() throws Exception {
         mockMvc.perform(get("/api/portal/quotes/" + quoteBId)
-                .header("X-Tenant-Id", tenantId)
-                .header("X-Customer-Id", emilyCustomerId.toString()))
+                .header("Authorization", "Bearer " + testJwtFactory.createCustomerToken(tenantId, emilyCustomerId)))
                 .andExpect(status().isForbidden());
     }
 
@@ -152,8 +156,7 @@ public class CustomerPortalSecurityTest {
         );
 
         mockMvc.perform(post("/api/portal/requests")
-                .header("X-Tenant-Id", tenantId)
-                .header("X-Customer-Id", emilyCustomerId.toString())
+                .header("Authorization", "Bearer " + testJwtFactory.createCustomerToken(tenantId, emilyCustomerId))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())

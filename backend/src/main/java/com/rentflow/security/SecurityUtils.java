@@ -1,10 +1,15 @@
 package com.rentflow.security;
 
-import com.rentflow.ai.mock.DemoDataRepository;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.UUID;
 
 /**
- * Thread-safe security context holder for the current HTTP request thread.
- * Holds tenantId, userRole, and userName extracted by TenantContextFilter.
+ * Security context accessor for RentFlow AI.
+ * Obtains identity authoritative from the Spring SecurityContext (RentFlowPrincipal).
+ * Unsafe default fallbacks to Evergreen / OWNER have been strictly removed.
  */
 public class SecurityUtils {
 
@@ -44,6 +49,12 @@ public class SecurityUtils {
 
     public static void setTestTenantId(String tenantId) {
         setTenantId(tenantId);
+        if (CURRENT_USER_NAME.get() == null) {
+            CURRENT_USER_NAME.set("test-user");
+        }
+        if (CURRENT_USER_ROLE.get() == null) {
+            CURRENT_USER_ROLE.set("OWNER");
+        }
     }
 
     public static void clearTestTenantId() {
@@ -57,31 +68,91 @@ public class SecurityUtils {
     }
 
     public static boolean hasExplicitTenantContext() {
-        return CURRENT_TENANT_ID.get() != null;
+        if (CURRENT_TENANT_ID.get() != null) {
+            return true;
+        }
+        RentFlowPrincipal principal = getPrincipal();
+        return principal != null && principal.getTenantId() != null;
     }
 
+    public static RentFlowPrincipal getPrincipal() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof RentFlowPrincipal principal) {
+            return principal;
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the current authenticated tenant ID.
+     * Throws AuthenticationCredentialsNotFoundException if no verified identity exists.
+     */
     public static String getCurrentTenantId() {
+        RentFlowPrincipal principal = getPrincipal();
+        if (principal != null && principal.getTenantId() != null) {
+            return principal.getTenantId();
+        }
         if (CURRENT_TENANT_ID.get() != null) {
             return CURRENT_TENANT_ID.get();
         }
-        return DemoDataRepository.EVERGREEN_TENANT_ID;
+        throw new AuthenticationCredentialsNotFoundException(
+                "Unauthenticated access rejected: no verified tenant context in SecurityContext"
+        );
     }
 
+    /**
+     * Retrieves the current authenticated user's identifier/email.
+     */
     public static String getCurrentUser() {
+        RentFlowPrincipal principal = getPrincipal();
+        if (principal != null) {
+            return principal.getEmail() != null && !principal.getEmail().isBlank()
+                    ? principal.getEmail()
+                    : principal.getUserId().toString();
+        }
         if (CURRENT_USER_NAME.get() != null) {
             return CURRENT_USER_NAME.get();
         }
-        return "Operations Manager";
+        throw new AuthenticationCredentialsNotFoundException(
+                "Unauthenticated access rejected: no verified user identity in SecurityContext"
+        );
     }
 
     public static String getCurrentUsername() {
         return getCurrentUser();
     }
 
+    public static UUID getCurrentUserId() {
+        RentFlowPrincipal principal = getPrincipal();
+        if (principal != null) {
+            return principal.getUserId();
+        }
+        throw new AuthenticationCredentialsNotFoundException(
+                "Unauthenticated access rejected: no verified userId in SecurityContext"
+        );
+    }
+
+    public static UUID getCurrentCustomerId() {
+        RentFlowPrincipal principal = getPrincipal();
+        if (principal != null && principal.getCustomerId() != null) {
+            return principal.getCustomerId();
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the current authenticated role.
+     */
     public static String getCurrentUserRole() {
+        RentFlowPrincipal principal = getPrincipal();
+        if (principal != null && principal.getRole() != null) {
+            return principal.getRole();
+        }
         if (CURRENT_USER_ROLE.get() != null) {
             return CURRENT_USER_ROLE.get();
         }
-        return "OWNER";
+        throw new AuthenticationCredentialsNotFoundException(
+                "Unauthenticated access rejected: no verified user role in SecurityContext"
+        );
     }
 }

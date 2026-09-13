@@ -21,13 +21,15 @@ import java.util.UUID;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public DeliveryController(DeliveryService deliveryService) {
+    public DeliveryController(DeliveryService deliveryService, com.rentflow.security.CurrentUserService currentUserService) {
         this.deliveryService = deliveryService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String headerTenantId) {
-        return (headerTenantId != null && !headerTenantId.trim().isEmpty()) ? headerTenantId : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
     @PostMapping("/deliveries/from-warehouse-order/{warehouseOrderId}")

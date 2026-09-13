@@ -37,6 +37,9 @@ public class CustomerPortalServiceTest {
     private CustomerPortalService portalService;
 
     @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Autowired
     private CustomerUserRepository customerUserRepository;
 
     @Autowired
@@ -99,7 +102,7 @@ public class CustomerPortalServiceTest {
             cu.setCustomerId(emilyCustomerId);
             cu.setUserId(UUID.randomUUID());
             cu.setEmail("customer@abcevents.demo");
-            cu.setPasswordHash("demo");
+            cu.setPasswordHash(passwordEncoder.encode("demo"));
             cu.setActive(true);
             customerUserRepository.save(cu);
         }

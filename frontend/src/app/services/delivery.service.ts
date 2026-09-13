@@ -120,9 +120,7 @@ export class DeliveryService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-User-Role': this.roleStateService.getCurrentRole(),
-      'X-User-Name': 'System Dispatcher'
+      'Content-Type': 'application/json'
     });
   }
 

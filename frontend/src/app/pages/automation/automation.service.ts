@@ -26,11 +26,8 @@ export class AutomationService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(role: string = 'ADMIN', userId: string = 'user-001'): HttpHeaders {
-    return new HttpHeaders()
-      .set('X-Tenant-Id', this.defaultTenantId)
-      .set('X-User-Role', role)
-      .set('X-User-Id', userId);
+  private getHeaders(_role: string = 'ADMIN', _userId: string = 'user-001'): HttpHeaders {
+    return new HttpHeaders();
   }
 
   getDashboard(role: string = 'ADMIN'): Observable<AutomationDashboardDTO> {

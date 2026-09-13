@@ -18,19 +18,19 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, com.rentflow.security.CurrentUserService currentUserService) {
         this.productService = productService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     @GetMapping

@@ -131,12 +131,10 @@ export class StorefrontService {
   }
 
   getStaffCustomerRequestsDashboard(): Observable<any> {
-    const headers = new HttpHeaders().set('X-Tenant-Id', '99999999-9999-9999-9999-999999999999').set('X-User-Role', 'OWNER');
-    return this.http.get<any>('/api/customer-requests/dashboard', { headers });
+    return this.http.get<any>('/api/customer-requests/dashboard');
   }
 
   getCustomer360(customerId: string): Observable<any> {
-    const headers = new HttpHeaders().set('X-Tenant-Id', '99999999-9999-9999-9999-999999999999').set('X-User-Role', 'OWNER');
-    return this.http.get<any>(`/api/customers/${customerId}/360`, { headers });
+    return this.http.get<any>(`/api/customers/${customerId}/360`);
   }
 }

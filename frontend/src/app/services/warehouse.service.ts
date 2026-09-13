@@ -89,9 +89,7 @@ export class WarehouseService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-Tenant-ID': '00000000-0000-0000-0000-000000000001',
-      'X-User-Role': this.roleState.getCurrentRole()
+      'Content-Type': 'application/json'
     });
   }
 

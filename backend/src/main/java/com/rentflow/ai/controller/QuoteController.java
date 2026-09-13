@@ -19,20 +19,21 @@ public class QuoteController {
 
     private final QuoteService quoteService;
     private final QuoteCalculationService calculationService;
+    private final com.rentflow.security.CurrentUserService currentUserService;
 
-    public QuoteController(QuoteService quoteService, QuoteCalculationService calculationService) {
+    public QuoteController(QuoteService quoteService, QuoteCalculationService calculationService,
+                           com.rentflow.security.CurrentUserService currentUserService) {
         this.quoteService = quoteService;
         this.calculationService = calculationService;
+        this.currentUserService = currentUserService;
     }
 
-    private String resolveTenantId(String tenantHeader) {
-        return (tenantHeader != null && !tenantHeader.isBlank())
-                ? tenantHeader : DemoDataRepository.EVERGREEN_TENANT_ID;
+    private String resolveTenantId(String ignoredHeader) {
+        return currentUserService.requireTenantId();
     }
 
-    private String resolveRole(String roleHeader) {
-        return (roleHeader != null && !roleHeader.isBlank())
-                ? roleHeader.toUpperCase() : "OWNER";
+    private String resolveRole(String ignoredHeader) {
+        return currentUserService.requireRole();
     }
 
     @PostMapping
