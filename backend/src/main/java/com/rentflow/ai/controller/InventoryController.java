@@ -19,7 +19,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/inventory")
-@CrossOrigin(originPatterns = "*")
 public class InventoryController {
 
     private final InventoryService inventoryService;

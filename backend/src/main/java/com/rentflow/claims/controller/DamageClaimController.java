@@ -19,7 +19,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/damage-claims")
-@CrossOrigin(originPatterns = "*")
 public class DamageClaimController {
 
     private final DamageClaimService claimService;

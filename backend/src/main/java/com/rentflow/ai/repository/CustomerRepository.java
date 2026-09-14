@@ -16,6 +16,7 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Optional<Customer> findByTenantIdAndId(String tenantId, UUID id);
     Optional<Customer> findFirstByTenantIdAndEmailIgnoreCase(String tenantId, String email);
     Optional<Customer> findByTenantIdAndCustomerNumberIgnoreCase(String tenantId, String customerNumber);
+    boolean existsByCustomerNumber(String customerNumber);
     long countByTenantId(String tenantId);
 
     @Query("SELECT c FROM Customer c WHERE c.tenantId = :tenantId AND " +

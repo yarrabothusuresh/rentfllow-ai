@@ -4,7 +4,10 @@ import com.rentflow.aisales.dto.*;
 import com.rentflow.aisales.service.AiCopilotService;
 import com.rentflow.aisales.service.CopilotActionService;
 import com.rentflow.aisales.service.CopilotBriefingService;
+import com.rentflow.auth.RateLimitExceededException;
+import com.rentflow.security.RateLimitingService;
 import com.rentflow.security.SecurityUtils;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +16,58 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/copilot")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class CopilotController {
 
     private final AiCopilotService copilotService;
     private final CopilotActionService actionService;
     private final CopilotBriefingService briefingService;
+    private final RateLimitingService rateLimitingService;
 
     public CopilotController(AiCopilotService copilotService,
                              CopilotActionService actionService,
-                             CopilotBriefingService briefingService) {
+                             CopilotBriefingService briefingService,
+                             RateLimitingService rateLimitingService) {
         this.copilotService = copilotService;
         this.actionService = actionService;
         this.briefingService = briefingService;
+        this.rateLimitingService = rateLimitingService;
+    }
+
+    private String resolveTenant(String headerTenant) {
+        if (SecurityUtils.hasExplicitTenantContext()) {
+            return SecurityUtils.getCurrentTenantId();
+        }
+        if (headerTenant != null && !headerTenant.isBlank()) {
+            return headerTenant;
+        }
+        return SecurityUtils.getCurrentTenantId();
+    }
+
+    private String resolveRole(String headerRole) {
+        if (SecurityUtils.hasExplicitTenantContext()) {
+            return SecurityUtils.getCurrentUserRole();
+        }
+        if (headerRole != null && !headerRole.isBlank()) {
+            return headerRole;
+        }
+        return "CUSTOMER";
+    }
+
+    private String resolveUserId(String headerUserId) {
+        if (SecurityUtils.hasExplicitTenantContext()) {
+            return SecurityUtils.getCurrentUser();
+        }
+        if (headerUserId != null && !headerUserId.isBlank()) {
+            return headerUserId;
+        }
+        return SecurityUtils.getCurrentUser();
+    }
+
+    private void checkRateLimit(String tenantId, String userId) {
+        String key = tenantId + ":" + userId;
+        if (!rateLimitingService.tryAcquire(RateLimitingService.RateLimitCategory.AI_COPILOT, key)) {
+            throw new RateLimitExceededException("AI Copilot request limit exceeded. Please try again shortly.");
+        }
     }
 
     @PostMapping("/conversations")
@@ -33,11 +75,13 @@ public class CopilotController {
             @RequestHeader(value = "X-Tenant-Id", required = false) String headerTenant,
             @RequestHeader(value = "X-User-Role", required = false) String headerRole,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
-            @RequestBody(required = false) CopilotChatRequestDTO request) {
+            @Valid @RequestBody(required = false) CopilotChatRequestDTO request) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
-        String role = (headerRole != null && !headerRole.isBlank()) ? headerRole : "OWNER";
-        String userId = (headerUserId != null && !headerUserId.isBlank()) ? headerUserId : SecurityUtils.getCurrentUser();
+        String tenantId = resolveTenant(headerTenant);
+        String role = resolveRole(headerRole);
+        String userId = resolveUserId(headerUserId);
+
+        checkRateLimit(tenantId, userId);
 
         String pageContextType = (request != null) ? request.getPageContextType() : null;
         String pageContextId = (request != null) ? request.getPageContextId() : null;
@@ -56,11 +100,17 @@ public class CopilotController {
             @RequestHeader(value = "X-Tenant-Id", required = false) String headerTenant,
             @RequestHeader(value = "X-User-Role", required = false) String headerRole,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
-            @RequestBody CopilotChatRequestDTO request) {
+            @Valid @RequestBody CopilotChatRequestDTO request) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
-        String role = (headerRole != null && !headerRole.isBlank()) ? headerRole : "OWNER";
-        String userId = (headerUserId != null && !headerUserId.isBlank()) ? headerUserId : SecurityUtils.getCurrentUser();
+        String tenantId = resolveTenant(headerTenant);
+        String role = resolveRole(headerRole);
+        String userId = resolveUserId(headerUserId);
+
+        checkRateLimit(tenantId, userId);
+
+        if (request != null && request.getMessage() != null && request.getMessage().length() > 4000) {
+            return ResponseEntity.badRequest().build();
+        }
 
         try {
             CopilotResponseDTO res = copilotService.processMessage(tenantId, role, userId, id, request);
@@ -79,10 +129,12 @@ public class CopilotController {
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
             @RequestHeader(value = "X-User-Name", required = false) String headerUserName) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
-        String role = (headerRole != null && !headerRole.isBlank()) ? headerRole : "OWNER";
-        String userId = (headerUserId != null && !headerUserId.isBlank()) ? headerUserId : SecurityUtils.getCurrentUser();
-        String userName = (headerUserName != null && !headerUserName.isBlank()) ? headerUserName : SecurityUtils.getCurrentUsername();
+        String tenantId = resolveTenant(headerTenant);
+        String role = resolveRole(headerRole);
+        String userId = resolveUserId(headerUserId);
+        String userName = (headerUserName != null && !headerUserName.isBlank()) ? headerUserName : userId;
+
+        checkRateLimit(tenantId, userId);
 
         return ResponseEntity.ok(briefingService.generateDailyBriefing(tenantId, role, userId, userName));
     }
@@ -91,7 +143,7 @@ public class CopilotController {
     public ResponseEntity<List<String>> getQuickPrompts(
             @RequestHeader(value = "X-User-Role", required = false) String headerRole) {
 
-        String role = (headerRole != null ? headerRole.toUpperCase() : "OWNER");
+        String role = resolveRole(headerRole);
         List<String> prompts;
         switch (role) {
             case "SALES":
@@ -149,9 +201,9 @@ public class CopilotController {
             @RequestHeader(value = "X-User-Role", required = false) String headerRole,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
-        String role = (headerRole != null && !headerRole.isBlank()) ? headerRole : "OWNER";
-        String userId = (headerUserId != null && !headerUserId.isBlank()) ? headerUserId : SecurityUtils.getCurrentUser();
+        String tenantId = resolveTenant(headerTenant);
+        String role = resolveRole(headerRole);
+        String userId = resolveUserId(headerUserId);
 
         try {
             CopilotActionProposalDTO confirmed = actionService.confirmAction(tenantId, proposalId, role, userId);
@@ -170,9 +222,9 @@ public class CopilotController {
             @RequestHeader(value = "X-User-Role", required = false) String headerRole,
             @RequestHeader(value = "X-User-Id", required = false) String headerUserId) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
-        String role = (headerRole != null && !headerRole.isBlank()) ? headerRole : "OWNER";
-        String userId = (headerUserId != null && !headerUserId.isBlank()) ? headerUserId : SecurityUtils.getCurrentUser();
+        String tenantId = resolveTenant(headerTenant);
+        String role = resolveRole(headerRole);
+        String userId = resolveUserId(headerUserId);
 
         return ResponseEntity.ok(actionService.cancelAction(tenantId, proposalId, role, userId));
     }
@@ -182,7 +234,7 @@ public class CopilotController {
             @PathVariable UUID proposalId,
             @RequestHeader(value = "X-Tenant-Id", required = false) String headerTenant) {
 
-        String tenantId = (headerTenant != null && !headerTenant.isBlank()) ? headerTenant : SecurityUtils.getCurrentTenantId();
+        String tenantId = resolveTenant(headerTenant);
         return actionService.getProposal(tenantId, proposalId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

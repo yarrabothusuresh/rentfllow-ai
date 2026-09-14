@@ -42,8 +42,8 @@ public class AuthenticationService {
         String email = request.getEmail().trim().toLowerCase();
 
         // Rate limiting check per email and per client IP
-        String rateLimitKey = "login:" + (clientIp != null ? clientIp : "global") + ":" + email;
-        if (!rateLimitingService.tryAcquire(rateLimitKey, 10)) {
+        String clientKey = (clientIp != null ? clientIp : "global") + ":" + email;
+        if (!rateLimitingService.tryAcquire(RateLimitingService.RateLimitCategory.AUTH_LOGIN, clientKey)) {
             throw new RateLimitExceededException("Too many login attempts. Please try again later.");
         }
 

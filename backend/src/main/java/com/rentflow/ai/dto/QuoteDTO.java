@@ -2,6 +2,8 @@ package com.rentflow.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rentflow.ai.model.QuoteStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,10 +16,14 @@ public class QuoteDTO {
     private UUID id;
     private String tenantId;
     private String quoteNumber;
+
+    @NotNull(message = "Customer ID is required")
     private UUID customerId;
     private String customerName;
     private String customerEmail;
     private String customerPhone;
+
+    @NotNull(message = "Event ID is required")
     private UUID eventId;
     private String eventName;
     private String venueName;
@@ -45,7 +51,9 @@ public class QuoteDTO {
     private BigDecimal depositAmount = BigDecimal.ZERO;
     private BigDecimal remainingBalance = BigDecimal.ZERO;
 
+    @Size(max = 2000, message = "Notes must not exceed 2000 characters")
     private String notes;
+    @Size(max = 2000, message = "Internal notes must not exceed 2000 characters")
     private String internalNotes; // Redacted for CUSTOMER role
     private String createdBy;
     private LocalDateTime createdAt;

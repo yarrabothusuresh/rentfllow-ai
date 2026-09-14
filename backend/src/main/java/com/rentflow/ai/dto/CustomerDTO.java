@@ -2,6 +2,9 @@ package com.rentflow.ai.dto;
 
 import com.rentflow.ai.model.CustomerStatus;
 import com.rentflow.ai.model.CustomerType;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,20 +13,51 @@ public class CustomerDTO {
     private UUID id;
     private String tenantId;
     private String customerNumber;
+
+    @NotBlank(message = "First name is required")
+    @Size(max = 255, message = "First name must not exceed 255 characters")
     private String firstName;
+
+    @Size(max = 255, message = "Last name must not exceed 255 characters")
     private String lastName;
+
+    @Size(max = 255, message = "Company name must not exceed 255 characters")
     private String companyName;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Must be a valid email address")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
     private String email;
+
+    @Size(max = 50, message = "Phone must not exceed 50 characters")
     private String phone;
+
+    @Size(max = 50, message = "Alternate phone must not exceed 50 characters")
     private String alternatePhone;
+
     private CustomerType customerType;
+
+    @Size(max = 255, message = "Billing address must not exceed 255 characters")
     private String billingAddress;
+
+    @Size(max = 255, message = "Shipping address must not exceed 255 characters")
     private String shippingAddress;
+
+    @Size(max = 100, message = "City must not exceed 100 characters")
     private String city;
+
+    @Size(max = 100, message = "State must not exceed 100 characters")
     private String state;
+
+    @Size(max = 20, message = "Zip code must not exceed 20 characters")
     private String zipCode;
+
+    @Size(max = 100, message = "Country must not exceed 100 characters")
     private String country;
+
+    @Size(max = 2000, message = "Notes must not exceed 2000 characters")
     private String notes;
+
     private CustomerStatus status;
     private int eventsCount;
     private LocalDateTime createdAt;

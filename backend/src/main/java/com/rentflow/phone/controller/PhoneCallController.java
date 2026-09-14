@@ -19,7 +19,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/phone")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class PhoneCallController {
 
     private static final Logger log = LoggerFactory.getLogger(PhoneCallController.class);

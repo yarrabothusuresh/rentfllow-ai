@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(originPatterns = "*")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -83,8 +82,16 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You do not have permission to search customers."));
         }
 
+        if (query == null || query.isBlank()) {
+            return ResponseEntity.ok(List.of());
+        }
+        String sanitizedQuery = query.trim();
+        if (sanitizedQuery.length() > 200) {
+            sanitizedQuery = sanitizedQuery.substring(0, 200);
+        }
+
         String tenantId = resolveTenantId(tenantHeader);
-        List<CustomerDTO> results = customerService.searchCustomers(tenantId, query);
+        List<CustomerDTO> results = customerService.searchCustomers(tenantId, sanitizedQuery);
         return ResponseEntity.ok(results);
     }
 
@@ -114,20 +121,13 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<?> createCustomer(
-            @RequestBody CustomerDTO dto,
+            @jakarta.validation.Valid @RequestBody CustomerDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
         String role = resolveRole(roleHeader);
         if (!canWrite(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You do not have permission to create customers."));
-        }
-
-        if (dto.getFirstName() == null || dto.getFirstName().isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "First name is required."));
-        }
-        if (dto.getEmail() == null || !dto.getEmail().contains("@")) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Valid email format is required."));
         }
 
         String tenantId = resolveTenantId(tenantHeader);
@@ -138,7 +138,7 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCustomer(
             @PathVariable("id") UUID id,
-            @RequestBody CustomerDTO dto,
+            @jakarta.validation.Valid @RequestBody CustomerDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 

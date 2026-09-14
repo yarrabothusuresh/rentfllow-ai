@@ -5,6 +5,7 @@ import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.model.QuoteStatus;
 import com.rentflow.ai.service.QuoteCalculationService;
 import com.rentflow.ai.service.QuoteService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/quotes")
-@CrossOrigin(originPatterns = "*")
 public class QuoteController {
 
     private final QuoteService quoteService;
@@ -38,7 +38,7 @@ public class QuoteController {
 
     @PostMapping
     public ResponseEntity<?> createQuote(
-            @RequestBody QuoteDTO dto,
+            @Valid @RequestBody QuoteDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
@@ -101,7 +101,7 @@ public class QuoteController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateQuote(
             @PathVariable("id") UUID id,
-            @RequestBody QuoteDTO dto,
+            @Valid @RequestBody QuoteDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 

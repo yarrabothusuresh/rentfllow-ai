@@ -100,8 +100,13 @@ public class CustomerService {
     }
 
     public String generateCustomerNumber(String tenantId) {
-        long count = customerRepository.countByTenantId(tenantId);
-        return String.format("CUS-%06d", count + 1);
+        long count = customerRepository.count();
+        String candidate = String.format("CUS-%06d", count + 1);
+        while (customerRepository.existsByCustomerNumber(candidate)) {
+            count++;
+            candidate = String.format("CUS-%06d", count + 1);
+        }
+        return candidate;
     }
 
     public CustomerDTO toDTO(Customer customer) {

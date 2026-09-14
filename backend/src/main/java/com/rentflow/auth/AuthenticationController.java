@@ -2,7 +2,9 @@ package com.rentflow.auth;
 
 import com.rentflow.auth.dto.AuthResponseDTO;
 import com.rentflow.auth.dto.LoginRequestDTO;
+import com.rentflow.security.RateLimitingService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,19 +17,17 @@ import java.util.Map;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final RateLimitingService rateLimitingService;
 
-    public AuthenticationController(AuthenticationService authenticationService) {
+    public AuthenticationController(AuthenticationService authenticationService,
+                                    RateLimitingService rateLimitingService) {
         this.authenticationService = authenticationService;
+        this.rateLimitingService = rateLimitingService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
-        String clientIp = httpRequest.getHeader("X-Forwarded-For");
-        if (clientIp == null || clientIp.isBlank()) {
-            clientIp = httpRequest.getRemoteAddr();
-        } else if (clientIp.contains(",")) {
-            clientIp = clientIp.split(",")[0].trim();
-        }
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
+        String clientIp = rateLimitingService.resolveSafeClientIp(httpRequest);
 
         try {
             AuthResponseDTO response = authenticationService.login(request, clientIp);

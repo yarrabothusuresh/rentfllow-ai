@@ -19,7 +19,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/automation")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class AutomationController {
 
     @Autowired

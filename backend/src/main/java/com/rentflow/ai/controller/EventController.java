@@ -14,7 +14,6 @@ import java.util.UUID;
 
 @RestController("crmEventController")
 @RequestMapping("/api/crm/events")
-@CrossOrigin(originPatterns = "*")
 public class EventController {
 
     private final EventService eventService;

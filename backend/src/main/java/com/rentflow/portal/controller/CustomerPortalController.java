@@ -22,7 +22,6 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/portal")
-@CrossOrigin(originPatterns = "*")
 public class CustomerPortalController {
 
     private final CustomerPortalService portalService;

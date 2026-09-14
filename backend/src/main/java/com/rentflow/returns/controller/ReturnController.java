@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(originPatterns = "*")
 public class ReturnController {
 
     private final ReturnService returnService;

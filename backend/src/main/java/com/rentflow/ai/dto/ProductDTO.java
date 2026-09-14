@@ -2,6 +2,9 @@ package com.rentflow.ai.dto;
 
 import com.rentflow.ai.model.ProductStatus;
 import com.rentflow.ai.model.ProductType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,26 +13,52 @@ import java.util.UUID;
 public class ProductDTO {
     private UUID id;
     private String tenantId;
+
+    @NotBlank(message = "SKU is required")
+    @Size(max = 100, message = "SKU cannot exceed 100 characters")
     private String sku;
+
+    @NotBlank(message = "Product name is required")
+    @Size(max = 255, message = "Product name cannot exceed 255 characters")
     private String name;
+
+    @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
+
     private UUID categoryId;
     private String categoryName;
+
     @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private ProductType productType;
 
     @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private ProductStatus status;
+
+    @PositiveOrZero(message = "Rental price must be zero or positive")
     private BigDecimal rentalPrice;
+
+    @PositiveOrZero(message = "Replacement cost must be zero or positive")
     private BigDecimal replacementCost; // Null for CUSTOMER role
+
+    @PositiveOrZero(message = "Quantity owned must be zero or positive")
     private int quantityOwned;
+
+    @PositiveOrZero(message = "Quantity in maintenance must be zero or positive")
     private int quantityInMaintenance;
+
+    @PositiveOrZero(message = "Quantity damaged must be zero or positive")
     private int quantityDamaged;
+
+    @PositiveOrZero(message = "Quantity lost must be zero or positive")
     private int quantityLost;
+
     private int availableQuantity; // Calculated
     private int quantityReserved; // Calculated for default period
     private String health; // GOOD, WARNING, CRITICAL
+
+    @Size(max = 1000, message = "Image URL cannot exceed 1000 characters")
     private String imageUrl;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

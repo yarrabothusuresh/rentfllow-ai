@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(originPatterns = "*")
 public class PaymentController {
 
     private final PaymentService paymentService;

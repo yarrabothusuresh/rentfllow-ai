@@ -16,7 +16,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/recommendations")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class RecommendationController {
 
     @Autowired

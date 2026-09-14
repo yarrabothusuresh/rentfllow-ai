@@ -54,6 +54,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
       } else if (error.status === 403) {
         console.warn('Access denied: You do not have permission to perform this action.');
+      } else if (error.status === 429) {
+        console.warn('Rate limit exceeded: Too many requests. Please wait and try again shortly.');
       }
       return throwError(() => error);
     })

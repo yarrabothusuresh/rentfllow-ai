@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/replacements")
-@CrossOrigin(originPatterns = "*")
 public class ReplacementController {
 
     private final ReplacementService replacementService;

@@ -1,12 +1,24 @@
 package com.rentflow.ai.dto;
 
-import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class AIRequest {
+
+    @NotBlank(message = "Message is required")
+    @Size(max = 4000, message = "Message must not exceed 4000 characters")
     private String message;
+
+    @Size(max = 255, message = "UserId must not exceed 255 characters")
     private String userId;
+
+    @Size(max = 255, message = "TenantId must not exceed 255 characters")
     private String tenantId;
+
+    @Size(max = 50, message = "Role must not exceed 50 characters")
     private String role;
+
+    @Size(max = 255, message = "ConversationId must not exceed 255 characters")
     private String conversationId;
 
     public AIRequest() {}

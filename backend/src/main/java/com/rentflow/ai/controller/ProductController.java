@@ -1,9 +1,9 @@
 package com.rentflow.ai.controller;
 
 import com.rentflow.ai.dto.ProductDTO;
-import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.model.ProductStatus;
 import com.rentflow.ai.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(originPatterns = "*")
 public class ProductController {
 
     private final ProductService productService;
@@ -37,14 +36,9 @@ public class ProductController {
     public ResponseEntity<?> getProducts(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            String role = resolveRole(roleHeader);
-            return ResponseEntity.ok(productService.getProducts(tenantId, role));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
-        }
+        String tenantId = resolveTenantId(tenantHeader);
+        String role = resolveRole(roleHeader);
+        return ResponseEntity.ok(productService.getProducts(tenantId, role));
     }
 
     @GetMapping("/search")
@@ -52,14 +46,17 @@ public class ProductController {
             @RequestParam("query") String query,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            String role = resolveRole(roleHeader);
-            return ResponseEntity.ok(productService.searchProducts(tenantId, query, role));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        if (query == null || query.isBlank()) {
+            return ResponseEntity.ok(List.of());
         }
+        String sanitizedQuery = query.trim();
+        if (sanitizedQuery.length() > 200) {
+            sanitizedQuery = sanitizedQuery.substring(0, 200);
+        }
+
+        String tenantId = resolveTenantId(tenantHeader);
+        String role = resolveRole(roleHeader);
+        return ResponseEntity.ok(productService.searchProducts(tenantId, sanitizedQuery, role));
     }
 
     @GetMapping("/{id}")
@@ -67,67 +64,45 @@ public class ProductController {
             @PathVariable("id") UUID id,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            String role = resolveRole(roleHeader);
-            return productService.getProductById(tenantId, id, role)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
-        }
+        String tenantId = resolveTenantId(tenantHeader);
+        String role = resolveRole(roleHeader);
+        return productService.getProductById(tenantId, id, role)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PostMapping
     public ResponseEntity<?> createProduct(
-            @RequestBody ProductDTO dto,
+            @Valid @RequestBody ProductDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
-        try {
-            String role = resolveRole(roleHeader);
-            if ("CUSTOMER".equals(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot create products."));
-            }
-
-            if (dto.getName() == null || dto.getName().isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Product name is required."));
-            }
-            if (dto.getSku() == null || dto.getSku().isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "SKU is required."));
-            }
-
-            String tenantId = resolveTenantId(tenantHeader);
-            ProductDTO created = productService.createProduct(tenantId, dto, role);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        String role = resolveRole(roleHeader);
+        if ("CUSTOMER".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot create products."));
         }
+
+        String tenantId = resolveTenantId(tenantHeader);
+        ProductDTO created = productService.createProduct(tenantId, dto, role);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(
             @PathVariable("id") UUID id,
-            @RequestBody ProductDTO dto,
+            @Valid @RequestBody ProductDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
-        try {
-            String role = resolveRole(roleHeader);
-            if ("CUSTOMER".equals(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot update products."));
-            }
-
-            String tenantId = resolveTenantId(tenantHeader);
-            return productService.updateProduct(tenantId, id, dto, role)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        String role = resolveRole(roleHeader);
+        if ("CUSTOMER".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot update products."));
         }
+
+        String tenantId = resolveTenantId(tenantHeader);
+        return productService.updateProduct(tenantId, id, dto, role)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PatchMapping("/{id}/status")
@@ -137,20 +112,15 @@ public class ProductController {
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
-        try {
-            String role = resolveRole(roleHeader);
-            if ("CUSTOMER".equals(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot update product status."));
-            }
-
-            String tenantId = resolveTenantId(tenantHeader);
-            return productService.updateStatus(tenantId, id, status, role)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        String role = resolveRole(roleHeader);
+        if ("CUSTOMER".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Customers cannot update product status."));
         }
+
+        String tenantId = resolveTenantId(tenantHeader);
+        return productService.updateStatus(tenantId, id, status, role)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @DeleteMapping("/{id}")
@@ -159,21 +129,16 @@ public class ProductController {
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
-        try {
-            String role = resolveRole(roleHeader);
-            if (!List.of("OWNER", "ADMIN").contains(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Only Owner or Admin can delete products."));
-            }
-
-            String tenantId = resolveTenantId(tenantHeader);
-            boolean deleted = productService.deleteProduct(tenantId, id);
-            if (deleted) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        String role = resolveRole(roleHeader);
+        if (!List.of("OWNER", "ADMIN").contains(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Only Owner or Admin can delete products."));
         }
+
+        String tenantId = resolveTenantId(tenantHeader);
+        boolean deleted = productService.deleteProduct(tenantId, id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
