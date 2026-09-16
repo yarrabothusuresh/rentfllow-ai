@@ -17,6 +17,7 @@ export interface Payment {
   id: string;
   tenantId: string;
   bookingId: string;
+  invoiceId?: string;
   customerId: string;
   amount: number;
   paymentMethod: PaymentMethod;
@@ -27,6 +28,7 @@ export interface Payment {
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
+  idempotentReplay?: boolean;
 }
 
 export interface RecordPaymentRequest {
@@ -35,6 +37,8 @@ export interface RecordPaymentRequest {
   paymentDate: string;
   transactionReference?: string;
   notes?: string;
+  invoiceId?: string;
+  bookingId?: string;
 }
 
 export interface BookingFinancialSummary {

@@ -1,10 +1,12 @@
 package com.rentflow.payment.controller;
 
-import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.payment.dto.BookingFinancialSummaryDTO;
 import com.rentflow.payment.dto.PaymentDTO;
 import com.rentflow.payment.dto.RecordPaymentDTO;
+import com.rentflow.payment.exception.IdempotencyConflictException;
 import com.rentflow.payment.service.PaymentService;
+import com.rentflow.security.CurrentUserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +19,9 @@ import java.util.UUID;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final com.rentflow.security.CurrentUserService currentUserService;
+    private final CurrentUserService currentUserService;
 
-    public PaymentController(PaymentService paymentService, com.rentflow.security.CurrentUserService currentUserService) {
+    public PaymentController(PaymentService paymentService, CurrentUserService currentUserService) {
         this.paymentService = paymentService;
         this.currentUserService = currentUserService;
     }
@@ -52,18 +54,49 @@ public class PaymentController {
     }
 
     @PostMapping("/api/bookings/{bookingId}/payments")
-    public ResponseEntity<?> recordPayment(
+    public ResponseEntity<?> recordBookingPayment(
             @PathVariable("bookingId") UUID bookingId,
-            @RequestBody RecordPaymentDTO dto,
+            @Valid @RequestBody RecordPaymentDTO dto,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
+        return executeRecordPayment(bookingId, dto, tenantHeader, roleHeader);
+    }
+
+    @PostMapping("/api/invoices/{invoiceId}/payments")
+    public ResponseEntity<?> recordInvoicePayment(
+            @PathVariable("invoiceId") UUID invoiceId,
+            @Valid @RequestBody RecordPaymentDTO dto,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
+
+        dto.setInvoiceId(invoiceId);
+        return executeRecordPayment(null, dto, tenantHeader, roleHeader);
+    }
+
+    @PostMapping("/api/payments")
+    public ResponseEntity<?> recordPayment(
+            @Valid @RequestBody RecordPaymentDTO dto,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
+
+        return executeRecordPayment(dto.getBookingId(), dto, tenantHeader, roleHeader);
+    }
+
+    private ResponseEntity<?> executeRecordPayment(UUID bookingId, RecordPaymentDTO dto, String tenantHeader, String roleHeader) {
         try {
             String tenantId = resolveTenantId(tenantHeader);
             String userRole = resolveRole(roleHeader);
+            UUID customerId = currentUserService.getCustomerId().orElse(null);
 
-            PaymentDTO created = paymentService.recordPayment(tenantId, bookingId, dto, userRole);
+            PaymentDTO created = paymentService.recordPayment(tenantId, bookingId, dto, userRole, customerId);
+
+            if (Boolean.TRUE.equals(created.getIdempotentReplay())) {
+                return ResponseEntity.ok(created);
+            }
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IdempotencyConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         } catch (IllegalArgumentException e) {

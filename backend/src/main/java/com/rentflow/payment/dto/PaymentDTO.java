@@ -13,6 +13,7 @@ public class PaymentDTO {
     private UUID id;
     private String tenantId;
     private UUID bookingId;
+    private UUID invoiceId;
     private UUID customerId;
     private BigDecimal amount;
     private PaymentMethod paymentMethod;
@@ -23,6 +24,7 @@ public class PaymentDTO {
     private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean idempotentReplay = false;
 
     public PaymentDTO() {}
 
@@ -34,6 +36,12 @@ public class PaymentDTO {
 
     public UUID getBookingId() { return bookingId; }
     public void setBookingId(UUID bookingId) { this.bookingId = bookingId; }
+
+    public UUID getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(UUID invoiceId) { this.invoiceId = invoiceId; }
+
+    public Boolean getIdempotentReplay() { return idempotentReplay; }
+    public void setIdempotentReplay(Boolean idempotentReplay) { this.idempotentReplay = idempotentReplay; }
 
     public UUID getCustomerId() { return customerId; }
     public void setCustomerId(UUID customerId) { this.customerId = customerId; }

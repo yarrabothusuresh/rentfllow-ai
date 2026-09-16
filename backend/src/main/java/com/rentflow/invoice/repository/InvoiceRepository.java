@@ -2,7 +2,9 @@ package com.rentflow.invoice.repository;
 
 import com.rentflow.invoice.model.Invoice;
 import com.rentflow.invoice.model.InvoiceStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,6 +27,14 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     boolean existsByTenantIdAndBookingIdAndStatusNot(String tenantId, UUID bookingId, InvoiceStatus status);
 
     long countByTenantId(String tenantId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM Invoice i WHERE i.tenantId = :tenantId AND i.id = :id")
+    Optional<Invoice> findByIdAndTenantIdForUpdate(@Param("tenantId") String tenantId, @Param("id") UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM Invoice i WHERE i.tenantId = :tenantId AND i.bookingId = :bookingId")
+    Optional<Invoice> findByTenantIdAndBookingIdForUpdate(@Param("tenantId") String tenantId, @Param("bookingId") UUID bookingId);
 
     @Query("SELECT i FROM Invoice i WHERE i.tenantId = :tenantId " +
            "AND (:status IS NULL OR i.status = :status) " +

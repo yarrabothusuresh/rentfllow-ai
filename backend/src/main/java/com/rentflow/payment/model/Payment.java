@@ -7,11 +7,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payment", indexes = {
-    @Index(name = "idx_payment_tenant", columnList = "tenantId"),
-    @Index(name = "idx_payment_booking", columnList = "bookingId"),
-    @Index(name = "idx_payment_customer", columnList = "customerId"),
-    @Index(name = "idx_payment_status", columnList = "paymentStatus")
+@Table(name = "payment", 
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_payment_tenant_transaction_reference", columnNames = {"tenantId", "transactionReference"})
+    },
+    indexes = {
+        @Index(name = "idx_payment_tenant", columnList = "tenantId"),
+        @Index(name = "idx_payment_tenant_ref", columnList = "tenantId, transactionReference"),
+        @Index(name = "idx_payment_booking", columnList = "bookingId"),
+        @Index(name = "idx_payment_invoice", columnList = "invoiceId"),
+        @Index(name = "idx_payment_customer", columnList = "customerId"),
+        @Index(name = "idx_payment_status", columnList = "paymentStatus")
 })
 public class Payment {
 
@@ -24,6 +30,8 @@ public class Payment {
 
     @Column(nullable = false)
     private UUID bookingId;
+
+    private UUID invoiceId;
 
     @Column(nullable = false)
     private UUID customerId;
@@ -42,6 +50,7 @@ public class Payment {
     @Column(nullable = false)
     private LocalDate paymentDate;
 
+    @Column(nullable = false, length = 100)
     private String transactionReference;
 
     @Column(length = 2000)
@@ -67,6 +76,9 @@ public class Payment {
         if (paymentStatus == null) {
             paymentStatus = PaymentStatus.COMPLETED;
         }
+        if (transactionReference == null || transactionReference.isBlank()) {
+            transactionReference = "TXN-" + UUID.randomUUID().toString();
+        }
     }
 
     @PreUpdate
@@ -84,6 +96,9 @@ public class Payment {
 
     public UUID getBookingId() { return bookingId; }
     public void setBookingId(UUID bookingId) { this.bookingId = bookingId; }
+
+    public UUID getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(UUID invoiceId) { this.invoiceId = invoiceId; }
 
     public UUID getCustomerId() { return customerId; }
     public void setCustomerId(UUID customerId) { this.customerId = customerId; }

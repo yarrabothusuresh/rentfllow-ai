@@ -445,6 +445,14 @@ public class CustomerPortalService {
         return paymentService.getBookingPayments(tenantId, inv.getBookingId());
     }
 
+    @Transactional
+    public PaymentDTO payInvoice(String tenantId, UUID customerId, UUID invoiceId, com.rentflow.payment.dto.RecordPaymentDTO dto) {
+        CustomerPortalInvoiceDTO inv = getInvoiceDetail(tenantId, customerId, invoiceId);
+        dto.setInvoiceId(invoiceId);
+        dto.setBookingId(inv.getBookingId());
+        return paymentService.recordPayment(tenantId, inv.getBookingId(), dto, "CUSTOMER", customerId);
+    }
+
     @Transactional(readOnly = true)
     public List<CustomerRequestDTO> getCustomerRequests(String tenantId, UUID customerId) {
         getCustomerWithAuth(tenantId, customerId);

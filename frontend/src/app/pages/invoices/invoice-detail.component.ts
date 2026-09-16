@@ -105,11 +105,12 @@ export class InvoiceDetailComponent implements OnInit {
   // Record Payment Modal Methods
   openRecordPaymentModal(): void {
     if (!this.invoice) return;
+    const autoRef = `PAY-INV-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     this.recordForm = {
       amount: this.invoice.balanceDue > 0 ? this.invoice.balanceDue : 0,
       paymentMethod: 'BANK_TRANSFER',
       paymentDate: new Date().toISOString().substring(0, 10),
-      transactionReference: '',
+      transactionReference: autoRef,
       notes: ''
     };
     this.recordPaymentError = null;
@@ -122,7 +123,7 @@ export class InvoiceDetailComponent implements OnInit {
   }
 
   submitRecordPayment(): void {
-    if (!this.invoice) return;
+    if (!this.invoice || this.isRecordingPayment) return;
     if (this.recordForm.amount <= 0) {
       this.recordPaymentError = 'Payment amount must be greater than zero.';
       return;
@@ -130,6 +131,10 @@ export class InvoiceDetailComponent implements OnInit {
     if (this.recordForm.amount > this.invoice.balanceDue) {
       this.recordPaymentError = `Payment cannot exceed outstanding balance of $${this.invoice.balanceDue.toFixed(2)}.`;
       return;
+    }
+
+    if (!this.recordForm.transactionReference || !this.recordForm.transactionReference.trim()) {
+      this.recordForm.transactionReference = `PAY-INV-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     }
 
     this.isRecordingPayment = true;
@@ -140,20 +145,28 @@ export class InvoiceDetailComponent implements OnInit {
       amount: this.recordForm.amount,
       paymentMethod: this.recordForm.paymentMethod,
       paymentDate: this.recordForm.paymentDate,
-      transactionReference: this.recordForm.transactionReference,
-      notes: this.recordForm.notes
+      transactionReference: this.recordForm.transactionReference.trim(),
+      notes: this.recordForm.notes,
+      invoiceId: this.invoice.id
     }, role).subscribe({
-      next: () => {
+      next: (payment) => {
         this.isRecordingPayment = false;
         this.showRecordPaymentModal = false;
-        this.showSuccess('Payment recorded successfully!');
+        const msg = payment.idempotentReplay
+          ? 'Existing payment verified (idempotent replay).'
+          : 'Payment recorded successfully!';
+        this.showSuccess(msg);
         if (this.invoiceId) {
           this.loadInvoice(this.invoiceId);
         }
       },
       error: (err) => {
         this.isRecordingPayment = false;
-        this.recordPaymentError = err.error?.error || 'Failed to record payment.';
+        if (err.status === 409) {
+          this.recordPaymentError = err.error?.error || 'Payment reference has already been used for a different payment.';
+        } else {
+          this.recordPaymentError = err.error?.error || 'Failed to record payment.';
+        }
       }
     });
   }

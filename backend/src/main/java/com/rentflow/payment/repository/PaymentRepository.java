@@ -16,7 +16,11 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     List<Payment> findByTenantIdAndBookingIdOrderByCreatedAtDesc(String tenantId, UUID bookingId);
 
+    List<Payment> findByTenantIdAndInvoiceIdOrderByCreatedAtDesc(String tenantId, UUID invoiceId);
+
     List<Payment> findByTenantIdAndBookingIdAndPaymentStatus(String tenantId, UUID bookingId, PaymentStatus paymentStatus);
 
     Optional<Payment> findByTenantIdAndId(String tenantId, UUID id);
+
+    Optional<Payment> findByTenantIdAndTransactionReference(String tenantId, String transactionReference);
 }

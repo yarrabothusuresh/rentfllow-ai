@@ -194,6 +194,7 @@ public class AnalyticsDataInitializer implements CommandLineRunner {
                     p.setPaymentMethod(PaymentMethod.CREDIT_CARD);
                     p.setPaymentStatus(PaymentStatus.COMPLETED);
                     p.setPaymentDate(bDate);
+                    p.setTransactionReference("ANALYTICS-" + b.getBookingNumber());
                     paymentRepository.save(p);
                 }
             }

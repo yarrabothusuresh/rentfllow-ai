@@ -2,7 +2,11 @@ package com.rentflow.ai.repository;
 
 import com.rentflow.ai.model.Booking;
 import com.rentflow.ai.model.BookingStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +24,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     Optional<Booking> findByBookingNumber(String bookingNumber);
     Optional<Booking> findByTenantIdAndBookingNumber(String tenantId, String bookingNumber);
     long countByTenantId(String tenantId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Booking b WHERE b.tenantId = :tenantId AND b.id = :id")
+    Optional<Booking> findByIdAndTenantIdForUpdate(@Param("tenantId") String tenantId, @Param("id") UUID id);
 }

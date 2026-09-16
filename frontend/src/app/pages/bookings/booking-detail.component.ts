@@ -195,11 +195,12 @@ export class BookingDetailComponent implements OnInit {
   openRecordPaymentModal(): void {
     this.recordPaymentError = null;
     const balance = this.financialSummary ? this.financialSummary.outstandingBalance : (this.booking?.balanceDue || 0);
+    const autoRef = `PAY-BKG-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     this.recordForm = {
       amount: balance > 0 ? balance : 0,
       paymentMethod: 'BANK_TRANSFER',
       paymentDate: new Date().toISOString().substring(0, 10),
-      transactionReference: '',
+      transactionReference: autoRef,
       notes: ''
     };
     this.showRecordPaymentModal = true;
@@ -211,7 +212,7 @@ export class BookingDetailComponent implements OnInit {
   }
 
   submitRecordPayment(): void {
-    if (!this.bookingId) return;
+    if (!this.bookingId || this.isRecordingPayment) return;
     this.recordPaymentError = null;
 
     if (!this.recordForm.amount || this.recordForm.amount <= 0) {
@@ -235,26 +236,37 @@ export class BookingDetailComponent implements OnInit {
       return;
     }
 
+    if (!this.recordForm.transactionReference || !this.recordForm.transactionReference.trim()) {
+      this.recordForm.transactionReference = `PAY-BKG-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    }
+
     this.isRecordingPayment = true;
 
     this.paymentService.recordPayment(this.bookingId, {
       amount: Number(this.recordForm.amount),
       paymentMethod: this.recordForm.paymentMethod,
       paymentDate: this.recordForm.paymentDate,
-      transactionReference: this.recordForm.transactionReference,
+      transactionReference: this.recordForm.transactionReference.trim(),
       notes: this.recordForm.notes
     }).subscribe({
       next: (createdPay) => {
         this.isRecordingPayment = false;
         this.showRecordPaymentModal = false;
-        this.successMessage = `Payment of $${createdPay.amount.toFixed(2)} recorded successfully.`;
+        const msg = createdPay.idempotentReplay
+          ? 'Existing payment verified (idempotent replay).'
+          : `Payment of $${createdPay.amount.toFixed(2)} recorded successfully.`;
+        this.successMessage = msg;
         this.loadBookingAndPayments(this.bookingId!);
         setTimeout(() => this.successMessage = null, 5000);
       },
       error: (err) => {
         console.error('Failed to record payment', err);
-        this.recordPaymentError = err.error?.error || err.error?.message || 'Failed to record payment.';
         this.isRecordingPayment = false;
+        if (err.status === 409) {
+          this.recordPaymentError = err.error?.error || 'Payment reference has already been used for a different payment.';
+        } else {
+          this.recordPaymentError = err.error?.error || err.error?.message || 'Failed to record payment.';
+        }
       }
     });
   }

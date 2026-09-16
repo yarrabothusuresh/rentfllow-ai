@@ -162,6 +162,23 @@ public class CustomerPortalController {
         return ResponseEntity.ok(portalService.getInvoicePayments(resolveTenantId(), resolveCustomerId(), id));
     }
 
+    @PostMapping("/invoices/{id}/pay")
+    public ResponseEntity<?> payInvoice(
+            @PathVariable UUID id,
+            @RequestBody com.rentflow.payment.dto.RecordPaymentDTO dto) {
+        try {
+            PaymentDTO payment = portalService.payInvoice(resolveTenantId(), resolveCustomerId(), id, dto);
+            if (Boolean.TRUE.equals(payment.getIdempotentReplay())) {
+                return ResponseEntity.ok(payment);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(payment);
+        } catch (com.rentflow.payment.exception.IdempotencyConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/payments")
     public ResponseEntity<?> getPayments() {
         String tenantId = resolveTenantId();
