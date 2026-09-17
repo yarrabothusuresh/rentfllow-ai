@@ -21,15 +21,34 @@ import java.util.UUID;
 public class PublicQuoteRequestService {
 
     private final QuoteService quoteService;
+    private final com.rentflow.ai.repository.QuoteRepository quoteRepository;
     private final CustomerRepository customerRepository;
 
-    public PublicQuoteRequestService(QuoteService quoteService, CustomerRepository customerRepository) {
+    public PublicQuoteRequestService(QuoteService quoteService,
+                                     com.rentflow.ai.repository.QuoteRepository quoteRepository,
+                                     CustomerRepository customerRepository) {
         this.quoteService = quoteService;
+        this.quoteRepository = quoteRepository;
         this.customerRepository = customerRepository;
     }
 
     public QuoteDTO submitPublicQuoteRequest(String tenantId, UUID customerId, PublicQuoteRequestDTO request) {
-        // Resolve or Create Customer if guest
+        String idempotencyKey = request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank()
+                ? request.getIdempotencyKey().trim() : null;
+
+        // 1. Fast-path: If quote already exists with this idempotency key, return it immediately
+        if (idempotencyKey != null) {
+            java.util.Optional<com.rentflow.ai.model.Quote> existingQuote = quoteRepository.findByTenantIdAndIdempotencyKey(tenantId, idempotencyKey);
+            if (existingQuote.isPresent()) {
+                QuoteDTO result = quoteService.getQuoteById(tenantId, existingQuote.get().getId(), "CUSTOMER").orElse(null);
+                if (result != null) {
+                    result.setIdempotentReplay(true);
+                    return result;
+                }
+            }
+        }
+
+        // 2. Resolve or Create Customer if guest
         UUID targetCustomerId = customerId;
         if (targetCustomerId == null) {
             Customer guest = new Customer();
@@ -51,6 +70,7 @@ public class PublicQuoteRequestService {
         QuoteDTO qDto = new QuoteDTO();
         qDto.setTenantId(tenantId);
         qDto.setCustomerId(targetCustomerId);
+        qDto.setIdempotencyKey(idempotencyKey);
 
         LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now().plusDays(1);
         LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : startDate.plusDays(2);

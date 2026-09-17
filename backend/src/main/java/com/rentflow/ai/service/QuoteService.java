@@ -66,6 +66,18 @@ public class QuoteService {
     public QuoteDTO createQuote(String tenantId, QuoteDTO dto, String userRole) {
         validateRolePricingPermission(userRole, dto);
 
+        // Idempotency check: if idempotencyKey is supplied, check if quote already exists
+        if (dto.getIdempotencyKey() != null && !dto.getIdempotencyKey().trim().isEmpty()) {
+            Optional<Quote> existing = quoteRepository.findByTenantIdAndIdempotencyKey(tenantId, dto.getIdempotencyKey().trim());
+            if (existing.isPresent()) {
+                QuoteDTO result = getQuoteById(tenantId, existing.get().getId(), userRole).orElse(null);
+                if (result != null) {
+                    result.setIdempotentReplay(true);
+                    return result;
+                }
+            }
+        }
+
         // Cross-tenant reference prevention: prevent linking to another tenant's entities
         if (dto.getCustomerId() != null) {
             customerRepository.findById(dto.getCustomerId()).ifPresent(c -> {
@@ -96,6 +108,7 @@ public class QuoteService {
         Quote q = new Quote();
         q.setTenantId(tenantId);
         q.setQuoteNumber(generateQuoteNumber(tenantId));
+        q.setIdempotencyKey(dto.getIdempotencyKey() != null && !dto.getIdempotencyKey().trim().isEmpty() ? dto.getIdempotencyKey().trim() : null);
         q.setCustomerId(dto.getCustomerId());
         q.setEventId(dto.getEventId());
         q.setStatus(dto.getStatus() != null ? dto.getStatus() : QuoteStatus.DRAFT);
@@ -431,6 +444,7 @@ public class QuoteService {
         dto.setId(q.getId());
         dto.setTenantId(q.getTenantId());
         dto.setQuoteNumber(q.getQuoteNumber());
+        dto.setIdempotencyKey(q.getIdempotencyKey());
         dto.setCustomerId(q.getCustomerId());
         dto.setEventId(q.getEventId());
         dto.setStatus(q.getStatus());

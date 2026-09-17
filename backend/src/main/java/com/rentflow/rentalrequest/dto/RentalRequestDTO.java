@@ -14,6 +14,8 @@ public class RentalRequestDTO {
     private String tenantId;
     private String requestNumber;
     private String idempotencyKey;
+    private String requestHash;
+    private boolean idempotentReplay = false;
     private RentalRequestStatus status;
     private UUID conversationId;
     private UUID leadId;
@@ -133,4 +135,10 @@ public class RentalRequestDTO {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getRequestHash() { return requestHash; }
+    public void setRequestHash(String requestHash) { this.requestHash = requestHash; }
+
+    public boolean isIdempotentReplay() { return idempotentReplay; }
+    public void setIdempotentReplay(boolean idempotentReplay) { this.idempotentReplay = idempotentReplay; }
 }

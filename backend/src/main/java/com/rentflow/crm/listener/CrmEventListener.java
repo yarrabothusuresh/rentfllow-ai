@@ -47,16 +47,18 @@ public class CrmEventListener {
             return;
         }
 
-        // Idempotency check: Do not create duplicate lead for the same rental request
-        Optional<Lead> existingLead = leadRepository.findByTenantIdAndRentalRequestId(event.getTenantId(), event.getRequestId());
-        if (existingLead.isPresent()) {
-            return;
-        }
+        String lockKey = (event.getTenantId() + ":lead-req:" + event.getRequestId()).intern();
+        synchronized (lockKey) {
+            // Idempotency check: Do not create duplicate lead for the same rental request
+            Optional<Lead> existingLead = leadRepository.findByTenantIdAndRentalRequestId(event.getTenantId(), event.getRequestId());
+            if (existingLead.isPresent()) {
+                return;
+            }
 
-        Customer customer = null;
-        if (event.getCustomerId() != null) {
-            customer = customerRepository.findByTenantIdAndId(event.getTenantId(), event.getCustomerId()).orElse(null);
-        }
+            Customer customer = null;
+            if (event.getCustomerId() != null) {
+                customer = customerRepository.findByTenantIdAndId(event.getTenantId(), event.getCustomerId()).orElse(null);
+            }
 
         Lead lead = new Lead();
         lead.setTenantId(event.getTenantId());
@@ -81,12 +83,16 @@ public class CrmEventListener {
         }
 
         lead.setCreatedBy("STOREFRONT_REQUEST");
-        Lead saved = leadRepository.save(lead);
-
-        activityService.logActivity(event.getTenantId(), saved.getId(), ActivityType.STATUS_CHANGE, ActivityDirection.INBOUND,
-                "Lead Created from Storefront Request (" + saved.getLeadNumber() + ")",
-                "Linked Rental Request #" + event.getRequestId(),
-                event.getMessage(), null, "RENTAL_REQUEST", event.getRequestId().toString(), "STOREFRONT");
+        try {
+            Lead saved = leadRepository.saveAndFlush(lead);
+            activityService.logActivity(event.getTenantId(), saved.getId(), ActivityType.STATUS_CHANGE, ActivityDirection.INBOUND,
+                    "Lead Created from Storefront Request (" + saved.getLeadNumber() + ")",
+                    "Linked Rental Request #" + event.getRequestId(),
+                    event.getMessage(), null, "RENTAL_REQUEST", event.getRequestId().toString(), "STOREFRONT");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Concurrent duplicate event delivery: existing lead already persisted by another thread
+        }
+        }
     }
 
     @EventListener

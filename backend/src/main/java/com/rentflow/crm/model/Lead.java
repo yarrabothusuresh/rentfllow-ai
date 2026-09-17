@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(name = "CrmLead")
-@Table(name = "crm_leads", indexes = {
+@Table(name = "crm_leads", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_crm_lead_tenant_rental_req", columnNames = {"tenantId", "rentalRequestId"})
+}, indexes = {
     @Index(name = "idx_crm_lead_tenant", columnList = "tenantId"),
     @Index(name = "idx_crm_lead_tenant_number", columnList = "tenantId, leadNumber", unique = true),
     @Index(name = "idx_crm_lead_stage", columnList = "stage"),

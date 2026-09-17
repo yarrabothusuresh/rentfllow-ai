@@ -69,7 +69,8 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of(
                 "Authorization", "Content-Type", "X-Tenant-Id", "X-Requested-With",
-                "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"
+                "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers",
+                "Idempotency-Key"
         ));
         configuration.setExposedHeaders(List.of("Authorization", "Link", "X-Total-Count"));
         configuration.setAllowCredentials(true);
@@ -142,6 +143,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/portal/auth/**").permitAll()
 
                         // Public storefront & rental catalog endpoints
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/storefront/**").permitAll()
                         .requestMatchers("/api/rentals/public/**", "/api/rentals/catalog/**", "/api/rentals/cart/**").permitAll()
                         .requestMatchers("/api/cart/**").permitAll()

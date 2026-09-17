@@ -40,6 +40,8 @@ public class PublicQuoteRequestDTO {
     private String guestPhone;
     private String guestCompany;
 
+    private String idempotencyKey;
+
     public PublicQuoteRequestDTO() {}
 
     public LocalDate getStartDate() { return startDate; }
@@ -77,4 +79,7 @@ public class PublicQuoteRequestDTO {
 
     public String getGuestCompany() { return guestCompany; }
     public void setGuestCompany(String guestCompany) { this.guestCompany = guestCompany; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 }

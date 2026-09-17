@@ -15,8 +15,9 @@ public class RentalRequestItem {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID rentalRequestId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rental_request_id")
+    private RentalRequest rentalRequest;
 
     @Column(nullable = false)
     private UUID productId;
@@ -47,8 +48,11 @@ public class RentalRequestItem {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public UUID getRentalRequestId() { return rentalRequestId; }
-    public void setRentalRequestId(UUID rentalRequestId) { this.rentalRequestId = rentalRequestId; }
+    public RentalRequest getRentalRequest() { return rentalRequest; }
+    public void setRentalRequest(RentalRequest rentalRequest) { this.rentalRequest = rentalRequest; }
+
+    public UUID getRentalRequestId() { return rentalRequest != null ? rentalRequest.getId() : null; }
+    public void setRentalRequestId(UUID rentalRequestId) { /* kept for backwards-compatibility */ }
 
     public UUID getProductId() { return productId; }
     public void setProductId(UUID productId) { this.productId = productId; }

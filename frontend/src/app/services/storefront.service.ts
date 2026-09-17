@@ -126,8 +126,20 @@ export class StorefrontService {
     return this.http.post<Cart>(`${this.publicUrl}/cart/validate`, {}, { headers: this.getHeaders() });
   }
 
-  submitQuoteRequest(request: any): Observable<any> {
-    return this.http.post<any>(`${this.publicUrl}/quote-requests`, request, { headers: this.getHeaders() });
+  submitQuoteRequest(request: any, idempotencyKey?: string): Observable<any> {
+    let headers = this.getHeaders();
+    if (idempotencyKey) {
+      headers = headers.set('Idempotency-Key', idempotencyKey);
+    }
+    return this.http.post<any>(`${this.publicUrl}/quote-requests`, request, { headers });
+  }
+
+  submitRentalRequest(request: any, idempotencyKey?: string): Observable<any> {
+    let headers = this.getHeaders();
+    if (idempotencyKey) {
+      headers = headers.set('Idempotency-Key', idempotencyKey);
+    }
+    return this.http.post<any>(`${this.publicUrl}/rental-requests`, request, { headers });
   }
 
   getStaffCustomerRequestsDashboard(): Observable<any> {

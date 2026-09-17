@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "booking", indexes = {
+@Table(name = "booking", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_booking_tenant_quote", columnNames = {"tenantId", "quoteId"})
+}, indexes = {
     @Index(name = "idx_booking_tenant", columnList = "tenantId"),
     @Index(name = "idx_booking_quote", columnList = "quoteId"),
     @Index(name = "idx_booking_customer", columnList = "customerId"),

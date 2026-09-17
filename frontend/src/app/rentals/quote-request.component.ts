@@ -270,9 +270,15 @@ export class QuoteRequestComponent implements OnInit {
   guestPhone: string = '(555) 019-2831';
   notes: string = 'Please deliver before 10 AM on event day.';
 
+  idempotencyKey: string = '';
+  errorMessage: string | null = null;
+
   constructor(private storefrontService: StorefrontService, private router: Router) {}
 
   ngOnInit(): void {
+    if (!this.idempotencyKey) {
+      this.idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'quo-' + Date.now();
+    }
     this.storefrontService.getCart().subscribe({
       next: (c) => this.cart = c
     });
@@ -285,8 +291,10 @@ export class QuoteRequestComponent implements OnInit {
     }
 
     this.submitting = true;
+    this.errorMessage = null;
 
     const requestPayload = {
+      idempotencyKey: this.idempotencyKey,
       startDate: this.startDate,
       endDate: this.endDate,
       eventName: this.eventName,
@@ -300,14 +308,18 @@ export class QuoteRequestComponent implements OnInit {
       items: this.cart?.items ? this.cart.items.map(i => ({ productId: i.productId, quantity: i.quantity })) : []
     };
 
-    this.storefrontService.submitQuoteRequest(requestPayload).subscribe({
+    this.storefrontService.submitQuoteRequest(requestPayload, this.idempotencyKey).subscribe({
       next: (res) => {
         this.submitting = false;
         this.router.navigate(['/quote-request/success'], { queryParams: { reqNo: res.quoteNumber || 'REQ-000123' } });
       },
       error: (err) => {
         this.submitting = false;
-        alert('Failed to submit quote request: ' + (err.error?.message || err.message));
+        if (err.status === 409) {
+          alert('This request has changed since it was first submitted. Please start a new checkout.');
+        } else {
+          alert('Failed to submit quote request: ' + (err.error?.message || err.message));
+        }
       }
     });
   }

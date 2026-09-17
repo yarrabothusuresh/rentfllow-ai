@@ -15,6 +15,7 @@ public interface QuoteRepository extends JpaRepository<Quote, UUID> {
     List<Quote> findByTenantIdAndCustomerId(String tenantId, UUID customerId);
     List<Quote> findByTenantIdAndEventId(String tenantId, UUID eventId);
     List<Quote> findByTenantIdAndStatus(String tenantId, QuoteStatus status);
+    Optional<Quote> findByTenantIdAndIdempotencyKey(String tenantId, String idempotencyKey);
     Optional<Quote> findByQuoteNumber(String quoteNumber);
     long countByTenantId(String tenantId);
 }

@@ -16,6 +16,8 @@ public class QuoteDTO {
     private UUID id;
     private String tenantId;
     private String quoteNumber;
+    private String idempotencyKey;
+    private boolean idempotentReplay = false;
 
     @NotNull(message = "Customer ID is required")
     private UUID customerId;
@@ -186,4 +188,10 @@ public class QuoteDTO {
 
     public List<String> getShortageWarnings() { return shortageWarnings; }
     public void setShortageWarnings(List<String> shortageWarnings) { this.shortageWarnings = shortageWarnings; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+
+    public boolean isIdempotentReplay() { return idempotentReplay; }
+    public void setIdempotentReplay(boolean idempotentReplay) { this.idempotentReplay = idempotentReplay; }
 }

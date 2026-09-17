@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,9 +20,12 @@ import java.util.stream.Collectors;
 public class RentalRequestService {
 
     private final RentalRequestRepository rentalRequestRepository;
+    private final org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
-    public RentalRequestService(RentalRequestRepository rentalRequestRepository) {
+    public RentalRequestService(RentalRequestRepository rentalRequestRepository,
+                                org.springframework.transaction.PlatformTransactionManager transactionManager) {
         this.rentalRequestRepository = rentalRequestRepository;
+        this.transactionTemplate = new org.springframework.transaction.support.TransactionTemplate(transactionManager);
     }
 
     public synchronized String generateRequestNumber(String tenantId) {
@@ -34,27 +38,64 @@ public class RentalRequestService {
         return candidate;
     }
 
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
     public RentalRequestDTO createRentalRequest(String tenantId, RentalRequestDTO dto) {
-        // Idempotency check: if idempotencyKey is supplied, check if request exists
+        // 1. Calculate canonical payload fingerprint
+        List<String> canonicalItems = new ArrayList<>();
+        if (dto.getItems() != null) {
+            for (RentalRequestDTO.ItemDTO item : dto.getItems()) {
+                canonicalItems.add((item.getProductId() != null ? item.getProductId().toString() : "") + ":" + item.getQuantity());
+            }
+        }
+        String currentHash = com.rentflow.common.idempotency.IdempotencyUtils.computeRequestFingerprint(
+                tenantId,
+                dto.getCustomerEmail(),
+                dto.getRentalStartDate() != null ? dto.getRentalStartDate().toString() : "",
+                dto.getRentalEndDate() != null ? dto.getRentalEndDate().toString() : "",
+                canonicalItems,
+                dto.getEstimatedTotal() != null ? dto.getEstimatedTotal().toPlainString() : "0"
+        );
+
+        // 2. Fast-path idempotency check: if idempotencyKey is supplied, check if request exists
         if (dto.getIdempotencyKey() != null && !dto.getIdempotencyKey().trim().isEmpty()) {
-            Optional<RentalRequest> existing = rentalRequestRepository.findByTenantIdAndIdempotencyKey(tenantId, dto.getIdempotencyKey().trim());
-            if (existing.isPresent()) {
-                return mapToDTO(existing.get());
+            String lockKey = (tenantId + ":" + dto.getIdempotencyKey().trim()).intern();
+            synchronized (lockKey) {
+                return transactionTemplate.execute(status -> {
+                    Optional<RentalRequest> existing = rentalRequestRepository.findByTenantIdAndIdempotencyKey(tenantId, dto.getIdempotencyKey().trim());
+                    if (existing.isPresent()) {
+                        RentalRequest req = existing.get();
+                        if (req.getRequestHash() != null && !req.getRequestHash().equals(currentHash)) {
+                            throw new com.rentflow.payment.exception.IdempotencyConflictException(
+                                    "This request has changed since it was first submitted. Please start a new checkout.");
+                        }
+                        RentalRequestDTO result = mapToDTO(req);
+                        result.setIdempotentReplay(true);
+                        return result;
+                    }
+                    return doCreateRentalRequest(tenantId, dto, currentHash);
+                });
             }
         }
 
+        return transactionTemplate.execute(status -> doCreateRentalRequest(tenantId, dto, currentHash));
+    }
+
+    private RentalRequestDTO doCreateRentalRequest(String tenantId, RentalRequestDTO dto, String currentHash) {
         // Conversation-level idempotency fallback
         if (dto.getConversationId() != null) {
             Optional<RentalRequest> existingByConv = rentalRequestRepository.findByTenantIdAndConversationId(tenantId, dto.getConversationId());
             if (existingByConv.isPresent()) {
-                return mapToDTO(existingByConv.get());
+                RentalRequestDTO result = mapToDTO(existingByConv.get());
+                result.setIdempotentReplay(true);
+                return result;
             }
         }
 
         RentalRequest request = new RentalRequest();
         request.setTenantId(tenantId);
         request.setRequestNumber(generateRequestNumber(tenantId));
-        request.setIdempotencyKey(dto.getIdempotencyKey());
+        request.setIdempotencyKey(dto.getIdempotencyKey() != null && !dto.getIdempotencyKey().trim().isEmpty() ? dto.getIdempotencyKey().trim() : null);
+        request.setRequestHash(currentHash);
         request.setStatus(dto.getStatus() != null ? dto.getStatus() : RentalRequestStatus.SUBMITTED);
         request.setConversationId(dto.getConversationId());
         request.setLeadId(dto.getLeadId());
@@ -91,14 +132,32 @@ public class RentalRequestService {
                 BigDecimal line = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                 item.setLineTotal(line);
                 calculatedTotal = calculatedTotal.add(line);
-                request.getItems().add(item);
+                request.addItem(item);
             }
         }
         request.setEstimatedTotal(dto.getEstimatedTotal() != null && dto.getEstimatedTotal().compareTo(BigDecimal.ZERO) > 0
                 ? dto.getEstimatedTotal() : calculatedTotal);
 
-        RentalRequest saved = rentalRequestRepository.save(request);
-        return mapToDTO(saved);
+        try {
+            RentalRequest saved = rentalRequestRepository.saveAndFlush(request);
+            return mapToDTO(saved);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Concurrent race condition fallback: reload existing record committed by competing process/cluster
+            if (dto.getIdempotencyKey() != null && !dto.getIdempotencyKey().trim().isEmpty()) {
+                Optional<RentalRequest> concurrentRecord = rentalRequestRepository.findByTenantIdAndIdempotencyKey(tenantId, dto.getIdempotencyKey().trim());
+                if (concurrentRecord.isPresent()) {
+                    RentalRequest existingReq = concurrentRecord.get();
+                    if (existingReq.getRequestHash() != null && !existingReq.getRequestHash().equals(currentHash)) {
+                        throw new com.rentflow.payment.exception.IdempotencyConflictException(
+                                "This request has changed since it was first submitted. Please start a new checkout.");
+                    }
+                    RentalRequestDTO result = mapToDTO(existingReq);
+                    result.setIdempotentReplay(true);
+                    return result;
+                }
+            }
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -162,6 +221,7 @@ public class RentalRequestService {
         dto.setTenantId(entity.getTenantId());
         dto.setRequestNumber(entity.getRequestNumber());
         dto.setIdempotencyKey(entity.getIdempotencyKey());
+        dto.setRequestHash(entity.getRequestHash());
         dto.setStatus(entity.getStatus());
         dto.setConversationId(entity.getConversationId());
         dto.setLeadId(entity.getLeadId());

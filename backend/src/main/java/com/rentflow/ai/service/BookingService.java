@@ -63,7 +63,11 @@ public class BookingService {
         // 1. Idempotency Check: if booking already exists for quote, return it
         Optional<Booking> existing = bookingRepository.findByTenantIdAndQuoteId(tenantId, quoteId);
         if (existing.isPresent()) {
-            return mapToDTO(existing.get(), userRole);
+            Booking b = existing.get();
+            if (b.getStatus() == BookingStatus.CANCELLED) {
+                throw new IllegalStateException("Quote " + quoteId + " has already been converted to booking " + b.getBookingNumber() + " which was cancelled. A new quote must be generated.");
+            }
+            return mapToDTO(b, userRole);
         }
 
         // 2. Load Quote
@@ -101,6 +105,16 @@ public class BookingService {
                 .collect(Collectors.toList());
         for (UUID pId : productIdsToLock) {
             productRepository.findWithLockByTenantIdAndId(tenantId, pId);
+        }
+
+        // 3.6 Re-check under lock (Double-Checked Locking): check if another concurrent thread completed conversion while waiting for product locks
+        Optional<Booking> underLock = bookingRepository.findByTenantIdAndQuoteId(tenantId, quoteId);
+        if (underLock.isPresent()) {
+            Booking b = underLock.get();
+            if (b.getStatus() == BookingStatus.CANCELLED) {
+                throw new IllegalStateException("Quote " + quoteId + " has already been converted to booking " + b.getBookingNumber() + " which was cancelled. A new quote must be generated.");
+            }
+            return mapToDTO(b, userRole);
         }
 
         // 4. Recheck availability for EVERY quote item inside transaction
@@ -159,7 +173,16 @@ public class BookingService {
         booking.setInternalNotes(quote.getInternalNotes());
         booking.setCreatedBy(userRole != null ? userRole : "System");
 
-        Booking savedBooking = bookingRepository.save(booking);
+        Booking savedBooking;
+        try {
+            savedBooking = bookingRepository.saveAndFlush(booking);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            Optional<Booking> concurrent = bookingRepository.findByTenantIdAndQuoteId(tenantId, quoteId);
+            if (concurrent.isPresent()) {
+                return mapToDTO(concurrent.get(), userRole);
+            }
+            throw e;
+        }
 
         // 7. Copy Quote Items to Booking Items (Snapshot)
         for (QuoteItem qItem : quoteItems) {

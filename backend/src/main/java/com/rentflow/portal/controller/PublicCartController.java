@@ -106,9 +106,13 @@ public class PublicCartController {
     public ResponseEntity<QuoteDTO> submitQuoteRequest(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-Customer-Id", required = false) String customerHeader,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKeyHeader,
             @RequestBody PublicQuoteRequestDTO dto) {
         String tenantId = resolveTenantId(tenantHeader);
         UUID customerId = resolveCustomerId(customerHeader);
+        if (idempotencyKeyHeader != null && !idempotencyKeyHeader.isBlank()) {
+            dto.setIdempotencyKey(idempotencyKeyHeader.trim());
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(quoteRequestService.submitPublicQuoteRequest(tenantId, customerId, dto));
     }
 }

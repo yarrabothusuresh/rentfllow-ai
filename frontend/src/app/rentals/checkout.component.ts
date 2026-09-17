@@ -113,6 +113,10 @@ import { StorefrontService, Cart } from '../services/storefront.service';
                 </label>
               </div>
 
+              <div *ngIf="errorMessage" class="error-banner" style="background: #fef2f2; color: #dc2626; border: 1px solid #f87171; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 500;">
+                {{ errorMessage }}
+              </div>
+
               <div class="step-buttons">
                 <button class="btn-back" (click)="currentStep = 2">← Back</button>
                 <button class="btn-confirm" (click)="confirmBooking()" [disabled]="processing">
@@ -235,6 +239,8 @@ export class CheckoutComponent implements OnInit {
   currentStep: number = 1;
   cart: Cart | null = null;
   processing: boolean = false;
+  idempotencyKey: string = '';
+  errorMessage: string | null = null;
 
   startDate: string = new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0];
   endDate: string = new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0];
@@ -251,6 +257,9 @@ export class CheckoutComponent implements OnInit {
   constructor(private storefrontService: StorefrontService, private router: Router) {}
 
   ngOnInit(): void {
+    if (!this.idempotencyKey) {
+      this.idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'chk-' + Date.now();
+    }
     this.storefrontService.getCart().subscribe({
       next: (c) => this.cart = c
     });
@@ -258,15 +267,40 @@ export class CheckoutComponent implements OnInit {
 
   confirmBooking(): void {
     this.processing = true;
-    setTimeout(() => {
-      this.processing = false;
-      this.router.navigate(['/checkout/success'], {
-        queryParams: {
-          bkgNo: 'BOOK-000123',
-          event: this.eventName,
-          total: this.cart?.estimatedTotal || 2450
+    this.errorMessage = null;
+
+    const payload = {
+      idempotencyKey: this.idempotencyKey,
+      customerName: this.customerName,
+      customerEmail: this.customerEmail,
+      eventName: this.eventName,
+      eventType: this.eventType,
+      rentalStartDate: this.startDate + 'T09:00:00',
+      rentalEndDate: this.endDate + 'T18:00:00',
+      deliveryAddress: this.deliveryAddress,
+      estimatedTotal: this.cart?.estimatedTotal || 0,
+      items: this.cart?.items ? this.cart.items.map(i => ({ productId: i.productId, quantity: i.quantity, unitPrice: i.unitPrice })) : []
+    };
+
+    this.storefrontService.submitRentalRequest(payload, this.idempotencyKey).subscribe({
+      next: (res) => {
+        this.processing = false;
+        this.router.navigate(['/checkout/success'], {
+          queryParams: {
+            bkgNo: res.requestNumber || 'REQ-000123',
+            event: this.eventName,
+            total: this.cart?.estimatedTotal || 2450
+          }
+        });
+      },
+      error: (err) => {
+        this.processing = false;
+        if (err.status === 409) {
+          this.errorMessage = 'This request has changed since it was first submitted. Please start a new checkout.';
+        } else {
+          this.errorMessage = err.error?.message || 'Failed to complete checkout. You may retry safely.';
         }
-      });
-    }, 800);
+      }
+    });
   }
 }

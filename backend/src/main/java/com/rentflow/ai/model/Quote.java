@@ -7,7 +7,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "quotes")
+@Table(name = "quotes", indexes = {
+    @Index(name = "idx_quotes_tenant", columnList = "tenantId"),
+    @Index(name = "idx_quotes_tenant_idempotency", columnList = "tenantId, idempotencyKey")
+})
 public class Quote {
 
     @Id
@@ -19,6 +22,9 @@ public class Quote {
 
     @Column(nullable = false, unique = true)
     private String quoteNumber;
+
+    @Column(length = 255)
+    private String idempotencyKey;
 
     @Column(nullable = false)
     private UUID customerId;
@@ -123,6 +129,9 @@ public class Quote {
 
     public String getQuoteNumber() { return quoteNumber; }
     public void setQuoteNumber(String quoteNumber) { this.quoteNumber = quoteNumber; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 
     public UUID getCustomerId() { return customerId; }
     public void setCustomerId(UUID customerId) { this.customerId = customerId; }

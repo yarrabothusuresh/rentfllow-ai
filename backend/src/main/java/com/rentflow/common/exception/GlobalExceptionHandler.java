@@ -141,6 +141,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getErrorDetails());
     }
 
+    @ExceptionHandler(com.rentflow.payment.exception.IdempotencyConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleIdempotencyConflict(com.rentflow.payment.exception.IdempotencyConflictException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", "Conflict");
+        body.put("message", ex.getMessage() != null ? ex.getMessage() : "This request has changed since it was first submitted. Please start a new checkout.");
+        body.put("timestamp", Instant.now().toString());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> handleMaxSizeExceeded(MaxUploadSizeExceededException ex) {
         Map<String, Object> body = new LinkedHashMap<>();

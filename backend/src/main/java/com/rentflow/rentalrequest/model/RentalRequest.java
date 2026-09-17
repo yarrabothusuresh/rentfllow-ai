@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "rental_requests", indexes = {
+@Table(name = "rental_requests", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_rental_req_tenant_idempotency", columnNames = {"tenantId", "idempotencyKey"})
+}, indexes = {
     @Index(name = "idx_rental_req_tenant", columnList = "tenantId"),
     @Index(name = "idx_rental_req_number", columnList = "tenantId, requestNumber", unique = true),
     @Index(name = "idx_rental_req_idempotency", columnList = "tenantId, idempotencyKey"),
@@ -31,6 +33,9 @@ public class RentalRequest {
 
     @Column(length = 255)
     private String idempotencyKey;
+
+    @Column(length = 64)
+    private String requestHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -70,14 +75,20 @@ public class RentalRequest {
     @Column(length = 4000)
     private String notes;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "rentalRequestId")
+    @OneToMany(mappedBy = "rentalRequest", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RentalRequestItem> items = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    public RentalRequest() {}
+
+    public void addItem(RentalRequestItem item) {
+        items.add(item);
+        item.setRentalRequest(this);
+    }
 
     @PrePersist
     public void onCreate() {
@@ -101,6 +112,9 @@ public class RentalRequest {
 
     public String getIdempotencyKey() { return idempotencyKey; }
     public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+
+    public String getRequestHash() { return requestHash; }
+    public void setRequestHash(String requestHash) { this.requestHash = requestHash; }
 
     public RentalRequestStatus getStatus() { return status; }
     public void setStatus(RentalRequestStatus status) { this.status = status; }
