@@ -125,8 +125,10 @@ public class DamageClaimService {
         for (ReturnOrderItem item : returnItems) {
             if (item.getQuantityDamaged() > 0 || item.getQuantityMissing() > 0) {
                 Product product = productRepository.findById(item.getProductId()).orElse(null);
-                BigDecimal unitRepair = BigDecimal.valueOf(25.00); // Standard repair default
-                BigDecimal unitReplace = (product != null && product.getReplacementCost() != null) ? product.getReplacementCost() : BigDecimal.valueOf(150.00);
+                BigDecimal unitRepair = new BigDecimal("25.00"); // Standard repair default
+                BigDecimal unitReplace = (product != null && product.getReplacementCost() != null) 
+                        ? product.getReplacementCost().setScale(2, RoundingMode.HALF_UP) 
+                        : new BigDecimal("150.00");
 
                 if (item.getQuantityDamaged() > 0) {
                     DamageClaimItem dci = new DamageClaimItem();
@@ -141,12 +143,12 @@ public class DamageClaimService {
                     dci.setUnitRepairCost(unitRepair);
                     dci.setUnitReplacementCost(unitReplace);
 
-                    BigDecimal itemEst = unitRepair.multiply(BigDecimal.valueOf(item.getQuantityDamaged()));
+                    BigDecimal itemEst = unitRepair.multiply(BigDecimal.valueOf(item.getQuantityDamaged())).setScale(2, RoundingMode.HALF_UP);
                     dci.setEstimatedCost(itemEst);
                     claimItemRepository.save(dci);
 
-                    totalEstRepair = totalEstRepair.add(itemEst);
-                    totalEstReplace = totalEstReplace.add(unitReplace.multiply(BigDecimal.valueOf(item.getQuantityDamaged())));
+                    totalEstRepair = totalEstRepair.add(itemEst).setScale(2, RoundingMode.HALF_UP);
+                    totalEstReplace = totalEstReplace.add(unitReplace.multiply(BigDecimal.valueOf(item.getQuantityDamaged()))).setScale(2, RoundingMode.HALF_UP);
                 }
 
                 if (item.getQuantityMissing() > 0) {
@@ -162,11 +164,11 @@ public class DamageClaimService {
                     mci.setUnitRepairCost(BigDecimal.ZERO);
                     mci.setUnitReplacementCost(unitReplace);
 
-                    BigDecimal itemEst = unitReplace.multiply(BigDecimal.valueOf(item.getQuantityMissing()));
+                    BigDecimal itemEst = unitReplace.multiply(BigDecimal.valueOf(item.getQuantityMissing())).setScale(2, RoundingMode.HALF_UP);
                     mci.setEstimatedCost(itemEst);
                     claimItemRepository.save(mci);
 
-                    totalEstReplace = totalEstReplace.add(itemEst);
+                    totalEstReplace = totalEstReplace.add(itemEst).setScale(2, RoundingMode.HALF_UP);
                 }
             }
         }
@@ -227,9 +229,9 @@ public class DamageClaimService {
         BigDecimal discount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
         BigDecimal tax = request.getTax() != null ? request.getTax() : BigDecimal.ZERO;
 
-        BigDecimal subtotal = repair.add(replace).add(labor).add(transport).add(other).subtract(discount);
-        if (subtotal.compareTo(BigDecimal.ZERO) < 0) subtotal = BigDecimal.ZERO;
-        BigDecimal total = subtotal.add(tax);
+        BigDecimal subtotal = repair.add(replace).add(labor).add(transport).add(other).subtract(discount)
+                .max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal total = subtotal.add(tax).setScale(2, RoundingMode.HALF_UP);
 
         ClaimEstimate estimate = new ClaimEstimate();
         estimate.setTenantId(tenantId);

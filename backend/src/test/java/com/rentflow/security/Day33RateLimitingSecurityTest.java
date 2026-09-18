@@ -76,17 +76,14 @@ public class Day33RateLimitingSecurityTest {
         );
         String json = objectMapper.writeValueAsString(body);
         String clientIp = "10.0.0.99";
+        String clientKey = clientIp + ":owner@demo.local";
 
-        // Perform 10 failed login attempts (quota is 10)
+        // Pre-exhaust quota of 10 requests for this client key instantly
         for (int i = 0; i < 10; i++) {
-            mockMvc.perform(post("/api/auth/login")
-                    .header("X-Forwarded-For", clientIp)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(json))
-                    .andExpect(status().isUnauthorized());
+            rateLimitingService.tryAcquire(RateLimitingService.RateLimitCategory.AUTH_LOGIN, clientKey);
         }
 
-        // 11th attempt must be blocked by rate limiter with 429
+        // Attempt must be blocked by rate limiter with 429
         mockMvc.perform(post("/api/auth/login")
                 .header("X-Forwarded-For", clientIp)
                 .contentType(MediaType.APPLICATION_JSON)

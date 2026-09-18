@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +36,8 @@ public class PublicCatalogController {
     public ResponseEntity<List<PublicProductDTO>> getCatalog(
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortBy) {
         String tenantId = resolveTenantId(tenantHeader);

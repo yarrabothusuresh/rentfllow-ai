@@ -38,7 +38,7 @@ class WorkflowControllerTest {
         // Check demo scenario
         assertNotNull(response.getBody().getDemoScenario());
         assertEquals("Emily Brown", response.getBody().getDemoScenario().getCustomerName());
-        assertEquals(6480.0, response.getBody().getDemoScenario().getTotalEstimated());
+        assertEquals(new java.math.BigDecimal("6480.00"), response.getBody().getDemoScenario().getTotalEstimated());
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -63,16 +64,23 @@ public class ClaimBillingService {
                 line.setProductId(item.getProductId());
                 line.setDescription("Damage Claim " + claim.getClaimNumber() + " - " + item.getProductNameSnapshot() + " (" + item.getClaimType() + ")");
                 line.setQuantity(item.getQuantity());
-                line.setUnitPrice(item.getApprovedCost());
-                line.setLineTotal(item.getApprovedCost());
+                line.setUnitPrice(item.getApprovedCost().setScale(2, RoundingMode.HALF_UP));
+                line.setLineTotal(item.getApprovedCost().setScale(2, RoundingMode.HALF_UP));
                 invoiceItemRepository.save(line);
             }
         }
 
-        BigDecimal newSubtotal = invoice.getSubtotal().add(claim.getApprovedTotalCost());
+        BigDecimal currentSub = invoice.getSubtotal() != null ? invoice.getSubtotal() : BigDecimal.ZERO;
+        BigDecimal claimCost = claim.getApprovedTotalCost() != null ? claim.getApprovedTotalCost() : BigDecimal.ZERO;
+        BigDecimal newSubtotal = currentSub.add(claimCost).setScale(2, RoundingMode.HALF_UP);
         invoice.setSubtotal(newSubtotal);
-        invoice.setTotalAmount(newSubtotal.add(invoice.getTax() != null ? invoice.getTax() : BigDecimal.ZERO));
-        invoice.setBalanceDue(invoice.getTotalAmount().subtract(invoice.getAmountPaid()));
+
+        BigDecimal currentTax = invoice.getTax() != null ? invoice.getTax() : BigDecimal.ZERO;
+        BigDecimal newTotal = newSubtotal.add(currentTax).setScale(2, RoundingMode.HALF_UP);
+        invoice.setTotalAmount(newTotal);
+
+        BigDecimal currentPaid = invoice.getAmountPaid() != null ? invoice.getAmountPaid() : BigDecimal.ZERO;
+        invoice.setBalanceDue(newTotal.subtract(currentPaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
         Invoice saved = invoiceRepository.save(invoice);
 
         return Optional.of(saved);

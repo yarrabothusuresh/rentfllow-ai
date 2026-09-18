@@ -16,12 +16,12 @@ public class QuoteCalculationService {
     public QuoteCalculationResponse calculate(QuoteCalculationRequest request) {
         QuoteCalculationResponse resp = new QuoteCalculationResponse();
 
-        BigDecimal grossSubtotal = BigDecimal.ZERO;
+        BigDecimal grossSubtotal = BigDecimal.ZERO.setScale(2, ROUNDING);
 
         // 1. Calculate each line item
         if (request.getItems() != null) {
             for (QuoteItemDTO item : request.getItems()) {
-                BigDecimal unitPrice = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+                BigDecimal unitPrice = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO.setScale(2, ROUNDING);
                 int qty = Math.max(0, item.getQuantity());
                 int days = Math.max(1, item.getRentalDays());
                 PricingStrategy strategy = item.getPricingStrategy() != null ? item.getPricingStrategy() : PricingStrategy.PER_EVENT;
@@ -30,7 +30,7 @@ public class QuoteCalculationService {
                 if (strategy == PricingStrategy.PER_DAY) {
                     multiplier = BigDecimal.valueOf(days);
                 } else if (strategy == PricingStrategy.PER_WEEK) {
-                    int weeks = (int) Math.ceil((double) days / 7.0);
+                    int weeks = (days + 6) / 7;
                     multiplier = BigDecimal.valueOf(Math.max(1, weeks));
                 }
 
@@ -45,8 +45,8 @@ public class QuoteCalculationService {
                     BigDecimal diff = unitPrice.subtract(item.getStandardUnitPrice()).setScale(2, ROUNDING);
                     item.setPriceOverrideDifference(diff);
                 } else {
-                    item.setStandardUnitPrice(unitPrice);
-                    item.setPriceOverrideDifference(BigDecimal.ZERO);
+                    item.setStandardUnitPrice(unitPrice.setScale(2, ROUNDING));
+                    item.setPriceOverrideDifference(BigDecimal.ZERO.setScale(2, ROUNDING));
                 }
 
                 grossSubtotal = grossSubtotal.add(lineSubtotal).setScale(2, ROUNDING);
@@ -54,10 +54,10 @@ public class QuoteCalculationService {
             }
         }
 
-        resp.setSubtotal(grossSubtotal);
+        resp.setSubtotal(grossSubtotal.setScale(2, ROUNDING));
 
         // 2. Calculate Order Discount
-        BigDecimal discountAmount = BigDecimal.ZERO;
+        BigDecimal discountAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
         BigDecimal discVal = request.getDiscountValue() != null ? request.getDiscountValue() : BigDecimal.ZERO;
         DiscountType discType = request.getDiscountType() != null ? request.getDiscountType() : DiscountType.PERCENTAGE;
 
@@ -73,7 +73,7 @@ public class QuoteCalculationService {
                 discountAmount = grossSubtotal;
             }
         }
-        resp.setDiscountAmount(discountAmount);
+        resp.setDiscountAmount(discountAmount.setScale(2, ROUNDING));
 
         // 3. Sum Order Fees
         BigDecimal delivery = request.getDeliveryFee() != null ? request.getDeliveryFee() : BigDecimal.ZERO;

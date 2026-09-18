@@ -5,6 +5,7 @@ import com.rentflow.ai.repository.ProductRepository;
 import com.rentflow.aisales.dto.ToolCallRequestDTO;
 import com.rentflow.aisales.dto.ToolCallResultDTO;
 import com.rentflow.aisales.model.MarginStatus;
+import com.rentflow.common.financial.FinancialMath;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -13,6 +14,13 @@ import java.util.*;
 
 @Component("aiSalesCheckInternalProfitabilityTool")
 public class CheckInternalProfitabilityTool implements AiSalesTool {
+
+    private static final BigDecimal WEAR_RATE = new BigDecimal("0.15");
+    private static final BigDecimal HANDLING_PER_ITEM = new BigDecimal("2.00");
+    private static final BigDecimal DISPATCH_REVENUE = new BigDecimal("150.00");
+    private static final BigDecimal DISPATCH_COST = new BigDecimal("80.00");
+    private static final BigDecimal TARGET_MARGIN = new BigDecimal("30.00");
+    private static final BigDecimal LOW_MARGIN_THRESHOLD = new BigDecimal("20.00");
 
     private final ProductRepository productRepository;
 
@@ -42,7 +50,7 @@ public class CheckInternalProfitabilityTool implements AiSalesTool {
 
     @Override
     public Set<String> getAllowedRoles() {
-        return Set.of("SALES", "ADMIN", "OWNER");
+        return Set.of("SALES", "ADMIN", "OWNER", "FINANCE");
     }
 
     @Override
@@ -69,12 +77,13 @@ public class CheckInternalProfitabilityTool implements AiSalesTool {
                             Optional<Product> prodOpt = productRepository.findByTenantIdAndId(tenantId, pId);
                             if (prodOpt.isPresent()) {
                                 Product p = prodOpt.get();
-                                BigDecimal lineRev = p.getRentalPrice().multiply(BigDecimal.valueOf(qty));
+                                BigDecimal unitPrice = FinancialMath.scaleCurrency(p.getRentalPrice());
+                                BigDecimal lineRev = FinancialMath.multiply(unitPrice, qty);
                                 totalRevenue = totalRevenue.add(lineRev);
 
-                                // Estimate item cost: wear/depreciation (e.g. 15% of rental price) + turnaround handling ($2/item)
-                                BigDecimal wearCost = lineRev.multiply(BigDecimal.valueOf(0.15));
-                                BigDecimal handlingCost = BigDecimal.valueOf(2.00).multiply(BigDecimal.valueOf(qty));
+                                // Estimate item cost: wear/depreciation (15% of rental price) + turnaround handling ($2/item)
+                                BigDecimal wearCost = lineRev.multiply(WEAR_RATE).setScale(FinancialMath.CURRENCY_SCALE, RoundingMode.HALF_UP);
+                                BigDecimal handlingCost = HANDLING_PER_ITEM.multiply(BigDecimal.valueOf(qty)).setScale(FinancialMath.CURRENCY_SCALE, RoundingMode.HALF_UP);
                                 totalCost = totalCost.add(wearCost).add(handlingCost);
                             }
                         } catch (Exception ignored) {}
@@ -83,37 +92,35 @@ public class CheckInternalProfitabilityTool implements AiSalesTool {
             }
         }
 
-        // Add standard dispatch labor delivery cost ($80.00)
+        // Add standard dispatch labor delivery cost ($80.00) and delivery revenue ($150.00)
         boolean delivery = args.get("deliveryRequired") == null || Boolean.parseBoolean(args.get("deliveryRequired").toString());
         if (delivery) {
-            totalRevenue = totalRevenue.add(BigDecimal.valueOf(150.00));
-            totalCost = totalCost.add(BigDecimal.valueOf(80.00));
+            totalRevenue = totalRevenue.add(DISPATCH_REVENUE);
+            totalCost = totalCost.add(DISPATCH_COST);
         }
 
-        BigDecimal profit = totalRevenue.subtract(totalCost);
-        double marginPct = 0.0;
-        if (totalRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            marginPct = profit.divide(totalRevenue, 4, RoundingMode.HALF_UP).doubleValue() * 100.0;
-        }
+        totalRevenue = FinancialMath.scaleCurrency(totalRevenue);
+        totalCost = FinancialMath.scaleCurrency(totalCost);
+        BigDecimal profit = FinancialMath.calculateProfit(totalRevenue, totalCost);
+        BigDecimal marginPct = FinancialMath.calculateMargin(totalRevenue, totalCost);
 
-        double targetMargin = 30.0;
         MarginStatus status = MarginStatus.HEALTHY;
         List<String> warnings = new ArrayList<>();
 
-        if (marginPct < 0) {
+        if (marginPct.compareTo(BigDecimal.ZERO) < 0 || profit.compareTo(BigDecimal.ZERO) < 0) {
             status = MarginStatus.LOSS_MAKING;
             warnings.add("Quote is operating at a net financial loss! Review line item pricing and delivery distance.");
-        } else if (marginPct < 20.0) {
+        } else if (marginPct.compareTo(LOW_MARGIN_THRESHOLD) < 0) {
             status = MarginStatus.LOW_MARGIN;
-            warnings.add("Low margin warning: " + String.format("%.1f", marginPct) + "% is below the tenant's 30.0% target margin.");
+            warnings.add("Low margin warning: " + marginPct + "% is below the tenant's " + TARGET_MARGIN + "% target margin.");
         }
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("estimatedRevenue", totalRevenue.setScale(2, RoundingMode.HALF_UP));
-        result.put("estimatedCost", totalCost.setScale(2, RoundingMode.HALF_UP));
-        result.put("estimatedProfit", profit.setScale(2, RoundingMode.HALF_UP));
-        result.put("estimatedMarginPct", Math.round(marginPct * 10.0) / 10.0);
-        result.put("targetMarginPct", targetMargin);
+        result.put("estimatedRevenue", totalRevenue);
+        result.put("estimatedCost", totalCost);
+        result.put("estimatedProfit", profit);
+        result.put("estimatedMarginPct", marginPct);
+        result.put("targetMarginPct", TARGET_MARGIN);
         result.put("marginStatus", status);
         result.put("warnings", warnings);
 

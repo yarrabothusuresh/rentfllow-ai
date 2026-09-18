@@ -55,7 +55,7 @@ public class PublicCatalogService {
                 });
     }
 
-    public List<PublicProductDTO> getPublicCatalog(String tenantId, String category, Double minPrice, Double maxPrice, String search, String sortBy) {
+    public List<PublicProductDTO> getPublicCatalog(String tenantId, String category, BigDecimal minPrice, BigDecimal maxPrice, String search, String sortBy) {
         List<Product> products = productRepository.findByTenantId(tenantId);
 
         if (category != null && !category.isBlank()) {
@@ -67,16 +67,14 @@ public class PublicCatalogService {
         }
 
         if (minPrice != null) {
-            BigDecimal min = BigDecimal.valueOf(minPrice);
             products = products.stream()
-                    .filter(p -> p.getRentalPrice() != null && p.getRentalPrice().compareTo(min) >= 0)
+                    .filter(p -> p.getRentalPrice() != null && p.getRentalPrice().compareTo(minPrice) >= 0)
                     .collect(Collectors.toList());
         }
 
         if (maxPrice != null) {
-            BigDecimal max = BigDecimal.valueOf(maxPrice);
             products = products.stream()
-                    .filter(p -> p.getRentalPrice() != null && p.getRentalPrice().compareTo(max) <= 0)
+                    .filter(p -> p.getRentalPrice() != null && p.getRentalPrice().compareTo(maxPrice) <= 0)
                     .collect(Collectors.toList());
         }
 

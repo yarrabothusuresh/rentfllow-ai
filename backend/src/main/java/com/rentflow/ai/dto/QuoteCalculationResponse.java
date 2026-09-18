@@ -5,21 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuoteCalculationResponse {
-    private BigDecimal subtotal = BigDecimal.ZERO;
-    private BigDecimal discountAmount = BigDecimal.ZERO;
-    private BigDecimal deliveryFee = BigDecimal.ZERO;
-    private BigDecimal pickupFee = BigDecimal.ZERO;
-    private BigDecimal setupFee = BigDecimal.ZERO;
-    private BigDecimal breakdownFee = BigDecimal.ZERO;
-    private BigDecimal serviceFee = BigDecimal.ZERO;
-    private BigDecimal totalFees = BigDecimal.ZERO;
+    private static final java.math.RoundingMode ROUNDING = java.math.RoundingMode.HALF_UP;
+    private BigDecimal subtotal = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal discountAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal deliveryFee = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal pickupFee = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal setupFee = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal breakdownFee = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal serviceFee = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal totalFees = BigDecimal.ZERO.setScale(2, ROUNDING);
     private BigDecimal taxRate = new BigDecimal("8.25");
-    private BigDecimal taxableAmount = BigDecimal.ZERO;
-    private BigDecimal taxAmount = BigDecimal.ZERO;
-    private BigDecimal totalAmount = BigDecimal.ZERO;
+    private BigDecimal taxableAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal taxAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal totalAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
     private BigDecimal depositPercentage = new BigDecimal("30.00");
-    private BigDecimal depositAmount = BigDecimal.ZERO;
-    private BigDecimal remainingBalance = BigDecimal.ZERO;
+    private BigDecimal depositAmount = BigDecimal.ZERO.setScale(2, ROUNDING);
+    private BigDecimal remainingBalance = BigDecimal.ZERO.setScale(2, ROUNDING);
     private List<QuoteItemDTO> calculatedItems = new ArrayList<>();
 
     public QuoteCalculationResponse() {}

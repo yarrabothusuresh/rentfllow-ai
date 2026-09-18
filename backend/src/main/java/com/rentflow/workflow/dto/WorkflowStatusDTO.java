@@ -2,6 +2,7 @@ package com.rentflow.workflow.dto;
 
 import com.rentflow.workflow.model.WorkflowStage;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class WorkflowStatusDTO {
@@ -36,11 +37,11 @@ public class WorkflowStatusDTO {
         private int guestCount;
         private String companyName;
         private List<String> products;
-        private double estimatedRental;
-        private double deliverySetup;
-        private double totalEstimated;
-        private double estimatedMargin;
-        private double estimatedCost;
+        private BigDecimal estimatedRental;
+        private BigDecimal deliverySetup;
+        private BigDecimal totalEstimated;
+        private BigDecimal estimatedMargin;
+        private BigDecimal estimatedCost;
 
         public DemoScenarioDTO() {}
 
@@ -65,19 +66,19 @@ public class WorkflowStatusDTO {
         public List<String> getProducts() { return products; }
         public void setProducts(List<String> products) { this.products = products; }
 
-        public double getEstimatedRental() { return estimatedRental; }
-        public void setEstimatedRental(double estimatedRental) { this.estimatedRental = estimatedRental; }
+        public BigDecimal getEstimatedRental() { return estimatedRental; }
+        public void setEstimatedRental(BigDecimal estimatedRental) { this.estimatedRental = estimatedRental; }
 
-        public double getDeliverySetup() { return deliverySetup; }
-        public void setDeliverySetup(double deliverySetup) { this.deliverySetup = deliverySetup; }
+        public BigDecimal getDeliverySetup() { return deliverySetup; }
+        public void setDeliverySetup(BigDecimal deliverySetup) { this.deliverySetup = deliverySetup; }
 
-        public double getTotalEstimated() { return totalEstimated; }
-        public void setTotalEstimated(double totalEstimated) { this.totalEstimated = totalEstimated; }
+        public BigDecimal getTotalEstimated() { return totalEstimated; }
+        public void setTotalEstimated(BigDecimal totalEstimated) { this.totalEstimated = totalEstimated; }
 
-        public double getEstimatedMargin() { return estimatedMargin; }
-        public void setEstimatedMargin(double estimatedMargin) { this.estimatedMargin = estimatedMargin; }
+        public BigDecimal getEstimatedMargin() { return estimatedMargin; }
+        public void setEstimatedMargin(BigDecimal estimatedMargin) { this.estimatedMargin = estimatedMargin; }
 
-        public double getEstimatedCost() { return estimatedCost; }
-        public void setEstimatedCost(double estimatedCost) { this.estimatedCost = estimatedCost; }
+        public BigDecimal getEstimatedCost() { return estimatedCost; }
+        public void setEstimatedCost(BigDecimal estimatedCost) { this.estimatedCost = estimatedCost; }
     }
 }

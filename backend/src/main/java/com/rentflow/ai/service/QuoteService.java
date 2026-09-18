@@ -452,20 +452,24 @@ public class QuoteService {
         dto.setValidUntil(q.getValidUntil());
         dto.setRentalStartDateTime(q.getRentalStartDateTime());
         dto.setRentalEndDateTime(q.getRentalEndDateTime());
-        dto.setSubtotal(q.getSubtotal());
-        dto.setDiscountAmount(q.getDiscountAmount());
-        dto.setDeliveryFee(q.getDeliveryFee());
-        dto.setPickupFee(q.getPickupFee());
-        dto.setSetupFee(q.getSetupFee());
-        dto.setBreakdownFee(q.getBreakdownFee());
-        dto.setServiceFee(q.getServiceFee());
-        dto.setTotalFees(q.getDeliveryFee().add(q.getPickupFee()).add(q.getSetupFee()).add(q.getBreakdownFee()).add(q.getServiceFee()));
-        dto.setTaxRate(q.getTaxRate());
-        dto.setTaxAmount(q.getTaxAmount());
-        dto.setTotalAmount(q.getTotalAmount());
-        dto.setDepositPercentage(q.getDepositPercentage());
-        dto.setDepositAmount(q.getDepositAmount());
-        dto.setRemainingBalance(q.getTotalAmount().subtract(q.getDepositAmount()).max(BigDecimal.ZERO));
+        dto.setSubtotal(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getSubtotal()));
+        dto.setDiscountAmount(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getDiscountAmount()));
+        dto.setDeliveryFee(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getDeliveryFee()));
+        dto.setPickupFee(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getPickupFee()));
+        dto.setSetupFee(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getSetupFee()));
+        dto.setBreakdownFee(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getBreakdownFee()));
+        dto.setServiceFee(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getServiceFee()));
+        dto.setTotalFees(com.rentflow.common.financial.FinancialMath.safeAdd(
+                q.getDeliveryFee(), q.getPickupFee(), q.getSetupFee(), q.getBreakdownFee(), q.getServiceFee()
+        ));
+        dto.setTaxRate(com.rentflow.common.financial.FinancialMath.scalePercentage(q.getTaxRate()));
+        dto.setTaxAmount(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getTaxAmount()));
+        dto.setTotalAmount(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getTotalAmount()));
+        dto.setDepositPercentage(com.rentflow.common.financial.FinancialMath.scalePercentage(q.getDepositPercentage()));
+        dto.setDepositAmount(com.rentflow.common.financial.FinancialMath.scaleCurrency(q.getDepositAmount()));
+        dto.setRemainingBalance(com.rentflow.common.financial.FinancialMath.scaleCurrency(
+                dto.getTotalAmount().subtract(dto.getDepositAmount()).max(BigDecimal.ZERO)
+        ));
         dto.setNotes(q.getNotes());
         dto.setCreatedBy(q.getCreatedBy());
         dto.setCreatedAt(q.getCreatedAt());

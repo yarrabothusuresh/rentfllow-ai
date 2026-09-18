@@ -47,9 +47,9 @@ public class BookingItem {
     protected void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (unitPrice == null) unitPrice = BigDecimal.ZERO;
+        if (unitPrice == null) unitPrice = BigDecimal.ZERO.setScale(2, java.math.RoundingMode.HALF_UP);
         if (lineSubtotal == null || lineSubtotal.compareTo(BigDecimal.ZERO) == 0) {
-            lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
+            lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, java.math.RoundingMode.HALF_UP);
         }
     }
 

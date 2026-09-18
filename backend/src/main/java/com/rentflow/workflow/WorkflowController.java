@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -156,11 +157,11 @@ public class WorkflowController {
         scenario.setGuestCount(250);
         scenario.setCompanyName("Evergreen Event Rentals");
         scenario.setProducts(List.of("250 Chiavari Chairs", "25 Round Tables", "25 White Table Linens"));
-        scenario.setEstimatedRental(4850.00);
-        scenario.setDeliverySetup(1150.00);
-        scenario.setTotalEstimated(6480.00);
-        scenario.setEstimatedMargin(54.9);
-        scenario.setEstimatedCost(2920.00);
+        scenario.setEstimatedRental(new BigDecimal("4850.00"));
+        scenario.setDeliverySetup(new BigDecimal("1150.00"));
+        scenario.setTotalEstimated(new BigDecimal("6480.00"));
+        scenario.setEstimatedMargin(new BigDecimal("54.90"));
+        scenario.setEstimatedCost(new BigDecimal("2920.00"));
 
         dto.setDemoScenario(scenario);
 

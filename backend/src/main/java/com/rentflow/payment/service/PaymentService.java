@@ -19,6 +19,7 @@ import com.rentflow.payment.model.PaymentMethod;
 import com.rentflow.payment.model.PaymentStatus;
 import com.rentflow.payment.repository.PaymentAuditRepository;
 import com.rentflow.payment.repository.PaymentRepository;
+import com.rentflow.common.financial.FinancialMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -350,6 +351,75 @@ public class PaymentService {
         return mapToDTO(updatedPayment);
     }
 
+    @Transactional
+    public PaymentDTO refundPayment(String tenantId, UUID paymentId, BigDecimal refundAmount, String userRole, String reason) {
+        // 1. Check RBAC
+        if (!canRecordOrVoidPayment(userRole)) {
+            throw new SecurityException("You do not have permission to refund payments.");
+        }
+
+        // 2. Fetch payment
+        Payment payment = paymentRepository.findByTenantIdAndId(tenantId, paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found with ID: " + paymentId));
+
+        if (payment.getPaymentStatus() != PaymentStatus.COMPLETED) {
+            throw new IllegalStateException("Only COMPLETED payments can be refunded. Current status: " + payment.getPaymentStatus());
+        }
+
+        BigDecimal originalAmount = FinancialMath.scaleCurrency(payment.getAmount());
+        BigDecimal actualRefund = refundAmount != null ? FinancialMath.scaleCurrency(refundAmount) : originalAmount;
+
+        if (actualRefund.signum() <= 0) {
+            throw new IllegalArgumentException("Refund amount must be greater than zero.");
+        }
+
+        if (actualRefund.compareTo(originalAmount) > 0) {
+            throw new IllegalArgumentException(String.format("Refund amount ($%s) cannot exceed original payment amount ($%s).",
+                    actualRefund.toPlainString(), originalAmount.toPlainString()));
+        }
+
+        // 3. Mark payment status / update amounts
+        boolean isFullRefund = actualRefund.compareTo(originalAmount) == 0;
+        if (isFullRefund) {
+            payment.setPaymentStatus(PaymentStatus.REFUNDED);
+        } else {
+            // Partial refund: adjust remaining completed amount
+            payment.setAmount(originalAmount.subtract(actualRefund).setScale(FinancialMath.CURRENCY_SCALE, FinancialMath.ROUNDING_MODE));
+        }
+
+        String existingNotes = payment.getNotes() != null ? payment.getNotes() + " | " : "";
+        payment.setNotes(existingNotes + String.format("REFUNDED: $%s (Reason: %s)", actualRefund, reason != null ? reason : "Not specified"));
+        Payment updatedPayment = paymentRepository.save(payment);
+
+        // 4. Lock booking and invoice in strict order to update balances
+        Booking booking = bookingRepository.findByIdAndTenantIdForUpdate(tenantId, payment.getBookingId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found for payment: " + payment.getBookingId()));
+
+        BigDecimal remainingPaidSum = calculateTotalCompletedPaid(tenantId, booking.getId());
+        BigDecimal bookingTotal = FinancialMath.scaleCurrency(booking.getTotalAmount());
+        updateBookingFinancials(booking, remainingPaidSum, bookingTotal);
+
+        // 5. Sync associated invoice if present
+        invoiceService.syncInvoiceWithPayments(tenantId, booking.getId());
+
+        // 6. Record audit log
+        PaymentAudit audit = new PaymentAudit(
+                tenantId,
+                booking.getId(),
+                updatedPayment.getId(),
+                "PAYMENT_REFUNDED",
+                userRole != null ? userRole : "System",
+                String.format("Refunded $%s from %s payment (Orig: $%s). Reason: %s",
+                        actualRefund, updatedPayment.getPaymentMethod(), originalAmount, reason != null ? reason : "No reason provided")
+        );
+        paymentAuditRepository.save(audit);
+
+        log.info("Payment refunded successfully: tenantId={}, paymentId={}, refundAmount={}, isFullRefund={}",
+                tenantId, paymentId, actualRefund, isFullRefund);
+
+        return mapToDTO(updatedPayment);
+    }
+
     @Transactional(readOnly = true)
     public List<PaymentDTO> getBookingPayments(String tenantId, UUID bookingId) {
         // Verify booking existence & tenant matching
@@ -381,10 +451,11 @@ public class PaymentService {
         Booking booking = bookingRepository.findByTenantIdAndId(tenantId, bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found with ID: " + bookingId));
 
-        BigDecimal bookingTotal = booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO;
-        BigDecimal depositRequired = booking.getDepositRequired() != null ? booking.getDepositRequired() : BigDecimal.ZERO;
+        BigDecimal bookingTotal = FinancialMath.scaleCurrency(booking.getTotalAmount());
+        BigDecimal depositRequired = FinancialMath.scaleCurrency(booking.getDepositRequired());
         BigDecimal amountPaid = calculateTotalCompletedPaid(tenantId, bookingId);
-        BigDecimal outstandingBalance = bookingTotal.subtract(amountPaid).max(BigDecimal.ZERO);
+        BigDecimal outstandingBalance = bookingTotal.subtract(amountPaid).max(BigDecimal.ZERO)
+                .setScale(FinancialMath.CURRENCY_SCALE, FinancialMath.ROUNDING_MODE);
 
         String statusStr = deriveFinancialStatus(amountPaid, bookingTotal, booking.getStatus());
 
@@ -405,19 +476,23 @@ public class PaymentService {
         return completedPayments.stream()
                 .map(Payment::getAmount)
                 .filter(a -> a != null)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(FinancialMath.CURRENCY_SCALE, FinancialMath.ROUNDING_MODE);
     }
 
     private void updateBookingFinancials(Booking booking, BigDecimal newPaidSum, BigDecimal bookingTotal) {
-        booking.setDepositPaid(newPaidSum);
-        BigDecimal balanceDue = bookingTotal.subtract(newPaidSum).max(BigDecimal.ZERO);
+        BigDecimal scaledPaid = FinancialMath.scaleCurrency(newPaidSum);
+        BigDecimal scaledTotal = FinancialMath.scaleCurrency(bookingTotal);
+        booking.setDepositPaid(scaledPaid);
+        BigDecimal balanceDue = scaledTotal.subtract(scaledPaid).max(BigDecimal.ZERO)
+                .setScale(FinancialMath.CURRENCY_SCALE, FinancialMath.ROUNDING_MODE);
         booking.setBalanceDue(balanceDue);
 
         // Update status if active booking
         if (booking.getStatus() != BookingStatus.CANCELLED) {
-            if (newPaidSum.compareTo(BigDecimal.ZERO) == 0) {
+            if (scaledPaid.compareTo(BigDecimal.ZERO) == 0) {
                 booking.setStatus(BookingStatus.DEPOSIT_PENDING);
-            } else if (newPaidSum.compareTo(bookingTotal) >= 0) {
+            } else if (scaledPaid.compareTo(scaledTotal) >= 0) {
                 booking.setStatus(BookingStatus.PAID);
             } else {
                 booking.setStatus(BookingStatus.PARTIALLY_PAID);

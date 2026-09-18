@@ -223,8 +223,10 @@ export class QuoteBuilderComponent implements OnInit {
       let multiplier = 1;
       if (item.pricingStrategy === 'PER_DAY') {
         multiplier = item.rentalDays || 1;
+      } else if (item.pricingStrategy === 'PER_WEEK') {
+        multiplier = Math.max(1, Math.ceil((item.rentalDays || 1) / 7));
       }
-      item.lineSubtotal = (item.quantity || 0) * (item.unitPrice || 0) * multiplier;
+      item.lineSubtotal = Number(((item.quantity || 0) * (item.unitPrice || 0) * multiplier).toFixed(2));
       grossSubtotal += item.lineSubtotal;
     });
 

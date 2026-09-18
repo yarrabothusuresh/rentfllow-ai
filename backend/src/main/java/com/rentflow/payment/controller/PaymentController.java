@@ -155,6 +155,43 @@ public class PaymentController {
         }
     }
 
+    @PostMapping("/api/payments/{paymentId}/refund")
+    public ResponseEntity<?> refundPayment(
+            @PathVariable("paymentId") UUID paymentId,
+            @RequestBody(required = false) Map<String, Object> body,
+            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
+            @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
+
+        try {
+            String tenantId = resolveTenantId(tenantHeader);
+            String userRole = resolveRole(roleHeader);
+            java.math.BigDecimal refundAmount = null;
+            String reason = null;
+
+            if (body != null) {
+                if (body.get("amount") != null) {
+                    refundAmount = new java.math.BigDecimal(body.get("amount").toString());
+                }
+                if (body.get("reason") != null) {
+                    reason = body.get("reason").toString();
+                }
+            }
+
+            PaymentDTO refunded = paymentService.refundPayment(tenantId, paymentId, refundAmount, userRole, reason);
+            return ResponseEntity.ok(refunded);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
+
     @GetMapping("/api/bookings/{bookingId}/financial-summary")
     public ResponseEntity<?> getBookingFinancialSummary(
             @PathVariable("bookingId") UUID bookingId,
