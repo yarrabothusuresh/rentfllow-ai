@@ -185,7 +185,20 @@ public class InventoryService {
         LocalDateTime start = request.getStartDateTime() != null ? request.getStartDateTime() : LocalDateTime.now();
         LocalDateTime end = request.getEndDateTime() != null ? request.getEndDateTime() : start.plusDays(2);
 
-        // Step 1: Pre-validate all items
+        // Step 1: Acquire pessimistic write locks on all requested products in canonical ascending order
+        List<UUID> productIdsToLock = request.getItems().stream()
+                .map(BatchReservationRequestDTO.ItemRequest::getProductId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+
+        for (UUID pId : productIdsToLock) {
+            productRepository.findWithLockByTenantIdAndId(tenantId, pId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found or access denied: " + pId));
+        }
+
+        // Step 2: Validate availability under lock for all items
         for (BatchReservationRequestDTO.ItemRequest item : request.getItems()) {
             AvailabilityResultDTO avail = availabilityService.checkAvailability(tenantId, item.getProductId(), item.getQuantity(), start, end);
             if (avail.getAvailableQuantity() < item.getQuantity()) {
@@ -193,7 +206,7 @@ public class InventoryService {
             }
         }
 
-        // Step 2: Create reservations atomically
+        // Step 3: Create reservations atomically
         List<InventoryReservationDTO> createdList = new java.util.ArrayList<>();
         for (BatchReservationRequestDTO.ItemRequest item : request.getItems()) {
             InventoryReservationDTO dto = new InventoryReservationDTO();

@@ -87,15 +87,8 @@ export class QuotePreviewComponent implements OnInit {
             } else {
               this.availabilityError = {
                 error: 'BOOKING_UNAVAILABLE',
-                message: err.error?.message || 'Inventory availability recheck failed.',
-                items: [
-                  {
-                    productName: 'Chiavari Chair',
-                    requestedQuantity: 250,
-                    availableQuantity: 180,
-                    shortage: 70
-                  }
-                ]
+                message: err.error?.message || err.error?.error || 'The requested quantity is no longer available for the selected dates. Please update your booking.',
+                items: err.error?.items || []
               };
             }
           }

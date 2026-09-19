@@ -104,7 +104,8 @@ public class BookingService {
                 .sorted()
                 .collect(Collectors.toList());
         for (UUID pId : productIdsToLock) {
-            productRepository.findWithLockByTenantIdAndId(tenantId, pId);
+            productRepository.findWithLockByTenantIdAndId(tenantId, pId)
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found or access denied: " + pId));
         }
 
         // 3.6 Re-check under lock (Double-Checked Locking): check if another concurrent thread completed conversion while waiting for product locks
@@ -256,7 +257,8 @@ public class BookingService {
                 .sorted()
                 .collect(Collectors.toList());
         for (UUID pId : productIdsToLock) {
-            productRepository.findWithLockByTenantIdAndId(tenantId, pId);
+            productRepository.findWithLockByTenantIdAndId(tenantId, pId)
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found or access denied: " + pId));
         }
 
         // Recheck availability inside transaction
@@ -284,9 +286,7 @@ public class BookingService {
         }
 
         // Create reservations if not existing
-        List<InventoryReservation> existingRes = reservationRepository.findByTenantId(tenantId).stream()
-                .filter(r -> booking.getId().equals(r.getBookingId()))
-                .collect(Collectors.toList());
+        List<InventoryReservation> existingRes = reservationRepository.findByTenantIdAndBookingId(tenantId, booking.getId());
 
         if (existingRes.isEmpty()) {
             for (BookingItem item : items) {
@@ -341,9 +341,7 @@ public class BookingService {
         Booking saved = bookingRepository.save(booking);
 
         // Find and release inventory reservations
-        List<InventoryReservation> reservations = reservationRepository.findByTenantId(tenantId).stream()
-                .filter(r -> booking.getId().equals(r.getBookingId()))
-                .collect(Collectors.toList());
+        List<InventoryReservation> reservations = reservationRepository.findByTenantIdAndBookingId(tenantId, booking.getId());
 
         for (InventoryReservation res : reservations) {
             if (res.getStatus() != ReservationStatus.RELEASED && res.getStatus() != ReservationStatus.CANCELLED) {
@@ -458,9 +456,7 @@ public class BookingService {
         dto.setItems(itemDTOs);
 
         // Map Inventory Reservations
-        List<InventoryReservation> resList = reservationRepository.findByTenantId(b.getTenantId()).stream()
-                .filter(r -> b.getId().equals(r.getBookingId()))
-                .collect(Collectors.toList());
+        List<InventoryReservation> resList = reservationRepository.findByTenantIdAndBookingId(b.getTenantId(), b.getId());
 
         List<InventoryReservationDTO> resDTOs = new ArrayList<>();
         for (InventoryReservation r : resList) {

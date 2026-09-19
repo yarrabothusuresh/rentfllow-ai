@@ -657,9 +657,8 @@ public class ReturnService {
         }
 
         // Release inventory reservations for this booking
-        List<InventoryReservation> reservations = reservationRepository.findByTenantId(tenantId).stream()
-                .filter(r -> returnOrder.getBookingId().equals(r.getBookingId()) &&
-                             (r.getStatus() == ReservationStatus.RESERVED || r.getStatus() == ReservationStatus.CONFIRMED || r.getStatus() == ReservationStatus.PENDING))
+        List<InventoryReservation> reservations = reservationRepository.findByTenantIdAndBookingId(tenantId, returnOrder.getBookingId()).stream()
+                .filter(r -> r.getStatus() == ReservationStatus.RESERVED || r.getStatus() == ReservationStatus.CONFIRMED || r.getStatus() == ReservationStatus.PENDING)
                 .collect(Collectors.toList());
 
         for (InventoryReservation res : reservations) {

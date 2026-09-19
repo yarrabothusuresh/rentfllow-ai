@@ -78,8 +78,7 @@ public class WarehouseService {
         }
 
         // 3. Verify inventory reservation exists or is ready
-        List<InventoryReservation> reservations = reservationRepository.findByTenantId(tenantId).stream()
-                .filter(r -> bookingId.equals(r.getBookingId()))
+        List<InventoryReservation> reservations = reservationRepository.findByTenantIdAndBookingId(tenantId, bookingId).stream()
                 .filter(r -> r.getStatus() == ReservationStatus.RESERVED || r.getStatus() == ReservationStatus.PENDING)
                 .collect(Collectors.toList());
 

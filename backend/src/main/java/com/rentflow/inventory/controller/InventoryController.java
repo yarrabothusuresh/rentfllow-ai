@@ -76,14 +76,24 @@ public class InventoryController {
     }
 
     @PostMapping("/receive")
-    public ResponseEntity<List<StockMovement>> receiveStock(@RequestBody StockReceiptDTO request) {
+    public ResponseEntity<?> receiveStock(@RequestBody StockReceiptDTO request) {
+        String role = SecurityUtils.getCurrentUserRole();
+        if (!List.of("OWNER", "ADMIN", "WAREHOUSE").contains(role)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", "Unauthorized: Only OWNER, ADMIN, and WAREHOUSE roles can receive stock."));
+        }
         String tenantId = SecurityUtils.getCurrentTenantId();
         String username = SecurityUtils.getCurrentUsername();
         return ResponseEntity.ok(inventoryService.receiveStock(tenantId, request, username));
     }
 
     @PostMapping("/adjust")
-    public ResponseEntity<StockMovement> adjustStock(@RequestBody StockAdjustmentDTO request) {
+    public ResponseEntity<?> adjustStock(@RequestBody StockAdjustmentDTO request) {
+        String role = SecurityUtils.getCurrentUserRole();
+        if (!List.of("OWNER", "ADMIN", "WAREHOUSE").contains(role)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(java.util.Map.of("error", "Unauthorized: Only OWNER, ADMIN, and WAREHOUSE roles can adjust stock."));
+        }
         String tenantId = SecurityUtils.getCurrentTenantId();
         String username = SecurityUtils.getCurrentUsername();
         return ResponseEntity.ok(inventoryService.adjustStock(tenantId, request, username));
