@@ -1,6 +1,8 @@
 package com.rentflow.ai.repository;
 
 import com.rentflow.ai.model.Customer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,10 +15,12 @@ import java.util.UUID;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     List<Customer> findByTenantId(String tenantId);
+    Page<Customer> findByTenantId(String tenantId, Pageable pageable);
     Optional<Customer> findByTenantIdAndId(String tenantId, UUID id);
     Optional<Customer> findFirstByTenantIdAndEmailIgnoreCase(String tenantId, String email);
     Optional<Customer> findByTenantIdAndCustomerNumberIgnoreCase(String tenantId, String customerNumber);
     boolean existsByCustomerNumber(String customerNumber);
+    boolean existsByTenantIdAndCustomerNumber(String tenantId, String customerNumber);
     long countByTenantId(String tenantId);
 
     @Query("SELECT c FROM Customer c WHERE c.tenantId = :tenantId AND " +
@@ -27,4 +31,20 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
            " LOWER(c.companyName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            " LOWER(c.customerNumber) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<Customer> searchCustomers(@Param("tenantId") String tenantId, @Param("query") String query);
+
+    @Query(value = "SELECT c FROM Customer c WHERE c.tenantId = :tenantId AND " +
+           "(LOWER(c.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.email) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.phone) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.companyName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.customerNumber) LIKE LOWER(CONCAT('%', :query, '%')))",
+           countQuery = "SELECT count(c) FROM Customer c WHERE c.tenantId = :tenantId AND " +
+           "(LOWER(c.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.email) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.phone) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.companyName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           " LOWER(c.customerNumber) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Customer> searchCustomers(@Param("tenantId") String tenantId, @Param("query") String query, Pageable pageable);
 }

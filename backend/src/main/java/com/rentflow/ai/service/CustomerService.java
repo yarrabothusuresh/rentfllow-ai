@@ -6,6 +6,8 @@ import com.rentflow.ai.model.CustomerStatus;
 import com.rentflow.ai.model.CustomerType;
 import com.rentflow.ai.repository.CustomerRepository;
 import com.rentflow.ai.repository.EventRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,11 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
+    public Page<CustomerDTO> getCustomers(String tenantId, Pageable pageable) {
+        return customerRepository.findByTenantId(tenantId, pageable)
+                .map(this::toDTO);
+    }
+
     public Optional<CustomerDTO> getCustomerById(String tenantId, UUID id) {
         return customerRepository.findByTenantIdAndId(tenantId, id)
                 .map(this::toDTO);
@@ -48,6 +55,14 @@ public class CustomerService {
         return customerRepository.searchCustomers(tenantId, query.trim()).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public Page<CustomerDTO> searchCustomers(String tenantId, String query, Pageable pageable) {
+        if (query == null || query.trim().isEmpty()) {
+            return getCustomers(tenantId, pageable);
+        }
+        return customerRepository.searchCustomers(tenantId, query.trim(), pageable)
+                .map(this::toDTO);
     }
 
     @Transactional
@@ -99,10 +114,10 @@ public class CustomerService {
         });
     }
 
-    public String generateCustomerNumber(String tenantId) {
-        long count = customerRepository.count();
+    public synchronized String generateCustomerNumber(String tenantId) {
+        long count = customerRepository.countByTenantId(tenantId);
         String candidate = String.format("CUS-%06d", count + 1);
-        while (customerRepository.existsByCustomerNumber(candidate)) {
+        while (customerRepository.existsByTenantIdAndCustomerNumber(tenantId, candidate)) {
             count++;
             candidate = String.format("CUS-%06d", count + 1);
         }

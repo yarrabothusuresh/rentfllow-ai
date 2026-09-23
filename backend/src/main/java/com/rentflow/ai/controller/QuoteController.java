@@ -5,12 +5,16 @@ import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.model.QuoteStatus;
 import com.rentflow.ai.service.QuoteCalculationService;
 import com.rentflow.ai.service.QuoteService;
+import com.rentflow.common.pagination.PaginationUtil;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +24,11 @@ public class QuoteController {
     private final QuoteService quoteService;
     private final QuoteCalculationService calculationService;
     private final com.rentflow.security.CurrentUserService currentUserService;
+
+    private static final Set<String> QUOTE_SORT_FIELDS = Set.of(
+            "id", "quoteNumber", "status", "quoteDate", "validUntil", "rentalStartDateTime",
+            "rentalEndDateTime", "totalAmount", "createdAt", "updatedAt"
+    );
 
     public QuoteController(QuoteService quoteService, QuoteCalculationService calculationService,
                            com.rentflow.security.CurrentUserService currentUserService) {
@@ -67,13 +76,21 @@ public class QuoteController {
 
     @GetMapping
     public ResponseEntity<?> getQuotes(
+            @RequestParam(name = "status", required = false) QuoteStatus status,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
         try {
             String tenantId = resolveTenantId(tenantHeader);
             String role = resolveRole(roleHeader);
-            return ResponseEntity.ok(quoteService.getQuotes(tenantId, role));
+            Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, QUOTE_SORT_FIELDS);
+            return ResponseEntity.ok(quoteService.getQuotes(tenantId, status, role, pageable));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));

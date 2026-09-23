@@ -18,6 +18,8 @@ import com.rentflow.invoice.repository.InvoiceItemRepository;
 import com.rentflow.invoice.repository.InvoiceRepository;
 import com.rentflow.payment.dto.PaymentDTO;
 import com.rentflow.payment.service.PaymentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +76,12 @@ public class InvoiceService {
 
     public synchronized String generateInvoiceNumber(String tenantId) {
         long count = invoiceRepository.countByTenantId(tenantId) + 1;
-        return String.format("INV-%06d", count);
+        String candidate = String.format("INV-%06d", count);
+        while (invoiceRepository.findByTenantIdAndInvoiceNumber(tenantId, candidate).isPresent()) {
+            count++;
+            candidate = String.format("INV-%06d", count);
+        }
+        return candidate;
     }
 
     @Transactional
@@ -363,6 +370,12 @@ public class InvoiceService {
         }
 
         return dtos;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<InvoiceDTO> listInvoices(String tenantId, InvoiceStatus status, UUID customerId, UUID bookingId, String search, String userRole, Pageable pageable) {
+        Page<Invoice> invoices = invoiceRepository.searchInvoices(tenantId, status, customerId, bookingId, search != null && !search.isBlank() ? search.trim() : null, pageable);
+        return invoices.map(i -> mapToDTO(i, userRole));
     }
 
     public InvoiceDTO mapToDTO(Invoice i, String userRole) {

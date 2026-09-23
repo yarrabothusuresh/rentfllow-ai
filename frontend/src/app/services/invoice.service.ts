@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Invoice, InvoiceStatus, CreateInvoiceRequest } from '../models/invoice.models';
 import { Payment } from '../models/payment.models';
 
@@ -25,10 +26,12 @@ export class InvoiceService {
     if (filters?.bookingId) params = params.set('bookingId', filters.bookingId);
     if (filters?.search) params = params.set('search', filters.search);
 
-    return this.http.get<Invoice[]>(`${this.apiUrl}/invoices`, {
+    return this.http.get<any>(`${this.apiUrl}/invoices`, {
       headers: this.getHeaders(role),
       params,
-    });
+    }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getInvoiceById(id: string, role: string = 'OWNER'): Observable<Invoice> {

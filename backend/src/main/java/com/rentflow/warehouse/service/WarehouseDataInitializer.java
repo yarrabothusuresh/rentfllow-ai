@@ -288,64 +288,64 @@ public class WarehouseDataInitializer implements CommandLineRunner {
             b456.setDepositPaid(new BigDecimal("1407.25"));
             b456.setBalanceDue(BigDecimal.ZERO);
             b456.setNotes("Day 23 Warehouse Operations 2.0 Demo Order. Priority VIP wedding delivery.");
-            bookingRepository.save(b456);
+            Booking savedB456 = bookingRepository.saveAndFlush(b456);
 
             // 4 Items: 100 Chairs, 10 Tables, 20 Linens, 2 Lighting Kits
             BookingItem bi1 = new BookingItem();
-            bi1.setBookingId(b456.getId());
+            bi1.setBookingId(savedB456.getId());
             bi1.setProductId(chiavari.getId());
             bi1.setDescription("Chiavari Chair (Gold)");
             bi1.setQuantity(100);
             bi1.setUnitPrice(new BigDecimal("8.00"));
-            bi1.setRentalStartDateTime(b456.getRentalStartDateTime());
-            bi1.setRentalEndDateTime(b456.getRentalEndDateTime());
+            bi1.setRentalStartDateTime(savedB456.getRentalStartDateTime());
+            bi1.setRentalEndDateTime(savedB456.getRentalEndDateTime());
             bi1.setLineSubtotal(new BigDecimal("800.00"));
-            bookingItemRepository.save(bi1);
+            bi1 = bookingItemRepository.save(bi1);
 
             BookingItem bi2 = new BookingItem();
-            bi2.setBookingId(b456.getId());
+            bi2.setBookingId(savedB456.getId());
             bi2.setProductId(roundTable.getId());
             bi2.setDescription("Round Banquet Table 60\"");
             bi2.setQuantity(10);
             bi2.setUnitPrice(new BigDecimal("15.00"));
-            bi2.setRentalStartDateTime(b456.getRentalStartDateTime());
-            bi2.setRentalEndDateTime(b456.getRentalEndDateTime());
+            bi2.setRentalStartDateTime(savedB456.getRentalStartDateTime());
+            bi2.setRentalEndDateTime(savedB456.getRentalEndDateTime());
             bi2.setLineSubtotal(new BigDecimal("150.00"));
-            bookingItemRepository.save(bi2);
+            bi2 = bookingItemRepository.save(bi2);
 
             BookingItem bi3 = new BookingItem();
-            bi3.setBookingId(b456.getId());
+            bi3.setBookingId(savedB456.getId());
             bi3.setProductId(linen.getId());
             bi3.setDescription("White Table Linen 120\"");
             bi3.setQuantity(20);
             bi3.setUnitPrice(new BigDecimal("10.00"));
-            bi3.setRentalStartDateTime(b456.getRentalStartDateTime());
-            bi3.setRentalEndDateTime(b456.getRentalEndDateTime());
+            bi3.setRentalStartDateTime(savedB456.getRentalStartDateTime());
+            bi3.setRentalEndDateTime(savedB456.getRentalEndDateTime());
             bi3.setLineSubtotal(new BigDecimal("200.00"));
-            bookingItemRepository.save(bi3);
+            bi3 = bookingItemRepository.save(bi3);
 
             BookingItem bi4 = new BookingItem();
-            bi4.setBookingId(b456.getId());
+            bi4.setBookingId(savedB456.getId());
             bi4.setProductId(lightingKit.getId());
             bi4.setDescription("Stage Lighting Kit (2 Kits = 8 Uplights, 2 Controllers, 8 Cables)");
             bi4.setQuantity(2);
             bi4.setUnitPrice(new BigDecimal("75.00"));
-            bi4.setRentalStartDateTime(b456.getRentalStartDateTime());
-            bi4.setRentalEndDateTime(b456.getRentalEndDateTime());
+            bi4.setRentalStartDateTime(savedB456.getRentalStartDateTime());
+            bi4.setRentalEndDateTime(savedB456.getRentalEndDateTime());
             bi4.setLineSubtotal(new BigDecimal("150.00"));
-            bookingItemRepository.save(bi4);
+            bi4 = bookingItemRepository.save(bi4);
 
             // Seed Inventory Reservations
-            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, chiavari.getId(), eventId, b456.getId(), 100, b456.getRentalStartDateTime(), b456.getRentalEndDateTime(), ReservationStatus.RESERVED));
-            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, roundTable.getId(), eventId, b456.getId(), 10, b456.getRentalStartDateTime(), b456.getRentalEndDateTime(), ReservationStatus.RESERVED));
-            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, linen.getId(), eventId, b456.getId(), 20, b456.getRentalStartDateTime(), b456.getRentalEndDateTime(), ReservationStatus.RESERVED));
-            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, lightingKit.getId(), eventId, b456.getId(), 2, b456.getRentalStartDateTime(), b456.getRentalEndDateTime(), ReservationStatus.RESERVED));
+            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, chiavari.getId(), eventId, savedB456.getId(), 100, savedB456.getRentalStartDateTime(), savedB456.getRentalEndDateTime(), ReservationStatus.RESERVED));
+            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, roundTable.getId(), eventId, savedB456.getId(), 10, savedB456.getRentalStartDateTime(), savedB456.getRentalEndDateTime(), ReservationStatus.RESERVED));
+            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, linen.getId(), eventId, savedB456.getId(), 20, savedB456.getRentalStartDateTime(), savedB456.getRentalEndDateTime(), ReservationStatus.RESERVED));
+            reservationRepository.save(new InventoryReservation(UUID.randomUUID(), tenantId, lightingKit.getId(), eventId, savedB456.getId(), 2, savedB456.getRentalStartDateTime(), savedB456.getRentalEndDateTime(), ReservationStatus.RESERVED));
 
             // Warehouse Order WH-000456
             WarehouseOrder wo456 = new WarehouseOrder();
             wo456.setId(UUID.fromString("44444444-4444-4444-4444-444444444456"));
             wo456.setTenantId(tenantId);
-            wo456.setBookingId(b456.getId());
+            wo456.setBookingId(savedB456.getId());
             wo456.setEventId(eventId);
             wo456.setCustomerId(customerId);
             wo456.setOrderNumber("WH-000456");

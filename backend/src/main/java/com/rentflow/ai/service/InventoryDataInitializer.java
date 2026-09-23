@@ -34,7 +34,9 @@ public class InventoryDataInitializer implements CommandLineRunner {
         String tenantId = DemoDataRepository.EVERGREEN_TENANT_ID;
 
         // 1. Ensure Chiavari Chair
-        Product chiavari = productRepository.findByTenantIdAndId(tenantId, DEMO_CHIAVARI_ID).orElse(null);
+        Product chiavari = productRepository.findByTenantIdAndSkuIgnoreCase(tenantId, "CHI-001")
+                .or(() -> productRepository.findByTenantIdAndId(tenantId, DEMO_CHIAVARI_ID))
+                .orElse(null);
         if (chiavari == null) {
             chiavari = new Product();
             chiavari.setId(DEMO_CHIAVARI_ID);
@@ -46,11 +48,13 @@ public class InventoryDataInitializer implements CommandLineRunner {
             chiavari.setQuantityDamaged(0);
             chiavari.setQuantityLost(0);
             chiavari.setRentalPrice(new BigDecimal("8.00"));
-            productRepository.save(chiavari);
+            chiavari = productRepository.save(chiavari);
         }
 
         // 2. Ensure Round Table
-        Product roundTable = productRepository.findByTenantIdAndId(tenantId, DEMO_ROUNDTABLE_ID).orElse(null);
+        Product roundTable = productRepository.findByTenantIdAndSkuIgnoreCase(tenantId, "TBL-060")
+                .or(() -> productRepository.findByTenantIdAndId(tenantId, DEMO_ROUNDTABLE_ID))
+                .orElse(null);
         if (roundTable == null) {
             roundTable = new Product();
             roundTable.setId(DEMO_ROUNDTABLE_ID);
@@ -62,11 +66,13 @@ public class InventoryDataInitializer implements CommandLineRunner {
             roundTable.setQuantityDamaged(0);
             roundTable.setQuantityLost(0);
             roundTable.setRentalPrice(new BigDecimal("15.00"));
-            productRepository.save(roundTable);
+            roundTable = productRepository.save(roundTable);
         }
 
         // 3. Ensure White Linen (Total: 500)
-        Product linen = productRepository.findByTenantIdAndId(tenantId, DEMO_LINEN_ID).orElse(null);
+        Product linen = productRepository.findByTenantIdAndSkuIgnoreCase(tenantId, "LIN-WHT")
+                .or(() -> productRepository.findByTenantIdAndId(tenantId, DEMO_LINEN_ID))
+                .orElse(null);
         if (linen == null) {
             linen = new Product();
             linen.setId(DEMO_LINEN_ID);
@@ -78,7 +84,7 @@ public class InventoryDataInitializer implements CommandLineRunner {
             linen.setQuantityDamaged(0);
             linen.setQuantityLost(0);
             linen.setRentalPrice(new BigDecimal("10.00"));
-            productRepository.save(linen);
+            linen = productRepository.save(linen);
         } else {
             if (linen.getQuantityOwned() < 500) {
                 linen.setQuantityOwned(500);
@@ -90,14 +96,18 @@ public class InventoryDataInitializer implements CommandLineRunner {
         LocalDateTime aug30Start = LocalDateTime.of(2026, 8, 30, 8, 0);
         LocalDateTime aug30End = LocalDateTime.of(2026, 8, 30, 22, 0);
 
+        UUID chiavariId = chiavari.getId();
+        UUID roundTableId = roundTable.getId();
+        UUID linenId = linen.getId();
+
         List<InventoryReservation> existingRes = reservationRepository.findByTenantId(tenantId);
-        boolean hasAug30Res = existingRes.stream().anyMatch(r -> DEMO_CHIAVARI_ID.equals(r.getProductId()) && r.getQuantity() == 100);
+        boolean hasAug30Res = existingRes.stream().anyMatch(r -> chiavariId.equals(r.getProductId()) && r.getQuantity() == 100);
 
         if (!hasAug30Res) {
             // Booking A reservation: 100 chairs
             InventoryReservation resA = new InventoryReservation();
             resA.setTenantId(tenantId);
-            resA.setProductId(DEMO_CHIAVARI_ID);
+            resA.setProductId(chiavariId);
             resA.setQuantity(100);
             resA.setStartDateTime(aug30Start);
             resA.setEndDateTime(aug30End);
@@ -109,7 +119,7 @@ public class InventoryDataInitializer implements CommandLineRunner {
             // Booking B reservation: 20 chairs
             InventoryReservation resB = new InventoryReservation();
             resB.setTenantId(tenantId);
-            resB.setProductId(DEMO_CHIAVARI_ID);
+            resB.setProductId(chiavariId);
             resB.setQuantity(20);
             resB.setStartDateTime(aug30Start);
             resB.setEndDateTime(aug30End);
@@ -121,7 +131,7 @@ public class InventoryDataInitializer implements CommandLineRunner {
             // Round table reservation: 20 tables
             InventoryReservation resTables = new InventoryReservation();
             resTables.setTenantId(tenantId);
-            resTables.setProductId(DEMO_ROUNDTABLE_ID);
+            resTables.setProductId(roundTableId);
             resTables.setQuantity(20);
             resTables.setStartDateTime(aug30Start);
             resTables.setEndDateTime(aug30End);
@@ -133,7 +143,7 @@ public class InventoryDataInitializer implements CommandLineRunner {
             // Linen reservation: 300 linens
             InventoryReservation resLinen = new InventoryReservation();
             resLinen.setTenantId(tenantId);
-            resLinen.setProductId(DEMO_LINEN_ID);
+            resLinen.setProductId(linenId);
             resLinen.setQuantity(300);
             resLinen.setStartDateTime(aug30Start);
             resLinen.setEndDateTime(aug30End);

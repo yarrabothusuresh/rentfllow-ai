@@ -108,19 +108,31 @@ public class BookingController {
         }
     }
 
+    private static final java.util.Set<String> BOOKING_SORT_FIELDS = java.util.Set.of(
+            "createdAt", "bookingNumber", "bookingDate", "rentalStartDateTime", "rentalEndDateTime", "status", "totalAmount"
+    );
+
     @GetMapping
     public ResponseEntity<?> getBookings(
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "status", required = false) com.rentflow.ai.model.BookingStatus status,
+            @RequestParam(value = "sortBy", required = false) String sortBy,
+            @RequestParam(value = "direction", required = false) String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
-        try {
-            String tenantId = resolveTenantId(tenantHeader);
-            String role = resolveRole(roleHeader);
-            return ResponseEntity.ok(bookingService.getBookings(tenantId, role));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage() != null ? e.getMessage() : e.toString()));
-        }
+        String tenantId = resolveTenantId(tenantHeader);
+        String role = resolveRole(roleHeader);
+
+        int effectivePage = (page != null) ? page : com.rentflow.common.pagination.PaginationUtil.DEFAULT_PAGE;
+        int effectiveSize = (size != null) ? size : com.rentflow.common.pagination.PaginationUtil.DEFAULT_PAGE_SIZE;
+
+        org.springframework.data.domain.Pageable pageable = com.rentflow.common.pagination.PaginationUtil.createPageRequest(
+                effectivePage, effectiveSize, sortBy, direction, BOOKING_SORT_FIELDS, "createdAt"
+        );
+
+        return ResponseEntity.ok(bookingService.getBookings(tenantId, status, pageable, role));
     }
 
     @GetMapping("/{id}")

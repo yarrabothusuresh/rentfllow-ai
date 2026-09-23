@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
 import {
   CustomerAuthResponse,
   CustomerPortalDashboard,
@@ -124,7 +124,9 @@ export class CustomerPortalService {
   }
 
   getQuotes(): Observable<CustomerPortalQuote[]> {
-    return this.http.get<CustomerPortalQuote[]>(`${this.apiUrl}/quotes`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${this.apiUrl}/quotes`, { headers: this.getHeaders() }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getQuoteDetail(id: string): Observable<CustomerPortalQuote> {
@@ -148,7 +150,9 @@ export class CustomerPortalService {
   }
 
   getBookings(): Observable<CustomerPortalBooking[]> {
-    return this.http.get<CustomerPortalBooking[]>(`${this.apiUrl}/bookings`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${this.apiUrl}/bookings`, { headers: this.getHeaders() }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getBookingDetail(id: string): Observable<CustomerPortalBooking> {
@@ -156,7 +160,9 @@ export class CustomerPortalService {
   }
 
   getInvoices(): Observable<CustomerPortalInvoice[]> {
-    return this.http.get<CustomerPortalInvoice[]>(`${this.apiUrl}/invoices`, { headers: this.getHeaders() });
+    return this.http.get<any>(`${this.apiUrl}/invoices`, { headers: this.getHeaders() }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getInvoiceDetail(id: string): Observable<CustomerPortalInvoice> {

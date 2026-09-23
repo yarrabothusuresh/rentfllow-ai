@@ -8,8 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.rentflow.common.pagination.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -18,6 +23,11 @@ public class ProductController {
 
     private final ProductService productService;
     private final com.rentflow.security.CurrentUserService currentUserService;
+
+    private static final Set<String> PRODUCT_SORT_FIELDS = Set.of(
+            "id", "sku", "name", "productType", "status", "rentalPrice", "replacementCost",
+            "quantityOwned", "createdAt", "updatedAt"
+    );
 
     public ProductController(ProductService productService, com.rentflow.security.CurrentUserService currentUserService) {
         this.productService = productService;
@@ -34,20 +44,29 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<?> getProducts(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
         String tenantId = resolveTenantId(tenantHeader);
         String role = resolveRole(roleHeader);
-        return ResponseEntity.ok(productService.getProducts(tenantId, role));
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, PRODUCT_SORT_FIELDS);
+        return ResponseEntity.ok(productService.getProducts(tenantId, role, pageable));
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchProducts(
             @RequestParam("query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
         if (query == null || query.isBlank()) {
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(Page.empty());
         }
         String sanitizedQuery = query.trim();
         if (sanitizedQuery.length() > 200) {
@@ -56,7 +75,8 @@ public class ProductController {
 
         String tenantId = resolveTenantId(tenantHeader);
         String role = resolveRole(roleHeader);
-        return ResponseEntity.ok(productService.searchProducts(tenantId, sanitizedQuery, role));
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, PRODUCT_SORT_FIELDS);
+        return ResponseEntity.ok(productService.searchProducts(tenantId, sanitizedQuery, role, pageable));
     }
 
     @GetMapping("/{id}")

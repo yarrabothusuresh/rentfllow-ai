@@ -6,11 +6,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "products", indexes = {
+@Table(name = "products", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_products_tenant_sku", columnNames = {"tenantId", "sku"})
+}, indexes = {
     @Index(name = "idx_product_tenant", columnList = "tenantId"),
     @Index(name = "idx_product_sku", columnList = "sku"),
     @Index(name = "idx_product_category", columnList = "categoryId"),
-    @Index(name = "idx_product_status", columnList = "status")
+    @Index(name = "idx_product_status", columnList = "status"),
+    @Index(name = "idx_products_tenant_created", columnList = "tenantId, createdAt"),
+    @Index(name = "idx_products_tenant_status", columnList = "tenantId, status"),
+    @Index(name = "idx_products_tenant_category", columnList = "tenantId, categoryId")
 })
 public class Product {
 

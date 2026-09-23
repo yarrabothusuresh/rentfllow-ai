@@ -8,13 +8,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "booking", uniqueConstraints = {
-    @UniqueConstraint(name = "uq_booking_tenant_quote", columnNames = {"tenantId", "quoteId"})
+    @UniqueConstraint(name = "uq_booking_tenant_quote", columnNames = {"tenantId", "quoteId"}),
+    @UniqueConstraint(name = "uq_booking_tenant_number", columnNames = {"tenantId", "bookingNumber"})
 }, indexes = {
     @Index(name = "idx_booking_tenant", columnList = "tenantId"),
     @Index(name = "idx_booking_quote", columnList = "quoteId"),
     @Index(name = "idx_booking_customer", columnList = "customerId"),
     @Index(name = "idx_booking_event", columnList = "eventId"),
-    @Index(name = "idx_booking_status", columnList = "status")
+    @Index(name = "idx_booking_status", columnList = "status"),
+    @Index(name = "idx_booking_tenant_created", columnList = "tenantId, createdAt"),
+    @Index(name = "idx_booking_tenant_status_created", columnList = "tenantId, status, createdAt"),
+    @Index(name = "idx_booking_tenant_customer_created", columnList = "tenantId, customerId, createdAt")
 })
 public class Booking {
 
@@ -25,7 +29,7 @@ public class Booking {
     @Column(nullable = false)
     private String tenantId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String bookingNumber;
 
     @Column(nullable = false)

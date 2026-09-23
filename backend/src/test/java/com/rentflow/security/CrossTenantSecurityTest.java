@@ -281,22 +281,22 @@ public class CrossTenantSecurityTest {
         mockMvc.perform(get("/api/products")
                 .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", hasItem(productA.getId().toString())))
-                .andExpect(jsonPath("$[*].id", not(hasItem(productB.getId().toString()))));
+                .andExpect(jsonPath("$.content[*].id", hasItem(productA.getId().toString())))
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(productB.getId().toString()))));
 
         // List customers
         mockMvc.perform(get("/api/customers")
                 .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", hasItem(customerA.getId().toString())))
-                .andExpect(jsonPath("$[*].id", not(hasItem(customerB.getId().toString()))));
+                .andExpect(jsonPath("$.content[*].id", hasItem(customerA.getId().toString())))
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(customerB.getId().toString()))));
 
         // Search products for 'Stage' (which only exists in Tenant B)
         mockMvc.perform(get("/api/products/search")
                 .param("query", "Stage")
                 .header("Authorization", "Bearer " + tokenA))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
     @Test

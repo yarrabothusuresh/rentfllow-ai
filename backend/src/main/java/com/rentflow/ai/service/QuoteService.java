@@ -4,6 +4,8 @@ import com.rentflow.ai.dto.*;
 import com.rentflow.ai.model.*;
 import com.rentflow.ai.repository.*;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,9 +55,9 @@ public class QuoteService {
     }
 
     public synchronized String generateQuoteNumber(String tenantId) {
-        long count = quoteRepository.count() + 1;
+        long count = quoteRepository.countByTenantId(tenantId) + 1;
         String candidate = String.format("QUO-%06d", count);
-        while (quoteRepository.findByQuoteNumber(candidate).isPresent()) {
+        while (quoteRepository.findByTenantIdAndQuoteNumber(tenantId, candidate).isPresent()) {
             count++;
             candidate = String.format("QUO-%06d", count);
         }
@@ -159,6 +161,13 @@ public class QuoteService {
         return quoteRepository.findByTenantId(tenantId).stream()
                 .map(q -> mapToDTO(q, userRole))
                 .collect(Collectors.toList());
+    }
+
+    public Page<QuoteDTO> getQuotes(String tenantId, QuoteStatus status, String userRole, Pageable pageable) {
+        Page<Quote> page = (status != null)
+                ? quoteRepository.findByTenantIdAndStatus(tenantId, status, pageable)
+                : quoteRepository.findByTenantId(tenantId, pageable);
+        return page.map(q -> mapToDTO(q, userRole));
     }
 
     public Optional<QuoteDTO> getQuoteById(String tenantId, UUID id, String userRole) {

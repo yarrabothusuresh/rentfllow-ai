@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   Quote,
   QuoteItem,
@@ -24,7 +25,9 @@ export class QuoteService {
   }
 
   getQuotes(role: string = 'OWNER'): Observable<Quote[]> {
-    return this.http.get<Quote[]>(this.apiUrl, { headers: this.getHeaders(role) });
+    return this.http.get<any>(this.apiUrl, { headers: this.getHeaders(role) }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getQuoteById(id: string, role: string = 'OWNER'): Observable<Quote> {

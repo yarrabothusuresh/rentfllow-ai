@@ -7,12 +7,16 @@ import com.rentflow.portal.service.CustomerAddressService;
 import com.rentflow.portal.service.CustomerMessagingService;
 import com.rentflow.portal.service.CustomerPortalService;
 import com.rentflow.security.CurrentUserService;
+import com.rentflow.common.pagination.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -28,6 +32,21 @@ public class CustomerPortalController {
     private final CustomerAddressService addressService;
     private final CustomerMessagingService messagingService;
     private final CurrentUserService currentUserService;
+
+    private static final Set<String> PORTAL_QUOTE_SORT_FIELDS = Set.of(
+            "id", "quoteNumber", "status", "quoteDate", "validUntil", "rentalStartDateTime",
+            "rentalEndDateTime", "totalAmount", "createdAt", "updatedAt"
+    );
+
+    private static final Set<String> PORTAL_BOOKING_SORT_FIELDS = Set.of(
+            "id", "bookingNumber", "status", "bookingDate", "rentalStartDateTime",
+            "rentalEndDateTime", "totalAmount", "createdAt", "updatedAt"
+    );
+
+    private static final Set<String> PORTAL_INVOICE_SORT_FIELDS = Set.of(
+            "id", "invoiceNumber", "status", "issueDate", "dueDate", "totalAmount",
+            "amountPaid", "balanceDue", "createdAt", "updatedAt"
+    );
 
     public CustomerPortalController(CustomerPortalService portalService,
                                     CustomerAddressService addressService,
@@ -98,8 +117,13 @@ public class CustomerPortalController {
     }
 
     @GetMapping("/quotes")
-    public ResponseEntity<List<CustomerPortalQuoteDTO>> getQuotes() {
-        return ResponseEntity.ok(portalService.getCustomerQuotes(resolveTenantId(), resolveCustomerId()));
+    public ResponseEntity<Page<CustomerPortalQuoteDTO>> getQuotes(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, PORTAL_QUOTE_SORT_FIELDS);
+        return ResponseEntity.ok(portalService.getCustomerQuotes(resolveTenantId(), resolveCustomerId(), pageable));
     }
 
     @GetMapping("/quotes/{id}")
@@ -138,8 +162,13 @@ public class CustomerPortalController {
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<CustomerPortalBookingDTO>> getBookings() {
-        return ResponseEntity.ok(portalService.getCustomerBookings(resolveTenantId(), resolveCustomerId()));
+    public ResponseEntity<Page<CustomerPortalBookingDTO>> getBookings(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, PORTAL_BOOKING_SORT_FIELDS);
+        return ResponseEntity.ok(portalService.getCustomerBookings(resolveTenantId(), resolveCustomerId(), pageable));
     }
 
     @GetMapping("/bookings/{id}")
@@ -148,8 +177,13 @@ public class CustomerPortalController {
     }
 
     @GetMapping("/invoices")
-    public ResponseEntity<List<CustomerPortalInvoiceDTO>> getInvoices() {
-        return ResponseEntity.ok(portalService.getCustomerInvoices(resolveTenantId(), resolveCustomerId()));
+    public ResponseEntity<Page<CustomerPortalInvoiceDTO>> getInvoices(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction) {
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, PORTAL_INVOICE_SORT_FIELDS);
+        return ResponseEntity.ok(portalService.getCustomerInvoices(resolveTenantId(), resolveCustomerId(), pageable));
     }
 
     @GetMapping("/invoices/{id}")

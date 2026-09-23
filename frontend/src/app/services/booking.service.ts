@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Booking } from '../models/booking.models';
 
 @Injectable({
@@ -18,7 +19,9 @@ export class BookingService {
   }
 
   getBookings(role: string = 'OWNER'): Observable<Booking[]> {
-    return this.http.get<Booking[]>(this.apiUrl, { headers: this.getHeaders(role) });
+    return this.http.get<any>(this.apiUrl, { headers: this.getHeaders(role) }).pipe(
+      map(res => (Array.isArray(res) ? res : res?.content || []))
+    );
   }
 
   getBookingById(id: string, role: string = 'OWNER'): Observable<Booking> {

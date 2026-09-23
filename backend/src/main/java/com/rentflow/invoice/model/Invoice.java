@@ -7,12 +7,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "invoices", indexes = {
+@Table(name = "invoices", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_invoices_tenant_number", columnNames = {"tenantId", "invoiceNumber"})
+}, indexes = {
     @Index(name = "idx_invoice_tenant", columnList = "tenantId"),
     @Index(name = "idx_invoice_number", columnList = "tenantId, invoiceNumber"),
     @Index(name = "idx_invoice_booking", columnList = "bookingId"),
     @Index(name = "idx_invoice_customer", columnList = "customerId"),
-    @Index(name = "idx_invoice_status", columnList = "status")
+    @Index(name = "idx_invoice_status", columnList = "status"),
+    @Index(name = "idx_invoices_tenant_created", columnList = "tenantId, createdAt"),
+    @Index(name = "idx_invoices_tenant_status_due", columnList = "tenantId, status, dueDate"),
+    @Index(name = "idx_invoices_tenant_customer_created", columnList = "tenantId, customerId, createdAt")
 })
 public class Invoice {
 

@@ -221,16 +221,16 @@ public class CustomerPortalIdorSecurityTest {
                 .header("Authorization", "Bearer " + tokenA1)
                 .header("X-Customer-Id", customerA2.getId().toString())) // Spoofed!
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", hasItem(quoteA1.getId().toString())))
-                .andExpect(jsonPath("$[*].id", not(hasItem(quoteA2.getId().toString()))));
+                .andExpect(jsonPath("$.content[*].id", hasItem(quoteA1.getId().toString())))
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(quoteA2.getId().toString()))));
 
         // Customer 1 calls bookings list with spoofed X-Customer-Id pointing to Customer 2
         mockMvc.perform(get("/api/portal/bookings")
                 .header("Authorization", "Bearer " + tokenA1)
                 .header("X-Customer-Id", customerA2.getId().toString())) // Spoofed!
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id", hasItem(bookingA1.getId().toString())))
-                .andExpect(jsonPath("$[*].id", not(hasItem(bookingA2.getId().toString()))));
+                .andExpect(jsonPath("$.content[*].id", hasItem(bookingA1.getId().toString())))
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(bookingA2.getId().toString()))));
     }
 
     @Test

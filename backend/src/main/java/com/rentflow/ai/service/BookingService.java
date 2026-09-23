@@ -373,6 +373,17 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
+    public org.springframework.data.domain.Page<BookingDTO> getBookings(
+            String tenantId,
+            BookingStatus status,
+            org.springframework.data.domain.Pageable pageable,
+            String userRole) {
+        org.springframework.data.domain.Page<Booking> page = (status != null)
+                ? bookingRepository.findByTenantIdAndStatus(tenantId, status, pageable)
+                : bookingRepository.findByTenantId(tenantId, pageable);
+        return page.map(b -> mapToDTO(b, userRole));
+    }
+
     public Optional<BookingDTO> getBookingById(String tenantId, UUID id, String userRole) {
         return bookingRepository.findByTenantIdAndId(tenantId, id)
                 .map(b -> mapToDTO(b, userRole));

@@ -45,7 +45,7 @@ public class FlywayMigrationValidationTest {
 
         // First startup
         MigrateResult firstRun = flyway.migrate();
-        assertEquals(5, firstRun.migrationsExecuted);
+        assertEquals(6, firstRun.migrationsExecuted);
 
         // Second startup
         MigrateResult secondRun = flyway.migrate();

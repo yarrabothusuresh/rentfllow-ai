@@ -159,11 +159,11 @@ public class FlywayExistingDatabaseTest {
         assertEquals("1", historyAfterBaseline[0].getVersion().getVersion());
         assertEquals("BASELINE", historyAfterBaseline[0].getType().name());
 
-        // Step 4: Apply only pending migrations (V2 through V5)
+        // Step 4: Apply only pending migrations (V2 through V6)
         MigrateResult migrateResult = flyway.migrate();
         assertTrue(migrateResult.success);
-        assertEquals(4, migrateResult.migrationsExecuted, "Should execute exactly 4 pending migrations (V2, V3, V4, V5)");
-        assertEquals("5", migrateResult.targetSchemaVersion);
+        assertEquals(5, migrateResult.migrationsExecuted, "Should execute exactly 5 pending migrations (V2, V3, V4, V5, V6)");
+        assertEquals("6", migrateResult.targetSchemaVersion);
 
         // Step 5: Assert Data Preservation (No data wiped or corrupted)
         assertEquals(preTenantCount, getRowCount(ds, "tenant"), "Tenant count must remain unchanged");

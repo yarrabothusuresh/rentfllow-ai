@@ -53,12 +53,12 @@ public class FlywayFreshDatabaseTest {
 
         MigrateResult result = flyway.migrate();
         assertTrue(result.success, "Flyway migration should succeed");
-        assertEquals(5, result.migrationsExecuted, "Should execute exactly 5 migrations (V1..V5)");
-        assertEquals("5", result.targetSchemaVersion, "Target schema version should be 5");
+        assertEquals(6, result.migrationsExecuted, "Should execute exactly 6 migrations (V1..V6)");
+        assertEquals("6", result.targetSchemaVersion, "Target schema version should be 6");
 
         // Verify Schema History Table Entries
         MigrationInfo[] applied = flyway.info().applied();
-        assertEquals(5, applied.length);
+        assertEquals(6, applied.length);
 
         assertEquals("1", applied[0].getVersion().getVersion());
         assertEquals("initial schema", applied[0].getDescription());
@@ -79,6 +79,10 @@ public class FlywayFreshDatabaseTest {
         assertEquals("5", applied[4].getVersion().getVersion());
         assertEquals("financial precision and inventory constraints", applied[4].getDescription());
         assertEquals("SUCCESS", applied[4].getState().name());
+
+        assertEquals("6", applied[5].getVersion().getVersion());
+        assertEquals("database constraints and performance indexes", applied[5].getDescription());
+        assertEquals("SUCCESS", applied[5].getState().name());
     }
 
     @Test

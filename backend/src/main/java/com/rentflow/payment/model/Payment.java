@@ -13,11 +13,12 @@ import java.util.UUID;
     },
     indexes = {
         @Index(name = "idx_payment_tenant", columnList = "tenantId"),
-        @Index(name = "idx_payment_tenant_ref", columnList = "tenantId, transactionReference"),
         @Index(name = "idx_payment_booking", columnList = "bookingId"),
         @Index(name = "idx_payment_invoice", columnList = "invoiceId"),
         @Index(name = "idx_payment_customer", columnList = "customerId"),
-        @Index(name = "idx_payment_status", columnList = "paymentStatus")
+        @Index(name = "idx_payment_status", columnList = "paymentStatus"),
+        @Index(name = "idx_payment_tenant_created", columnList = "tenantId, createdAt"),
+        @Index(name = "idx_payment_tenant_customer", columnList = "tenantId, customerId")
 })
 public class Payment {
 

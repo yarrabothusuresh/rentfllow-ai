@@ -428,9 +428,10 @@ export class CatalogService {
 
   // --- HELPERS ---
 
-  private sanitizeProducts(products: Product[]): Product[] {
+  private sanitizeProducts(products: any): Product[] {
+    const list: Product[] = Array.isArray(products) ? products : (products?.content || []);
     const role = this.roleState.getCurrentRole();
-    return products.map(p => this.sanitizeProduct(p, role));
+    return list.map(p => this.sanitizeProduct(p, role));
   }
 
   private sanitizeProduct(p: Product, role?: string): Product {

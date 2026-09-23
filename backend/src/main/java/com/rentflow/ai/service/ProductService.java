@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +34,11 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public Page<ProductDTO> getProducts(String tenantId, String userRole, Pageable pageable) {
+        return productRepository.findByTenantId(tenantId, pageable)
+                .map(p -> mapToDTO(p, userRole));
+    }
+
     public Optional<ProductDTO> getProductById(String tenantId, UUID id, String userRole) {
         return productRepository.findByTenantIdAndId(tenantId, id)
                 .map(p -> mapToDTO(p, userRole));
@@ -41,6 +48,14 @@ public class ProductService {
         return productRepository.searchProducts(tenantId, query).stream()
                 .map(p -> mapToDTO(p, userRole))
                 .collect(Collectors.toList());
+    }
+
+    public Page<ProductDTO> searchProducts(String tenantId, String query, String userRole, Pageable pageable) {
+        if (query == null || query.isBlank()) {
+            return getProducts(tenantId, userRole, pageable);
+        }
+        return productRepository.searchProducts(tenantId, query.trim(), pageable)
+                .map(p -> mapToDTO(p, userRole));
     }
 
     public ProductDTO createProduct(String tenantId, ProductDTO dto, String userRole) {

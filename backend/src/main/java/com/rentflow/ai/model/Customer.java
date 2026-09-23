@@ -5,11 +5,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customers", indexes = {
+@Table(name = "customers", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_customers_tenant_number", columnNames = {"tenantId", "customerNumber"})
+}, indexes = {
     @Index(name = "idx_customer_tenant", columnList = "tenantId"),
     @Index(name = "idx_customer_email", columnList = "email"),
     @Index(name = "idx_customer_phone", columnList = "phone"),
-    @Index(name = "idx_customer_number", columnList = "customerNumber")
+    @Index(name = "idx_customer_number", columnList = "customerNumber"),
+    @Index(name = "idx_customers_tenant_created", columnList = "tenantId, createdAt"),
+    @Index(name = "idx_customers_tenant_name", columnList = "tenantId, lastName, firstName")
 })
 public class Customer {
 
@@ -20,7 +24,7 @@ public class Customer {
     @Column(nullable = false)
     private String tenantId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String customerNumber;
 
     @Column(nullable = false)

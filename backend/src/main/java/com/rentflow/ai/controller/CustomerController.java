@@ -5,12 +5,16 @@ import com.rentflow.ai.dto.EventDTO;
 import com.rentflow.ai.mock.DemoDataRepository;
 import com.rentflow.ai.service.CustomerService;
 import com.rentflow.ai.service.EventService;
+import com.rentflow.common.pagination.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -20,6 +24,10 @@ public class CustomerController {
     private final CustomerService customerService;
     private final EventService eventService;
     private final com.rentflow.security.CurrentUserService currentUserService;
+
+    private static final Set<String> CUSTOMER_SORT_FIELDS = Set.of(
+            "id", "customerNumber", "firstName", "lastName", "companyName", "email", "status", "createdAt", "updatedAt"
+    );
 
     public CustomerController(CustomerService customerService, EventService eventService,
                               com.rentflow.security.CurrentUserService currentUserService) {
@@ -58,6 +66,10 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<?> getCustomers(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
@@ -66,14 +78,19 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You do not have permission to view customers."));
         }
 
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, CUSTOMER_SORT_FIELDS);
         String tenantId = resolveTenantId(tenantHeader);
-        List<CustomerDTO> customers = customerService.getCustomers(tenantId);
+        Page<CustomerDTO> customers = customerService.getCustomers(tenantId, pageable);
         return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchCustomers(
             @RequestParam("query") String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantHeader,
             @RequestHeader(value = "X-User-Role", required = false) String roleHeader) {
 
@@ -83,15 +100,16 @@ public class CustomerController {
         }
 
         if (query == null || query.isBlank()) {
-            return ResponseEntity.ok(List.of());
+            return ResponseEntity.ok(Page.empty());
         }
         String sanitizedQuery = query.trim();
         if (sanitizedQuery.length() > 200) {
             sanitizedQuery = sanitizedQuery.substring(0, 200);
         }
 
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, sortBy, direction, CUSTOMER_SORT_FIELDS);
         String tenantId = resolveTenantId(tenantHeader);
-        List<CustomerDTO> results = customerService.searchCustomers(tenantId, sanitizedQuery);
+        Page<CustomerDTO> results = customerService.searchCustomers(tenantId, sanitizedQuery, pageable);
         return ResponseEntity.ok(results);
     }
 

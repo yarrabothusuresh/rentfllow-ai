@@ -7,9 +7,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "quotes", indexes = {
+@Table(name = "quotes", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_quotes_tenant_number", columnNames = {"tenantId", "quoteNumber"})
+}, indexes = {
     @Index(name = "idx_quotes_tenant", columnList = "tenantId"),
-    @Index(name = "idx_quotes_tenant_idempotency", columnList = "tenantId, idempotencyKey")
+    @Index(name = "idx_quotes_tenant_idempotency", columnList = "tenantId, idempotencyKey"),
+    @Index(name = "idx_quotes_tenant_created", columnList = "tenantId, createdAt"),
+    @Index(name = "idx_quotes_tenant_status_created", columnList = "tenantId, status, createdAt"),
+    @Index(name = "idx_quotes_tenant_customer_created", columnList = "tenantId, customerId, createdAt")
 })
 public class Quote {
 
@@ -20,7 +25,7 @@ public class Quote {
     @Column(nullable = false)
     private String tenantId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String quoteNumber;
 
     @Column(length = 255)

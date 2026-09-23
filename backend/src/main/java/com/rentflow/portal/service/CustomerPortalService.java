@@ -18,6 +18,8 @@ import com.rentflow.portal.model.*;
 import com.rentflow.portal.repository.*;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -286,6 +288,13 @@ public class CustomerPortalService {
     }
 
     @Transactional(readOnly = true)
+    public Page<CustomerPortalQuoteDTO> getCustomerQuotes(String tenantId, UUID customerId, Pageable pageable) {
+        getCustomerWithAuth(tenantId, customerId);
+        return quoteRepository.findByTenantIdAndCustomerId(tenantId, customerId, pageable)
+                .map(q -> mapQuoteToDTO(tenantId, q));
+    }
+
+    @Transactional(readOnly = true)
     public CustomerPortalQuoteDTO getQuoteDetail(String tenantId, UUID customerId, UUID quoteId) {
         getCustomerWithAuth(tenantId, customerId);
         Quote quote = quoteRepository.findById(quoteId)
@@ -409,6 +418,13 @@ public class CustomerPortalService {
     }
 
     @Transactional(readOnly = true)
+    public Page<CustomerPortalBookingDTO> getCustomerBookings(String tenantId, UUID customerId, Pageable pageable) {
+        getCustomerWithAuth(tenantId, customerId);
+        return bookingRepository.findByTenantIdAndCustomerId(tenantId, customerId, pageable)
+                .map(b -> mapBookingToDTO(tenantId, b));
+    }
+
+    @Transactional(readOnly = true)
     public CustomerPortalBookingDTO getBookingDetail(String tenantId, UUID customerId, UUID bookingId) {
         getCustomerWithAuth(tenantId, customerId);
         Booking booking = bookingRepository.findById(bookingId)
@@ -424,6 +440,13 @@ public class CustomerPortalService {
         return invoiceRepository.findByTenantIdAndCustomerId(tenantId, customerId).stream()
                 .map(i -> mapInvoiceToDTO(i))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CustomerPortalInvoiceDTO> getCustomerInvoices(String tenantId, UUID customerId, Pageable pageable) {
+        getCustomerWithAuth(tenantId, customerId);
+        return invoiceRepository.findByTenantIdAndCustomerId(tenantId, customerId, pageable)
+                .map(this::mapInvoiceToDTO);
     }
 
     @Transactional(readOnly = true)
