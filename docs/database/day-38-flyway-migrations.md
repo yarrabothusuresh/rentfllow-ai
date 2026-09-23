@@ -1,156 +1,69 @@
 # Day 38: Flyway Database Migration & Production-Safe Schema Management
 
-## 1. Executive Summary & Architecture
+## 1. Existing Database Architecture
+RentFlow AI was designed with a multi-tenant PostgreSQL target architecture (containerized via Docker Compose using `postgres:15-alpine`, database `rentflow_prod`, user `rentflow_user`), while local rapid development uses an in-memory H2 database (`jdbc:h2:mem:rentflow;MODE=PostgreSQL`).
+Prior to Day 38:
+- Database schema was generated dynamically by Hibernate (`ddl-auto=update`).
+- The domain model comprised 114 database tables (112 JPA entities + 2 join tables: `app_user_roles`, `ai_conversation_tags`).
+- Core business tables include `tenants`, `app_users`, `customers`, `products`, `quotes`, `booking`, `invoices`, `payments`, `warehouse_stock`, and `rental_requests`.
+- As confirmed by database inspection, host PostgreSQL had 0 RentFlow connections and role `rentflow_user` was not yet provisioned. Production baselining on live host was safely blocked to prevent false baselining.
 
-RentFlow AI uses **Flyway** paired with **PostgreSQL** and **Spring Boot 3.2.4** to manage enterprise-grade, version-controlled database schema migrations.
+## 2. Flyway Version and Dependencies
+- **Flyway Version**: `9.22.3` (managed by `spring-boot-starter-parent` 3.2.4).
+- **Dependency in `backend/pom.xml`**:
+  ```xml
+  <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+  </dependency>
+  ```
+- **Driver**: `org.postgresql:postgresql:42.6.2` (managed dependency).
+- *Note*: Flyway 9.x includes PostgreSQL support natively inside `flyway-core`. The separate `flyway-database-postgresql` artifact only exists in Flyway 10+ and is neither needed nor compatible with 9.22.3.
 
-### Core Architectural Principles
-1. **Source of Truth**: Versioned SQL scripts in `src/main/resources/db/migration/` are the authoritative source of truth for the database schema.
-2. **Strict Validation**: In production (`prod` profile), `spring.jpa.hibernate.ddl-auto=validate` enforces zero schema drift between JPA `@Entity` definitions and the live PostgreSQL schema.
-3. **P0 Data Safety**: Destructive DDL operations (`DROP TABLE`, `DROP DATABASE`, `TRUNCATE`, `DROP SCHEMA CASCADE`) are strictly prohibited.
-4. **Controlled Dual-Path Onboarding**:
-   - **Path A (Fresh Install)**: Automatically applies `V1` through `V5` on empty schemas.
-   - **Path B (Existing Database Baseline)**: Safely baselines existing Day 30 schemas at version `1` without dropping data, then applies incremental migrations `V2` through `V5`.
-5. **Pre-Check Guardrails**: Migrations introducing unique constraints (e.g., payment references, booking idempotency) run pre-check verification to identify and resolve duplicates prior to applying DDL.
+## 3. Migration Directory Structure
+Versioned migrations are placed in the standard classpath location:
+`backend/src/main/resources/db/migration/`
 
----
-
-## 2. Configuration Matrix
-
-### Development Profile (`application.properties`)
-```properties
-spring.application.name=RentFlow AI Backend
-server.port=8080
-
-# In-memory H2 database for local velocity
-spring.datasource.url=jdbc:h2:mem:rentflow;DB_CLOSE_DELAY=-1
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.h2.console.enabled=true
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+```text
+backend/src/main/resources/db/migration/
+├── V1__initial_schema.sql
+├── V2__security_and_auth_hardening.sql
+├── V3__payment_idempotency_constraints.sql
+├── V4__booking_checkout_idempotency.sql
+└── V5__financial_precision_and_inventory_constraints.sql
 ```
 
-### Production Profile (`application-prod.properties`)
-```properties
-spring.application.name=RentFlow AI Backend (Production)
-server.port=${PORT:8080}
+## 4. Selected Baseline Strategy
+**Option A: Versioned Initial Schema** was selected.
+- `V1__initial_schema.sql` captures the baseline schema of all 114 tables as of Day 30.
+- Subsequent migrations (`V2` through `V5`) cleanly isolate each phase of schema evolution from Days 31 to 37.
+- For new databases: Flyway runs `V1` -> `V2` -> `V3` -> `V4` -> `V5` sequentially.
+- For existing databases: Flyway baselines the schema at version `1` (which represents the Day 30 state), then applies pending migrations `V2` through `V5` without dropping or truncating tables.
 
-# Database (PostgreSQL)
-spring.datasource.url=${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rentflow}}
-spring.datasource.username=${DATABASE_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}
-spring.datasource.password=${DATABASE_PASSWORD:${SPRING_DATASOURCE_PASSWORD:}}
-spring.datasource.driver-class-name=org.postgresql.Driver
+## 5. Baseline Version
+- **Baseline Version**: `1`
+- **Baseline Description**: `Initial Baseline`
+- **Configuration Rule**: `spring.flyway.baseline-on-migrate=false` in production (`application-prod.properties`). Automatic baselining is disabled to avoid accidental unverified baselines against an uninspected database. Baselining is strictly performed via controlled operations.
 
-# Connection Pool Tuning (HikariCP)
-spring.datasource.hikari.maximum-pool-size=${DB_POOL_MAX:20}
-spring.datasource.hikari.minimum-idle=${DB_POOL_MIN_IDLE:5}
-spring.datasource.hikari.idle-timeout=30000
-spring.datasource.hikari.connection-timeout=20000
-spring.datasource.hikari.max-lifetime=1800000
-spring.datasource.hikari.pool-name=RentFlowProdHikariPool
-
-# Flyway Database Migration
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration
-spring.flyway.baseline-on-migrate=false
-spring.flyway.validate-on-migrate=true
-spring.flyway.table=flyway_schema_history
-
-# JPA / Hibernate Validation
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.ddl-auto=${HIBERNATE_DDL_AUTO:validate}
-spring.jpa.show-sql=false
-spring.jpa.open-in-view=false
-```
-
-> [!IMPORTANT]
-> `spring.flyway.baseline-on-migrate=false` is enforced in production to prevent unintended automatic baselining against an unverified or corrupted database state. Controlled baseline operations must be run explicitly.
-
----
-
-## 3. Versioned Migration Catalog
-
-All migration files are located under `backend/src/main/resources/db/migration/`:
-
-| Version | File Name | Purpose | Scope / Key Elements |
-|---------|-----------|---------|-----------------------|
-| `V1` | `V1__initial_schema.sql` | Baseline Schema | 114 tables (112 JPA entities + 2 join tables: `app_user_roles`, `ai_conversation_tags`), primary keys, foreign keys, and indexes up to Day 30. |
-| `V2` | `V2__security_and_auth_hardening.sql` | Security & Auth | Composite multi-tenant indexes on `refresh_tokens`, `security_audit_logs`, and user lookups. |
-| `V3` | `V3__payment_idempotency_constraints.sql` | Financial Integrity | Unique constraint `uq_payment_tenant_transaction_reference` on `(tenant_id, transaction_reference)` and payment lookup index `idx_payment_tenant_status`. |
-| `V4` | `V4__booking_checkout_idempotency.sql` | Booking & Lead Idempotency | Adds missing columns if necessary and enforces: `uq_rental_req_tenant_idempotency`, `uq_crm_lead_tenant_rental_req`, `uq_booking_tenant_quote`, and quote idempotency indexes. |
-| `V5` | `V5__financial_precision_and_inventory_constraints.sql` | Inventory Integrity | Unique constraint `uk_wh_stock_product_warehouse` on `warehouse_stock(product_id, warehouse_id)`, check constraint `chk_products_quantity_owned_nonneg` (`quantity_owned >= 0`), and `idx_inv_res_product_dates`. |
-
----
-
-## 4. Initialization Workflows
-
-```mermaid
-flowchart TD
-    Start([Database Setup]) --> CheckType{Is database empty or existing?}
-    
-    CheckType -->|Empty Database| Fresh[Path A: Fresh Installation]
-    Fresh --> F1[Run Flyway Migrate]
-    F1 --> F2[Applies V1 -> V2 -> V3 -> V4 -> V5]
-    F2 --> F3[Creates flyway_schema_history]
-    F3 --> F4[Spring Boot boots with ddl-auto=validate]
-    F4 --> FEnd([System Ready])
-    
-    CheckType -->|Existing Database| Existing[Path B: Existing Database Baseline]
-    Existing --> E1[Run Pre-Flight Integrity Checklist]
-    E1 --> E2[Verify Tables & Backup Database]
-    E2 --> E3[Run Deduplication Pre-checks]
-    E3 --> E4[Flyway Baseline at Version 1]
-    E4 --> E5[Flyway Migrate applies V2 -> V5]
-    E5 --> E6[100% Data Preserved]
-    E6 --> E7[Spring Boot boots with ddl-auto=validate]
-    E7 --> EEnd([System Ready])
-```
-
-### Path A: New / Empty Database Installation
-1. Provision empty PostgreSQL database and user:
+## 6. Fresh Database Installation
+For new production environments or blank databases:
+1. An empty PostgreSQL database is provisioned with appropriate user permissions:
    ```sql
    CREATE DATABASE rentflow;
    CREATE USER rentflow_user WITH ENCRYPTED PASSWORD 'StrongSecretPassword!';
    GRANT ALL PRIVILEGES ON DATABASE rentflow TO rentflow_user;
    ```
-2. Start application with `spring.profiles.active=prod`.
-3. Flyway detects an empty schema, applies `V1__initial_schema.sql` through `V5__financial_precision_and_inventory_constraints.sql`, and records migration metadata in `flyway_schema_history`.
-4. Hibernate validates the schema against the JPA entity domain model and boots cleanly.
+2. Application starts with `spring.profiles.active=prod`.
+3. Flyway executes `V1` through `V5` in order.
+4. Schema history is logged in `flyway_schema_history`.
+5. Hibernate runs with `ddl-auto=validate`, confirms 0 schema drift, and the application becomes ready.
 
-### Path B: Existing Database Baseline Procedure (Option A Rationale)
-When an existing database already contains tables created prior to Flyway introduction:
-1. **Pre-flight Integrity Audit**:
-   - Verify existing schema matches Day 30 baseline table structures.
-   - Run a physical database backup (`pg_dump`).
-2. **Deduplication Pre-Checks**:
-   Before applying `V3`, `V4`, and `V5` unique constraints, verify no duplicate records exist:
-   ```sql
-   -- Verify payment transaction references
-   SELECT tenant_id, transaction_reference, COUNT(*)
-   FROM payments
-   WHERE transaction_reference IS NOT NULL
-   GROUP BY tenant_id, transaction_reference
-   HAVING COUNT(*) > 1;
-
-   -- Verify rental request idempotency
-   SELECT tenant_id, idempotency_key, COUNT(*)
-   FROM rental_requests
-   WHERE idempotency_key IS NOT NULL
-   GROUP BY tenant_id, idempotency_key
-   HAVING COUNT(*) > 1;
-
-   -- Verify warehouse stock per product
-   SELECT product_id, warehouse_id, COUNT(*)
-   FROM warehouse_stock
-   WHERE product_id IS NOT NULL AND warehouse_id IS NOT NULL
-   GROUP BY product_id, warehouse_id
-   HAVING COUNT(*) > 1;
-   ```
-3. **Execute Baseline**:
-   Baseline the existing schema at version `1`:
+## 7. Existing Database Onboarding
+For environments with existing Day 30 data:
+1. **Pre-flight Audit**: Verify all 114 tables exist and match expected definitions.
+2. **Backup**: Execute `pg_dump` physical backup.
+3. **Data Pre-check**: Verify uniqueness for pending constraints (`payments.transaction_reference`, `rental_requests.idempotency_key`, etc.).
+4. **Controlled Baseline**: Execute Flyway baseline at version 1:
    ```bash
    flyway -url=jdbc:postgresql://localhost:5432/rentflow \
           -user=rentflow_user -password=StrongSecretPassword! \
@@ -158,102 +71,110 @@ When an existing database already contains tables created prior to Flyway introd
           -baselineDescription="Initial Baseline" \
           baseline
    ```
-   Or via Spring Boot CLI / temporary environment property:
-   `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` with `SPRING_FLYWAY_BASELINE_VERSION=1`.
-4. **Apply Pending Migrations**:
-   Run `flyway migrate` or boot the application. Flyway skips `V1` and safely applies `V2`, `V3`, `V4`, and `V5` in sequence.
-5. **Data Preservation**:
-   All business records in all 114 tables remain untouched.
+5. **Migrate**: Run `flyway migrate` or start Spring Boot. Migrations `V2` through `V5` are applied.
+6. **Data Integrity Guarantee**: 100% of existing rows across all tables are preserved.
 
----
+## 8. Schema-Drift Report
+Inspection comparing JPA `@Entity` definitions against the database identified:
+- **Table Naming Drift**: `@Entity class BookingItem` maps to table `booking_item` (singular), while `IntegrationOutbox` maps to `integration_outbox`. All 114 tables were mapped to exact Hibernate naming standards in `V1`.
+- **Nullable vs Non-null Drift**: Idempotency columns in `rental_requests`, `quotes`, and `crm_leads` were added dynamically in Days 34–35. `V4` safely ensures column presence via `ADD COLUMN IF NOT EXISTS` before adding unique constraints.
+- **Orphaned Migration File**: An orphaned `V35__idempotency_constraints.sql` script with incorrect table references was discovered in `db/migration`. It was deleted and replaced by sequential, properly tested `V4` and `V5` scripts.
 
-## 5. Production-Safe Schema Evolution Rules
-
-When adding future migrations (`V6`, `V7`, ...), engineers must adhere to the following rules:
-
-### 1. Expand and Contract Pattern
-- **Never rename or drop columns** in a single release.
-- **Phase 1 (Expand)**: Add the new column as nullable or with default. Update backend to write to both old and new columns.
-- **Phase 2 (Backfill)**: Backfill data from old column to new column.
-- **Phase 3 (Contract)**: Update backend to read only from new column. Drop or deprecate old column in a future migration.
-
-### 2. Non-blocking Index Creation
-In PostgreSQL, creating indexes on large production tables blocks writes unless executed concurrently. Standalone operational scripts should use:
-```sql
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_name ON table_name (column_name);
+## 9. Hibernate Validation Configuration
+In `application-prod.properties`:
+```properties
+spring.jpa.hibernate.ddl-auto=${HIBERNATE_DDL_AUTO:validate}
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.show-sql=false
 ```
-
-### 3. Adding NOT NULL Columns
-- Never add a `NOT NULL` column without a `DEFAULT` value to a table with existing rows:
-```sql
--- Safe
-ALTER TABLE products ADD COLUMN IF NOT EXISTS warranty_months INTEGER NOT NULL DEFAULT 12;
+In development (`application.properties`):
+```properties
+spring.jpa.hibernate.ddl-auto=update
 ```
+This guarantees that production environments immediately fail to boot if any JPA entity deviates from the Flyway-applied schema.
 
-### 4. Adding UNIQUE Constraints
-- Always run pre-check validation queries to identify duplicates before creating unique constraints.
-- In migration scripts, ensure idempotent execution syntax (`IF NOT EXISTS` or exception-safe PL/pgSQL blocks).
+## 10. Payment Constraints
+Introduced in `V3__payment_idempotency_constraints.sql`:
+- **Unique Constraint**: `uq_payment_tenant_transaction_reference` on `(tenant_id, transaction_reference)` prevents duplicate payment processing for the same tenant.
+- **Index**: `idx_payment_tenant_status` on `(tenant_id, status)` for fast transaction reconciliation.
+- **Pre-check Query**:
+  ```sql
+  SELECT tenant_id, transaction_reference, COUNT(*)
+  FROM payments
+  WHERE transaction_reference IS NOT NULL
+  GROUP BY tenant_id, transaction_reference
+  HAVING COUNT(*) > 1;
+  ```
 
----
+## 11. Booking Constraints
+Introduced in `V4__booking_checkout_idempotency.sql`:
+- **Rental Request Idempotency**: `uq_rental_req_tenant_idempotency` on `(tenant_id, idempotency_key)`.
+- **CRM Lead Idempotency**: `uq_crm_lead_tenant_rental_req` on `(tenant_id, rental_request_id)`.
+- **Quote-to-Booking Uniqueness**: `uq_booking_tenant_quote` on `(tenant_id, quote_id)` preventing duplicate booking conversions from the same quote.
+- **Quote Idempotency Index**: `idx_quotes_tenant_idempotency` on `(tenant_id, idempotency_key)`.
 
-## 6. Operational Runbooks
+## 12. Financial Column Changes
+Reconciled in `V1` and `V5`:
+- All currency and monetary fields (`subtotal`, `tax_amount`, `total_amount`, `deposit_amount`, `balance_due`, `rental_price`, `replacement_cost`) use `NUMERIC(19, 4)` to eliminate floating-point rounding errors.
+- Default tax rates and fee percentages use `NUMERIC(7, 4)`.
 
-### Runbook 1: Pre-Migration Backup Requirement
-Before executing any migration in staging or production:
-```bash
-pg_dump -h localhost -p 5432 -U rentflow_user -F c -b -v -f "/var/backups/rentflow_pre_migration_$(date +%Y%m%d_%H%M%S).dump" rentflow
-```
+## 13. Inventory Constraints
+Introduced in `V5__financial_precision_and_inventory_constraints.sql`:
+- **Unique Warehouse Stock**: `uk_wh_stock_product_warehouse` on `(product_id, warehouse_id)`.
+- **Non-Negative Quantity Check**: `chk_products_quantity_owned_nonneg` enforcing `quantity_owned >= 0`.
+- **Reservation Date Range Index**: `idx_inv_res_product_dates` on `inventory_reservations(product_id, start_date_time, end_date_time)`.
 
-### Runbook 2: Checksum Mismatch Resolution
-If a migration script was altered after being applied:
-1. **Prohibition**: Never edit applied migration files in production!
-2. **If script was modified in error**:
-   - Revert the SQL file to match the checksum recorded in `flyway_schema_history`.
-3. **If comment/whitespace change only**:
-   - Run `flyway repair` to recalculate checksums in `flyway_schema_history`:
-     ```bash
-     flyway -url=... -user=... -password=... repair
-     ```
-4. **If DDL change is needed**:
-   - Create a new migration (e.g., `V6__fix_constraint.sql`) instead of modifying an applied migration.
+## 14. Index Strategy
+All multi-tenant lookup pathways include composite indexes prefixed by `tenant_id`:
+- Security: `idx_refresh_tokens_tenant_token` on `refresh_tokens(tenant_id, token_hash)`.
+- Audit: `idx_security_audit_tenant_time` on `security_audit_logs(tenant_id, timestamp)`.
+- CRM: `idx_crm_leads_tenant_status` on `crm_leads(tenant_id, status)`.
+- Warehouse: `idx_wh_stock_tenant_product` on `warehouse_stock(tenant_id, product_id)`.
 
-### Runbook 3: Schema Drift Diagnosis
-If the application fails to boot with `SchemaManagementException`:
-```
-org.hibernate.tool.schema.spi.SchemaManagementException: Schema-validation: missing column [...]
-```
-1. Inspect the error log to identify the missing column or type mismatch.
-2. Determine which migration was missed or which JPA entity was modified without a corresponding migration script.
-3. Author a new versioned migration (`V{N}__add_missing_column.sql`) and run `flyway migrate`.
+## 15. Data-Preservation Checks
+The `FlywayExistingDatabaseTest` integration test explicitly verifies:
+- Baseline is applied without table drops.
+- Pre-existing rows in `tenants`, `customers`, `products`, `quotes`, `booking`, `payments`, `invoices` remain intact after `V2..V5` migrations.
+- Data integrity checks pass with 100% data preservation.
 
----
+## 16. Migration Testing
+Integration test suite in `com.rentflow.migration`:
+1. `FlywayFreshDatabaseTest`: Tests empty database execution of `V1` to `V5`, verifies table count, indexes, and constraint enforcement.
+2. `FlywayExistingDatabaseTest`: Tests baselining existing database at `V1`, incremental application of `V2` to `V5`, and data preservation.
+3. `FlywayMigrationValidationTest`: Tests repeat startup idempotency, checksum mismatch detection, duplicate pre-check verification, and failure abort.
+4. `FlywaySchemaValidationTest`: Tests full Spring Boot boot with Flyway applied and `spring.jpa.hibernate.ddl-auto=validate`.
 
-## 7. Verification & Test Evidence
+## 17. Migration Failure Recovery
+If a migration fails mid-way:
+1. **Diagnosis**: Inspect logs for the failing SQL statement and error code.
+2. **Transaction Rollback**: PostgreSQL DDL is transactional (with few exceptions). If a statement errors, the transaction rolls back.
+3. **History Fix**: If the failed migration is recorded with `success = false` in `flyway_schema_history`, resolve the root cause in the database and run `flyway repair`.
+4. **Never edit an applied migration**: Always roll forward with a subsequent versioned patch migration.
 
-The migration architecture has been validated through an automated integration test suite:
+## 18. Backup Prerequisites
+Prior to executing migrations in staging or production:
+- Perform full physical backup:
+  ```bash
+  pg_dump -h localhost -p 5432 -U rentflow_user -F c -b -v -f "/var/backups/rentflow_pre_migration_$(date +%Y%m%d_%H%M%S).dump" rentflow_prod
+  ```
+- Store backup in immutable offsite storage.
+- Verify backup file size and checksum.
 
-### Test Classes in `com.rentflow.migration`
-1. **`FlywayFreshDatabaseTest`**:
-   - Validates fresh installation on empty database.
-   - Verifies sequential execution of `V1` through `V5`.
-   - Asserts all core tables, constraints, and indexes exist.
-   - Asserts behavioral enforcement of constraints (e.g. duplicate payment reference rejection).
-2. **`FlywayExistingDatabaseTest`**:
-   - Simulates pre-existing Day 30 database with live business records.
-   - Baselines schema at `V1`.
-   - Executes pending migrations `V2` through `V5`.
-   - Verifies 100% data preservation across all tables.
-3. **`FlywayMigrationValidationTest`**:
-   - Tests repeatable startup idempotency (0 migrations re-executed on second run).
-   - Detects and rejects checksum mismatches.
-   - Verifies duplicate payment pre-check detection.
-   - Validates failure and abort behavior on invalid SQL.
-4. **`FlywaySchemaValidationTest`**:
-   - Boots Spring Boot `ApplicationContext` with Flyway applied and `spring.jpa.hibernate.ddl-auto=validate`.
-   - Confirms 0 schema drift errors across all 112 JPA entities.
+## 19. Rollback Limitations
+- Flyway Community Edition does not support automated down-migrations (`U` scripts).
+- Reverting a migration requires applying a new forward migration (e.g., `V6__drop_deprecated_constraint.sql`) or restoring the database from the pre-migration backup.
+- Forward-only migrations are enforced for auditability.
 
-### Verification Summary
-- **Migration Suite**: 10 of 10 tests passed (0 failures, 0 errors).
-- **Day 31–37 Regression Suite**: 63 of 63 tests passed (0 failures, 0 errors).
-- **Frontend Test Suite**: 18 of 18 Karma tests passed.
-- **Data Safety**: Zero destructive DDL commands in all migration files.
+## 20. Deployment Considerations
+- **Blue/Green & Rolling Deployments**: Migrations must adhere to the **Expand and Contract pattern**:
+  - Step 1: Add new column as nullable or with default.
+  - Step 2: Deploy new application code that writes to both columns.
+  - Step 3: Backfill data.
+  - Step 4: Deploy code that reads new column.
+  - Step 5: Drop or deprecate old column in a later release.
+- **Lock Timeouts**: For high-traffic tables, apply DDL with a short `lock_timeout` to prevent blocking production transactions.
+
+## 21. Remaining Migration Risks
+1. **Host PostgreSQL Readiness**: Host PostgreSQL server currently lacks role `rentflow_user` and database `rentflow_prod`. Database provisioning scripts must be executed prior to production startup.
+2. **Large Table Index Creation**: In high-volume production databases, future index additions on tables with millions of rows should be executed using `CREATE INDEX CONCURRENTLY` outside of Flyway transaction blocks or during maintenance windows.
+3. **Strict Validation Drift**: Any future change to JPA entity annotations without a matching Flyway SQL script will prevent Spring Boot from booting in production. This strict behavior is intended to protect production data integrity.
