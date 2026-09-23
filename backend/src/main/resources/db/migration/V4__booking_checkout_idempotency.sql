@@ -1,11 +1,13 @@
 -- ====================================================================
--- Flyway Migration: V35__idempotency_constraints.sql
--- Day 35: Booking, Checkout & Rental Request Idempotency Constraints
+-- RentFlow AI - V4__booking_checkout_idempotency.sql
+-- Day 35: Booking, Checkout, Lead & Rental Request Idempotency
 -- ====================================================================
 
 -- 1. Rental Requests Idempotency & Tamper Protection
 ALTER TABLE rental_requests
-    ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(255);
+
+ALTER TABLE rental_requests
     ADD COLUMN IF NOT EXISTS request_hash VARCHAR(64);
 
 ALTER TABLE rental_requests
